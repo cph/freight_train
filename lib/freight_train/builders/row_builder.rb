@@ -8,18 +8,26 @@ class FreightTrain::Builders::RowBuilder
   def self.default_row_builder; @@default_row_builder; end
   def self.default_row_builder=(val); @@default_row_builder=val; end
 
+
   def initialize(template, object_name, record)
     @template = template
     @object_name = object_name
     @record = record
   end
 
-  # todo: move to extension of freight_train in this app?
+
+  def record
+    @record
+  end
+
+
+  # todo: move to extension of freight_train in this app?  
   def currency_of(method)
     number = @record.send method
     string = 
     if( number < 0 )
-      "($<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency -number, :unit=>""}</span>)"
+      # "($<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency -number, :unit=>""}</span>)"
+      "<span class=\"negative\">($<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency -number, :unit=>""}</span>)</span>"
     else
       "$<span attr=\"#{@object_name}[#{method}]\">#{number_to_currency number, :unit=>""}</span>"
     end
@@ -37,6 +45,10 @@ class FreightTrain::Builders::RowBuilder
     end
   end
 
+
+  #def hidden_field(*args)
+  #  method = args.shift    
+  #  value = args.shift || @record.send(method)
   def hidden_field(method)
     value = @record.send method
     if value.is_a? Array
@@ -49,25 +61,39 @@ class FreightTrain::Builders::RowBuilder
   def nested_fields_for(method, *args, &block)
     options = args.extract_options!
   
-    @template.concat "<table class=\"nested #{options[:hidden]?"hidden":""}\" attr=\"#{@object_name}[#{method}]\""
+    css = options[:hidden] ? "nested hidden" : "nested"
+    @template.concat "<table class=\"#{css}\" attr=\"#{@object_name}[#{method}]\">"
     #html_options.each{|k,v| @template.concat " #{k}=\"#{v}\""}
-    @template.concat ">"
+    #@template.concat ">"
+    
+    # <<<<<<< HEAD:lib/freight_train/builders/row_builder.rb
+    # i = 0
+    # children = @record.send method
+    # for child in children
+    #   @template.concat "<tr id=\"#{method.to_s.singularize}_#{i}\">"
+    # =======
+    # yield NestedTableBuilder.new( @template )
     
     i = 0
     children = @record.send method
     for child in children
-      @template.concat "<tr id=\"#{method.to_s.singularize}_#{i}\">"
+      klass = options[:class]
+      klass = klass.yield(child) if klass.is_a?(Proc)
+      @template.concat "<tr id=\"#{method.to_s.singularize}_#{i}\"" << (klass ? " class=\"#{klass}\">" : ">")
+    # >>>>>>> master:lib/freight_train/builders/row_builder.rb
       yield @@default_row_builder.new( @template, "#{@object_name}[#{method}]", child )
       @template.concat "</tr>"
       i += 1
     end
     @template.concat "</table>"
   end
-  
+
+
   def text_of(method)
     "<span attr=\"#{@object_name}[#{method}]\">#{h @record.send(method)}</span>"
   end
-  
+
+
   def toggle_of(method, *args)
     options = args.extract_options!
     value = @record.send method    
@@ -78,7 +104,8 @@ class FreightTrain::Builders::RowBuilder
     content << " title=\"#{options[:title]}\"" if options[:title]
     content << "></div>"
   end
-  
+
+
   def value_of(method, value_method, display_method, *args)
     options = args.extract_options!
     value = @record.send method
@@ -88,7 +115,5 @@ class FreightTrain::Builders::RowBuilder
     "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value_value}\">#{value_display}</span>"    
   end
   
-
-protected
   
 end

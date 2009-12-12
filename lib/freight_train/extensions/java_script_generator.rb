@@ -1,5 +1,6 @@
 class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
 
+
   def refresh( mode, record, *args )
     case mode
     when :single
@@ -8,7 +9,8 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
       refresh_records record.class, *args
     end
   end
-  
+
+
   def add_record( record, *args )
     options = args.extract_options!
     model_name = record.class.name
@@ -20,6 +22,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     @lines << "FT.hookup_row('#{model_name}',$('#{idof record}'));"
     call "FT.restripe_rows"
   end
+
 
   def refresh_record( record, *args )
     options = args.extract_options!
@@ -33,6 +36,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     @lines << "FT.hookup_row('#{model_name}',$('#{id}'));"
   end
 
+
   def refresh_records( model, *args )
     options = args.extract_options!
     collection = args.first || model
@@ -45,9 +49,13 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     @lines << "$('#{table_name}').select('.row').each(function(row){FT.hookup_row('#{model_name}',row);});"
   end
 
-  def show_error( message )
-    replace_html "flash_error", message
-    show "flash_error"
+
+  def show_error( message, *args )
+    options = args.extract_options!
+    id = options[:error_id] || "flash_error"
+    replace_html id, message
+    show id
   end
-  
+
+
 end

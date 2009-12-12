@@ -44,6 +44,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     @after_init_edit = @template.instance_variable_get("@after_init_edit")
   end
 
+
   def check_box(method, options={})
     attr_name = "#{@object_name}[#{method}]"
     code(
@@ -54,6 +55,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
       "<input name=\"#{attr_name}\" type=\"checkbox\"'+(checked ? 'checked=\"checked\"' : '')+' value=\"1\" />"
   end
 
+
   def check_list_for(method, values, &block)
     attr_name = "#{@object_name}[#{method}]"
     @after_init_edit << "FT.check_selected_values(tr,tr_edit,'#{attr_name}');"
@@ -61,7 +63,8 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
       yield FreightTrain::Builders::CheckListBuilder.new(attr_name, [], value, @template)
     end
   end
-
+  
+  
   def collection_select(method, collection, value_method, text_method, options = {}, html_options = {})
     attr_name = "#{@object_name}[#{method}]"
     @after_init_edit << "FT.copy_selected_value(tr,tr_edit,'#{attr_name}','#{method}');"
@@ -79,11 +82,28 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     
     "#{tag("select", html_options, true)}'+FT.create_options(#{o})+'</select>"
   end
-  
+
+
   def fields_for( method, *args, &block )
     options = args.extract_options!
     yield @@default_editor_builder.new( "#{@object_name}[#{method}]", nil, @template, options, block )
   end
+
+
+  def id
+    "'+tr.readAttribute('id').match(/\\d+/)+'"
+  end
+
+
+  def static_field( method, value )
+    @template.tag( "input", {
+      :id => method,
+      :class => "field",
+      :type=>"hidden",
+      :value=>value,
+      :name=>"#{@object_name}[#{method}]"} )
+  end  
+
 
   def hidden_field( method )
     options = { :type => "hidden" }
@@ -114,6 +134,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     )
   end
 
+
   def nested_editor_for( method, *args, &block )
     raise ArgumentError, "Missing block" unless block_given?
     options = args.extract_options!
@@ -123,13 +144,13 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     @template.instance_variable_set "@enable_nested_records", true
 
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-    @template.concat "<table class=\"nested editor\" name=\"#{name}\">"
+    concat "<table class=\"nested editor\" name=\"#{name}\">"
 
     # This FormBuilder expects 'tr' to refer to a TR that represents and object and contains
     # TDs representing the object's attributes. For nested objects, the TR is a child of the
     # root TR. Create a closure in which the variable 'tr' refers to the nested object while
     # preserving the reference to the root TR.
-    @template.concat code(
+    concat code(
       "(function(root_tr){" <<
       "var nested_rows=root_tr.select('table[attr=\"#{attr_name}\"] tr');" <<
       #"alert('#{attr_name}: '+nested_rows.length);" <<
@@ -139,17 +160,18 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     @after_init_edit << "FT.for_each_row(tr,tr_edit,'table[attr=\"#{attr_name}\"] tr','table[name=\"#{name}\"] tr',function(tr,tr_edit){"
 
     fields_for method, nil, *args do |f|
-      @template.concat "<tr id=\"#{method.to_s.singularize}_'+i+'\">"
+      concat "<tr id=\"#{method.to_s.singularize}_'+i+'\">"
       block.call(f)
-      @template.concat "<td><a class=\"delete-link\" href=\"#\" onclick=\"FT.delete_nested_object(this);return false;\"><div class=\"delete-nested\"></div></a></td>"
-      @template.concat "<td><a class=\"add-link\" href=\"#\" onclick=\"FT.add_nested_object(this);return false;\"><div class=\"add-nested\"></div></a></td>"
-      @template.concat "</tr>"
+      concat "<td class=\"delete-nested\"><a class=\"delete-link\" href=\"#\" onclick=\"FT.delete_nested_object(this);return false;\"><div class=\"delete-nested\"></div></a></td>"
+      concat "<td class=\"add-nested\"><a class=\"add-link\" href=\"#\" onclick=\"FT.add_nested_object(this);return false;\"><div class=\"add-nested\"></div></a></td>"
+      concat "</tr>"
     end
     @after_init_edit << "});"
-    @template.concat code( "}})(tr);" )
+    concat code( "}})(tr);" )
     
-    @template.concat "</table>"
+    concat "</table>"
   end
+
 
   def select(method, choices, options = {}, html_options = {})
     attr_name = "#{@object_name}[#{method}]"
@@ -161,6 +183,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     super
   end
 
+
   def text(method, options={})
     attr_name = "#{@object_name}[#{method}]"
     code(
@@ -169,6 +192,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
       "html += e.innerHTML;"
     )
   end
+
 
   def text_field(method, options={})
     attr_name = "#{@object_name}[#{method}]"
@@ -188,9 +212,15 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
   
 private
 
-  
+
+  def concat(x)
+    @template.concat(x)
+  end
+
+
   def code(string)
     "';" << string << "html+='"
   end
-  
+
+
 end

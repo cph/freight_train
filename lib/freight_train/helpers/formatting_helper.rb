@@ -11,7 +11,6 @@ module FreightTrain::Helpers::FormattingHelper
   end
 
 
-  # todo: this is also in lail_extensions; but FT requires it
   def format_errors( object )
     if object and object.respond_to? "errors"
       temp = "<ul>"
@@ -31,6 +30,7 @@ module FreightTrain::Helpers::FormattingHelper
   end
 
 
+  # todo: can this be deleted?
   def format_exception_for(record, options={})
     "<p>An error occurred while trying to #{options[:action]} #{record.class.name.titleize}:</p><ul><li>#{h $!}</li></ul>"
   end

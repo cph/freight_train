@@ -1,6 +1,7 @@
 module FreightTrain::Helpers::PageScriptHelper
 
 
+
   def make_interactive( path, table_name, options )
     options[:destroy] = true unless options.key?(:destroy)
 
@@ -39,6 +40,7 @@ module FreightTrain::Helpers::PageScriptHelper
   end
 
 
+
   # move as much of this as possible to core.js
   def ft_init(options={})
     unless @already_initialized
@@ -64,14 +66,22 @@ private
       "FT.destroy('#{msg}',('#{table_name.to_s.singularize}_'+idn),(path+'/'+idn));" <<
     "}"
   end
-  
-  
+
+
   def hookup_row_method( options )
     content = "hookup_row: function(row){"
     if @inline_editor
       content << "if(row.hasClassName('editable')) FT.edit_row_inline(row,path,editor_writer);"
     elsif (options[:editable] != false)
-      content << "if(row.hasClassName('editable')) FT.edit_row(row,path);"
+      # <<<<<<< HEAD:lib/freight_train/helpers/page_script_helper.rb
+      # content << "if(row.hasClassName('editable')) FT.edit_row(row,path);"
+      # =======
+      if (fn=options[:editor])
+        content << "if(row.hasClassName('editable')) FT.edit_row_fn(row,#{fn});"
+      else
+        content << "if(row.hasClassName('editable')) FT.edit_row(row,path);"
+      end 
+      # >>>>>>> master:lib/freight_train/helpers/page_script_helper.rb
     end
     content << "obsv.fire('hookup_row',row);"
     content << "}"
@@ -95,7 +105,7 @@ private
                "});"
   end
   
-  
+
   def editor_writer_method( options )
     "function(tr){" <<  
       "var e;" <<

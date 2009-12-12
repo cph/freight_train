@@ -103,7 +103,7 @@ module FreightTrain::ActionBuilder
                   end
                   format.xml  { render :xml => record, :status => :created, :location => record }
                 else
-                  format.html { show_errors_for record }
+                  format.html { show_errors_for record, options }
                   format.xml  { render :xml => record.errors, :status => :unprocessable_entity }
                 end
               end
@@ -136,7 +136,7 @@ module FreightTrain::ActionBuilder
               end
               format.xml  { head :ok  }
             else
-              format.html { show_errors_for record }
+              format.html { show_errors_for record, options }
               format.xml  { render :xml => record.errors, :status => :unprocessable_entity }
             end
             #rescue Exception
@@ -158,7 +158,7 @@ module FreightTrain::ActionBuilder
               format.html { refresh_updated_color_for record }
               format.xml  { head :ok  }
             else
-              format.html { show_errors_for record }
+              format.html { show_errors_for record, options }
               format.xml  { render :xml => record.errors, :status => :unprocessable_entity }
             end
             rescue Exception
