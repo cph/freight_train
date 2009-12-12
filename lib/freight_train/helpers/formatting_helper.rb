@@ -1,16 +1,6 @@
 module FreightTrain::Helpers::FormattingHelper
 
 
-  # todo: this can be deleted
-  def number_to_currency(number, options={})
-    if( number < 0 )
-      "(#{super -number, options})"
-    else
-      super(number, options)
-    end
-  end
-
-
   def format_errors( object )
     if object and object.respond_to? "errors"
       temp = "<ul>"
@@ -30,7 +20,6 @@ module FreightTrain::Helpers::FormattingHelper
   end
 
 
-  # todo: can this be deleted?
   def format_exception_for(record, options={})
     "<p>An error occurred while trying to #{options[:action]} #{record.class.name.titleize}:</p><ul><li>#{h $!}</li></ul>"
   end
