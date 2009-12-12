@@ -92,6 +92,7 @@ module FreightTrain::Helpers::CoreHelper
     # generate javascript
     make_interactive path, table_name, options
   end
+  alias_method :table_for, :list
 
 
 private
