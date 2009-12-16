@@ -1,7 +1,8 @@
+# TODO: This needs the most work. Refactor using Responders in Rails 3.0
+# TODO: Move this entire module out of FreightTrain; all FT needs is the special default responder
 module FreightTrain::ActionBuilder
 
 
-  # TODO: This needs the most work. Refactor using Responders in Rails 3.0
   module ClassMethods
 
 
@@ -211,10 +212,10 @@ module FreightTrain::ActionBuilder
       end
     end
 
-    def get_actions( resource_type, options={} ) 
+
+    def get_actions(resource_type, options={}) 
       only = options[:only]
       except = options[:except]
-      extra = options[:include]
 
       if only
         actions = only
@@ -227,7 +228,8 @@ module FreightTrain::ActionBuilder
       return actions
     end
 
-    def get_standard_actions( resource_type )
+
+    def get_standard_actions(resource_type)
       case resource_type
       when :simple_record
         [:index, :show, :create, :update, :destroy]
@@ -235,6 +237,7 @@ module FreightTrain::ActionBuilder
         [:index, :show, :new, :create, :edit, :update, :destroy]
       end
     end
+
 
   end
 
