@@ -1,6 +1,20 @@
 module FreightTrain::Helpers::FormattingHelper
 
 
+<<<<<<< HEAD:lib/freight_train/helpers/formatting_helper.rb
+=======
+  # todo: this can be deleted
+  def number_to_currency(number, options={})
+    if( number < 0 )
+      "(#{super -number, options})"
+    else
+      super(number, options)
+    end
+  end
+
+
+  # todo: this is also in lail_extensions; but FT requires it
+>>>>>>> temp2:lib/freight_train/helpers/formatting_helper.rb
   def format_errors( object )
     if object and object.respond_to? "errors"
       temp = "<ul>"

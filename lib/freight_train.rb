@@ -11,8 +11,13 @@ module FreightTrain
     Dir["#{dir}/**/*_helper.rb"].each do |file|
       h = "freight_train/helpers/#{file.sub(extract,'\1')}"
       require h
+<<<<<<< HEAD:lib/freight_train.rb
       # puts "ActionController::Base.add_template_helper(#{h.camelize.constantize})"
       # ActionController::Base.add_template_helper(h.camelize.constantize)
+=======
+      puts "ActionController::Base.add_template_helper(#{h.camelize.constantize})"
+      #ActionController::Base.add_template_helper(h.camelize.constantize)
+>>>>>>> temp2:lib/freight_train.rb
       other_module.send :helper, h.camelize.constantize
     end
     
