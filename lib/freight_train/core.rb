@@ -1,25 +1,8 @@
 module FreightTrain::Core
   include FreightTrain::Helpers::FormattingHelper
-
-
-  def show_errors_for( record, options={}, &block )
-    render :update do |page|
-      page.show_error format_errors( record ), options
-      page.alert options[:alert] if options.key?(:alert)
-    end
-  end 
-
-
-  def show_exception_for( record, options={}, &block )
-    render :update do |page|
-      page.show_error format_exception_for(record, options.merge(:action => @current_action)), options
-      page.alert options[:alert] if options.key?(:alert)
- 
-      if block_given?
-        yield(page)
-      end
-    end
-  end
+  
+  
+  # TODO: Can we simplify out :originating_controller?
 
 
   def refresh_on_create( refresh, record, options={}, &block )
@@ -42,10 +25,7 @@ module FreightTrain::Core
  
       page.call "FT.highlight", idof(record)
       page.call "FT.on_created"
- 
-      if block_given?
-        yield(page)
-      end
+      yield(page) if block_given?
     end
   end
 
@@ -69,10 +49,7 @@ module FreightTrain::Core
       end
  
       page.call "FT.highlight", idof(record)
- 
-      if block_given?
-        yield(page)
-      end
+      yield(page) if block_given?
     end
   end
 
@@ -80,27 +57,26 @@ module FreightTrain::Core
   def remove_deleted( record, &block )
     render :update do |page|
       page.call "FT.delete_record", idof(record)
- 
-      if block_given?
-        yield(page)
-      end
+      yield(page) if block_given?
     end
   end
-  
-
-protected
 
 
-  def responder
-    FreightTrain::Responder
-  end    
-  
-  
-private
+  def show_errors_for( record, options={}, &block )
+    render :update do |page|
+      page.show_error format_errors( record ), options
+      page.alert options[:alert] if options.key?(:alert)
+      yield(page) if block_given?
+    end
+  end 
 
 
-  def get_finder( finder_hash )
-    finder_hash.is_a?(Symbol) ? send(finder_hash) : finder_hash
+  def show_exception_for( record, options={}, &block )
+    render :update do |page|
+      page.show_error format_exception_for(record, options.merge(:action => @current_action)), options
+      page.alert options[:alert] if options.key?(:alert)
+      yield(page) if block_given?
+    end
   end
 
 

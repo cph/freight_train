@@ -16,23 +16,32 @@ module FreightTrain
       other_module.send :helper, h.camelize.constantize
     end
     
-    # augment ActionController with class methods
-    other_module.extend FreightTrain::ActionBuilder::ClassMethods
-    
+    other_module.extend ClassMethods
   end
+  
+  
+  module ClassMethods
 
-
-  # allows substituting builders
-  ActionView::Base.default_form_builder = FreightTrain::Builders::FormBuilder
-  class << self
+    # allows substituting builders
     def default_form_builder; ActionView::Base.default_form_builder; end
     def default_form_builder=(value); ActionView::Base.default_form_builder = value; end
     def default_row_builder; FreightTrain::Builders::RowBuilder.default_row_builder; end
     def default_row_builder=(value); FreightTrain::Builders::RowBuilder.default_row_builder = value; end  
     def default_editor_builder; FreightTrain::Builders::EditorBuilder.default_editor_builder; end
     def default_editor_builder=(value); FreightTrain::Builders::EditorBuilder.default_editor_builder = value; end
-  end 
+    
+    
+    # TODO: accept parameters e.g. :paginate => {:per_page => 20}
+    def uses_freight_train
+      define_method "responder" do
+        FreightTrain::Responder
+      end
+    end
 
+
+  end
+
+  ActionView::Base.default_form_builder = FreightTrain::Builders::FormBuilder
 
 end
 
