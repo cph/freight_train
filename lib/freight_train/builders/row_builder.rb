@@ -78,7 +78,7 @@ class FreightTrain::Builders::RowBuilder
     children = @record.send method
     for child in children
       klass = options[:class]
-      klass = klass.yield(child) if klass.is_a?(Proc)
+      klass = klass.call(child) if klass.is_a?(Proc)
       @template.concat "<tr id=\"#{method.to_s.singularize}_#{i}\"" << (klass ? " class=\"#{klass}\">" : ">")
     # >>>>>>> master:lib/freight_train/builders/row_builder.rb
       yield @@default_row_builder.new( @template, "#{@object_name}[#{method}]", child )
