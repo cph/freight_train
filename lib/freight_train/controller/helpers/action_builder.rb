@@ -73,25 +73,40 @@ module FreightTrain::Controller::Helpers::ActionBuilder
         define_method "create" do
           respond_to do |format|
             begin
-            record = mod.new(params[instance_name])
-            instance_variable_set("@#{instance_name}",record)
-
-            #render :update do |page| page.alert "params:\r\n" + format_params; end; return;
-
-            if record.save
-              if (resource_type == :simple_record)
-                format.html { refresh_on_create(refresh_on_create, record, options) }
+              if params[collection_name]
+                # todo: this will be multiple records
+                # todo: really need to come up with a more elegant way of doing all this
+                # ... step 1: can't wait to add Rails 3.0 responders
+                # records = mod.create(params[collection_name][instance_name])
+                records = []
+                for n in params[collection_name][instance_name]
+                  begin
+                    records << mod.create(n)
+                  rescue NoMethodError
+                    puts n
+                  end
+                end
+                  
+                instance_variable_set("@#{collection_name}",records)
+                format.xml{ render :xml => records, :status => :created }
               else
-                format.html { redirect_to record }
+                record = mod.new(params[instance_name])
+                instance_variable_set("@#{instance_name}",record)
+  
+                #render :update do |page| page.alert "params:\r\n" + format_params; end; return;
+    
+                if record.save
+                  if (resource_type == :simple_record)
+                    format.html { refresh_on_create(refresh_on_create, record, options) }
+                  else
+                    format.html { redirect_to record }
+                  end
+                  format.xml  { render :xml => record, :status => :created, :location => record }
+                else
+                  format.html { show_errors_for record }
+                  format.xml  { render :xml => record.errors, :status => :unprocessable_entity }
+                end
               end
-              format.xml  { render :xml => record, :status => :created, :location => record }
-            else
-              format.html { show_errors_for record }
-              format.xml  { render :xml => record.errors, :status => :unprocessable_entity }
-            end
-            #rescue Exception
-            #  format.html { show_exception_for record }
-              #format.xml {}
             end
           end
         end   
