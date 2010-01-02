@@ -1,7 +1,7 @@
-module FreightTrain::Controller::Helpers::ActionBuilder
- #include FreightTrain::Helpers::FormattingHelper
-  include FreightTrain::Controller::Helpers::Core
+module FreightTrain::ActionBuilder
 
+
+  # TODO: This needs the most work. Refactor using Responders in Rails 3.0
   module ClassMethods
 
     def mapped_actions_for(resource_type, mod, *args)
@@ -214,14 +214,13 @@ module FreightTrain::Controller::Helpers::ActionBuilder
 
   end
 
+
 private
+
 
   def self.included(other_module)
     other_module.extend ClassMethods
   end
 
-  def get_finder( finder_hash )
-    finder_hash.is_a?(Symbol) ? send(finder_hash) : finder_hash
-  end
 
 end

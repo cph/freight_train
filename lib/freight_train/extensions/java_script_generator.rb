@@ -46,8 +46,8 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
   end
 
   def show_error( message )
-    replace_html "error", message
-    show "error"
+    replace_html "flash_error", message
+    show "flash_error"
   end
   
 end

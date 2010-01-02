@@ -1,2 +1,1 @@
-require 'freight_train/controller/base'
-require 'route_set'
+require 'freight_train'

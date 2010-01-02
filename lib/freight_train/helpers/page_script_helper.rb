@@ -1,5 +1,6 @@
 module FreightTrain::Helpers::PageScriptHelper
 
+
   def make_interactive( path, table_name, options )
     options[:destroy] = true unless options.key?(:destroy)
 
@@ -37,6 +38,7 @@ module FreightTrain::Helpers::PageScriptHelper
     @already_defined = true
   end
 
+
   # move as much of this as possible to core.js
   def ft_init(options={})
     unless @already_initialized
@@ -52,7 +54,9 @@ module FreightTrain::Helpers::PageScriptHelper
     end
   end
 
+
 private
+
 
   def destroy_method( table_name, options )
     msg = options[:confirm] || "Delete #{table_name.to_s.singularize.titleize}?"
@@ -60,6 +64,7 @@ private
       "FT.destroy('#{msg}',('#{table_name.to_s.singularize}_'+idn),(path+'/'+idn));" <<
     "}"
   end
+  
   
   def hookup_row_method( options )
     content = "hookup_row: function(row){"
@@ -71,6 +76,7 @@ private
     content << "obsv.fire('hookup_row',row);"
     content << "}"
   end
+
 
   def reset_on_create_method( table_name, options )
     arg = options[:reset_on_create]
@@ -89,6 +95,7 @@ private
                "});"
   end
   
+  
   def editor_writer_method( options )
     "function(tr){" <<  
       "var e;" <<
@@ -97,6 +104,7 @@ private
     "}"
   end
 
+
   def after_edit_method( options )
     content = "function(tr,tr_edit){"
     content << "tr_edit.select('table.nested').each(FT.reset_add_remove_for);" if @enable_nested_records
@@ -104,4 +112,5 @@ private
     content << "}"
   end
   
+
 end

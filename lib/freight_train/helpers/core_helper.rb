@@ -1,11 +1,13 @@
 module FreightTrain::Helpers::CoreHelper
-  
+
+
   class ListBuilder
 
     def initialize(sym, template, options)
       @sym, @template, @options = sym, template, options
     end
-    
+
+
     def headings(*args, &block)
       @template.concat "<tr class=\"row\">\n"
       if block_given?
@@ -16,6 +18,7 @@ module FreightTrain::Helpers::CoreHelper
       @template.concat "<th></th></tr>\n"
     end
     
+    
     def creator(*args, &block)
       raise ArgumentError, "Missing block" unless block_given?
       new_record = args.first || @template.instance_variable_get("@#{@sym}")
@@ -25,10 +28,11 @@ module FreightTrain::Helpers::CoreHelper
       @template.concat "</tr>"
     end
     
+    
     def editor(*args, &block)
       raise ArgumentError, "Missing block" unless block_given?
       options = args.extract_options!
-      builder = FreightTrain::Builders::InlineFormBuilder.default_inline_editor_builder
+      builder = FreightTrain::Builders::EditorBuilder.default_editor_builder
  
       #@after_init_edit = "" # if !@after_init_edit
       @template.instance_variable_set("@after_init_edit", "")
@@ -39,7 +43,11 @@ module FreightTrain::Helpers::CoreHelper
     end
     
   end
-  
+
+  # todo: write usage here
+  #
+  #  :paginate => [true, false]     -
+  #  :path =>                       -
   def list( *args, &block )
     options = args.extract_options!    
     table_name = args.last.to_s

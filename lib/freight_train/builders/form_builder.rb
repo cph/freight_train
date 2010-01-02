@@ -1,14 +1,6 @@
 class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
   attr_reader :object
 
-  def auto_complete_text_field_tag(method, options={})
-    url = options.delete(:url)
-    #url[:action] = "autocomplete_#{method}"
- 
-    content = @template.text_field_tag(method, options[:value], options)
-    content << "<div class=\"auto_complete\" id=\"#{method}_auto_complete\"></div>"
-    content << @template.auto_complete_field(method, {:url => url})
-  end
 
   def check_list_for( method, values, &block )
     #options = args.extract_options!
@@ -17,6 +9,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
       yield FreightTrain::Builders::CheckListBuilder.new("#{@object_name}[#{method}]", array, value, @template)
     end
   end
+
 
   # override: do arrays like attributes  
   def fields_for(method_or_object, *args, &block)
@@ -42,6 +35,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
  
     super(method_or_object, *args, &block)
   end
+
 
   def hidden_field( method_or_object, *args )  
     options = args.extract_options!
@@ -77,6 +71,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     content
   end
 
+
   def nested_editor_for( object_name, *args, &block )
     @template.instance_variable_set "@enable_nested_records", true
     i = 0
@@ -92,12 +87,15 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     end
     @template.concat "</table>"
   end
+
   
 private
+
 
   def nested_fields_for(method_or_object, *args, &block)
     args << {:builder => FreightTrain::Builders::NestedFormBuilderWrapper}
     fields_for(method_or_object, *args, &block)    
   end
+
 
 end

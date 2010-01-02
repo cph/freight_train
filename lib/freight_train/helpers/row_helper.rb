@@ -1,5 +1,6 @@
 module FreightTrain::Helpers::RowHelper
 
+
   def row_for( record, *args, &block )
     options = args.extract_options!
     
@@ -29,6 +30,7 @@ module FreightTrain::Helpers::RowHelper
     concat "</tr>\n" unless @update_row
   end
 
+
   def commands_for( record, commands )
     html = ""
     if commands
@@ -40,6 +42,7 @@ module FreightTrain::Helpers::RowHelper
     end
     html
   end
+
 
   def idof( record )
     "#{record.class.name.underscore}_#{record.id}"
@@ -55,5 +58,6 @@ private
     #"<a class=\"delete-command\" href=\"#\" onclick=\"Generated.delete_item(#{record.id});\">delete</a>"
     "<a class=\"delete-command\" href=\"#\" onclick=\"FT.#{record.class.name}.destroy(#{record.id});\">delete</a>"
   end
+
 
 end

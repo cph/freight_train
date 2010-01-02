@@ -1,5 +1,7 @@
 module FreightTrain::Helpers::FormattingHelper
 
+
+  # todo: this can be deleted
   def number_to_currency(number, options={})
     if( number < 0 )
       "(#{super -number, options})"
@@ -8,24 +10,8 @@ module FreightTrain::Helpers::FormattingHelper
     end
   end
 
-  def format_params( hash=params, level=0 )
-    output = ""
-    hash.map do |k,v|
-      level.times do
-        output << " "
-      end
-      if v.is_a? Hash
-        output << "#{k}:\n"
-        output << format_params(v, level + 2) if v.is_a? Hash
-      elsif v.is_a? Array
-        output << "#{k}=[#{v.join(",")}]\n"
-      else
-        output << "#{k}='#{v}'\n"
-      end
-    end
-    output
-  end
 
+  # todo: this is also in lail_extensions; but FT requires it
   def format_errors( object )
     if object and object.respond_to? "errors"
       temp = "<ul>"
@@ -44,8 +30,10 @@ module FreightTrain::Helpers::FormattingHelper
     end
   end
 
+
   def format_exception_for(record, options={})
     "<p>An error occurred while trying to #{options[:action]} #{record.class.name.titleize}:</p><ul><li>#{h $!}</li></ul>"
   end
+
 
 end

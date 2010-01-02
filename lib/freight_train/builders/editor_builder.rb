@@ -1,13 +1,16 @@
-class FreightTrain::Builders::InlineFormBuilder < ActionView::Helpers::FormBuilder
+class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
   include ActionView::Helpers::TagHelper
 
-  @@default_inline_editor_builder = FreightTrain::Builders::InlineFormBuilder
-  def self.default_inline_editor_builder; @@default_inline_editor_builder; end
-  def self.default_inline_editor_builder=(val); @@default_inline_editor_builder=val; end
+  @@default_editor_builder = FreightTrain::Builders::EditorBuilder
+  def self.default_editor_builder; @@default_editor_builder; end
+  def self.default_editor_builder=(val); @@default_editor_builder=val; end
+  
+  
+  # TODO: Push this into a JavaScript library
   
   
   # ===================================================================================================
-  # ABOUT INLINE_FORM_BUILDER
+  # ABOUT EDITOR_BUILDER
   # ===================================================================================================
   #
   # This is used to make an entire Ruby block into a single-quoted JavaScript string that,
@@ -79,7 +82,7 @@ class FreightTrain::Builders::InlineFormBuilder < ActionView::Helpers::FormBuild
   
   def fields_for( method, *args, &block )
     options = args.extract_options!
-    yield @@default_inline_editor_builder.new( "#{@object_name}[#{method}]", nil, @template, options, block )
+    yield @@default_editor_builder.new( "#{@object_name}[#{method}]", nil, @template, options, block )
   end
 
   def hidden_field( method )

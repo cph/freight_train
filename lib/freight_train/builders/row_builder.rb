@@ -14,6 +14,7 @@ class FreightTrain::Builders::RowBuilder
     @record = record
   end
 
+  # todo: move to extension of freight_train in this app?
   def currency_of(method)
     number = @record.send method
     string = 
