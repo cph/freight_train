@@ -2,7 +2,7 @@ class FreightTrain::Builders::NestedFormBuilderWrapper
 
   def initialize(object_name, object, template, options, proc)
     #template.concat "<!-- I'm in! -->"
-    @builder = FreightTrain::Controller::Base.default_form_builder.new(object_name, object, template, options, proc)
+    @builder = ActionView::Base.default_form_builder.new(object_name, object, template, options, proc)
   end
   
   def collection_select(method, collection, value_method, text_method, options = {}, html_options = {})
