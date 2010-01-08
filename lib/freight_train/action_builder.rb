@@ -3,6 +3,12 @@ module FreightTrain::ActionBuilder
 
   # TODO: This needs the most work. Refactor using Responders in Rails 3.0
   module ClassMethods
+  
+  
+    def self.included
+    end
+    
+    
 
     def mapped_actions_for(resource_type, mod, *args)
       options = args.extract_options!      
@@ -31,15 +37,19 @@ module FreightTrain::ActionBuilder
 
       if actions.member? :index
         define_method "index" do
-          respond_to do |format|
-            collection = mod.find(:all, get_finder(options[:find]))
-            instance_variable_set("@#{collection_name}", collection)
-            instance_variable_set("@#{instance_name}", mod.new(options[:new]||{})) if (resource_type == :simple_record)
-
-            format.html                                                       #if formats.member? :html
-            format.xml  { render :xml => collection }                         #if formats.member? :xml
-            format.yml  {}                                                    if formats.member? :yml
-          end
+          collection = mod.find(:all, get_finder(options[:find]))
+          instance_variable_set("@#{collection_name}", collection)
+          instance_variable_set("@#{instance_name}", mod.new(options[:new]||{})) if (resource_type == :simple_record)
+          respond_with(collection)
+          
+          #respond_to do |format|
+          #  collection = mod.find(:all, get_finder(options[:find]))
+          #  instance_variable_set("@#{collection_name}", collection)
+          #  instance_variable_set("@#{instance_name}", mod.new(options[:new]||{})) if (resource_type == :simple_record)
+          #  format.html                                                       #if formats.member? :html
+          #  format.xml  { render :xml => collection }                         #if formats.member? :xml
+          #  format.yml  {}                                                    if formats.member? :yml
+          #end
         end
       end
 
@@ -72,7 +82,26 @@ module FreightTrain::ActionBuilder
       if actions.member? :create
         define_method "create" do
           respond_to do |format|
-            begin
+            format.html do
+              record = mod.new(params[instance_name])
+              instance_variable_set("@#{instance_name}",record)
+
+              #render :update do |page| page.alert "params:\r\n" + format_params; end; return;
+  
+              if record.save
+                if (resource_type == :simple_record)
+                  format.html { refresh_on_create(refresh_on_create, record, options) }
+                else
+                  format.html { redirect_to record }
+                end
+                format.xml  { render :xml => record, :status => :created, :location => record }
+              else
+                format.html { show_errors_for record }
+                format.xml  { render :xml => record.errors, :status => :unprocessable_entity }
+              end
+            end
+            format.xml do
+              # merge
               if params[collection_name]
                 # todo: this will be multiple records
                 # todo: really need to come up with a more elegant way of doing all this
