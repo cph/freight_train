@@ -67,6 +67,14 @@ module FreightTrain::Core
   	end
   end
   
+
+protected
+
+
+  def responder
+    FreightTrain::Responder
+  end    
+  
   
 private
 

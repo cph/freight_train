@@ -15,7 +15,7 @@ module FreightTrain::ActionBuilder
       actions = get_actions(resource_type, options)
      #finder_hash = options[:find] || {}
      #new_hash = options[:new] || {}
-      formats = options[:formats] || [:html, :xml]
+      # formats = options[:formats] || [:html, :xml]
 
       default_refresh = :single
       refresh = options[:refresh]
