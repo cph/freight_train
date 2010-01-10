@@ -2,7 +2,7 @@ class FreightTrain::Responder < ActionController::Responder
   
   
   # methods in FreightTrain::Core
-  delegate :refresh_on_create, :refresh_on_update, :remove_deleted, :show_errors_for, :show_exception_for,
+  delegate :refresh_on_create, :refresh_on_update, :remove_deleted, :show_error, :show_errors_for, :show_exception_for,
            :to => :controller
 
   
@@ -35,9 +35,17 @@ protected
   end
   
   def destroy
-    if resource.destroyed?
-      remove_deleted resource
-    else
+    # nb! should require Rails 2.3.4 or greater!
+    destroyed = resource.respond_to?(:destroyed?) ? resource.destroyed? : !resource.class.find_by_id(resource.id)
+    puts "DESTROYED: #{destroyed}"
+    begin
+      if destroyed
+        remove_deleted resource
+      else
+        show_error "Unable to destroy #{resource}"
+      end
+    rescue
+      show_error "#{$!}"
     end
   end
 
