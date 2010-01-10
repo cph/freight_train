@@ -61,7 +61,7 @@ private
   def destroy_method( table_name, options )
     msg = options[:confirm] || "Delete #{table_name.to_s.singularize.titleize}?"
     "destroy: function(idn){" <<
-      "FT.destroy('#{msg}',('#{table_name.to_s.singularize}_'+idn),(path+'/'+idn));" <<
+      "return FT.destroy('#{msg}',('#{table_name.to_s.singularize}_'+idn),(path+'/'+idn));" <<
     "}"
   end
 

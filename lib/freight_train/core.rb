@@ -62,21 +62,23 @@ module FreightTrain::Core
   end
 
 
-  def show_errors_for( record, options={}, &block )
+  def show_error( message, options={}, &block )
     render :update do |page|
-      page.show_error format_errors( record ), options
+      page.show_error message, options
       page.alert options[:alert] if options.key?(:alert)
       yield(page) if block_given?
     end
+  end
+
+
+  def show_errors_for( record, options={}, &block )
+    show_error(format_errors(record), options, &block)
   end 
 
 
   def show_exception_for( record, options={}, &block )
-    render :update do |page|
-      page.show_error format_exception_for(record, options.merge(:action => @current_action)), options
-      page.alert options[:alert] if options.key?(:alert)
-      yield(page) if block_given?
-    end
+    message = format_exception_for(record, options.merge(:action => @current_action))
+    show_error(message, options, &block)
   end
 
 
