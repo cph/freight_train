@@ -1,4 +1,11 @@
+# Is this used?
+
+
 class FreightTrain::Builders::NestedTableBuilder
+    
+  
+  # delegate :concat, :alt_content_tag, :fields_for, :to => :@template
+
 
   def initialize(template)
     @template = template
@@ -21,7 +28,8 @@ class FreightTrain::Builders::NestedTableBuilder
       @template.instance_variable_set("@alt", alt)
       css_class << " alt" if !alt
 
-      concat "<tr class=\"#{css_class}\" id=\"#{idof record}\">"
+      #concat "<tr class=\"#{css_class}\" id=\"#{idof record}\">"
+      concat alt_tag(:tr, :class => css_class, :id => idof(record))
     end
 
     name = ActionController::RecordIdentifier.singular_class_name(record)
@@ -29,9 +37,13 @@ class FreightTrain::Builders::NestedTableBuilder
 
     # IE7 doesn't support the CSS selector :last-child, therefore, we do this explicitly
     #concat "<td>#{commands_for(record, options[:commands])}</td>"
-    concat "  <td class=\"last-child\">#{commands_for(record, options[:commands])}</td>\n"
+    # concat "  <td class=\"last-child\">#{commands_for(record, options[:commands])}</td>\n"
+    alt_content_tag :td, :class => "last-child" do
+      commands_for(record, options[:commands])
+    end
 
-    concat "</tr>\n" unless @update_row
+    #concat "</tr>\n" unless @update_row
+    concat "</#{FreightTrain::Tags[:tr] || :tr}>" unless @update_row
   end
   
   

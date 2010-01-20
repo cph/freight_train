@@ -10,7 +10,7 @@ module FreightTrain::Helpers::PageScriptHelper
            # create a namespace for record-specific functions
     concat "FT.#{table_name.classify}=(function(){\n" <<
            "  var path='#{path}';\n" <<
-           "  var obsv=new Observer();\n"
+           "  var obsv=new Observer();\n" 
 
     if @inline_editor
       concat "  var editor_writer=#{editor_writer_method(options)};\n"
@@ -71,15 +71,11 @@ private
     if @inline_editor
       content << "if(row.hasClassName('editable')) FT.edit_row_inline(row,path,editor_writer);"
     elsif (options[:editable] != false)
-      # <<<<<<< HEAD:lib/freight_train/helpers/page_script_helper.rb
-      # content << "if(row.hasClassName('editable')) FT.edit_row(row,path);"
-      # =======
       if (fn=options[:editor])
         content << "if(row.hasClassName('editable')) FT.edit_row_fn(row,#{fn});"
       else
         content << "if(row.hasClassName('editable')) FT.edit_row(row,path);"
       end 
-      # >>>>>>> master:lib/freight_train/helpers/page_script_helper.rb
     end
     content << "obsv.fire('hookup_row',row);"
     content << "}"
@@ -98,7 +94,7 @@ private
     end
     
     # make this intuitive
-    content <<     "form.select('#add_row table.nested.editor').each(FT.reset_nested);" if @enable_nested_records
+    content <<     "form.select('#add_row .nested.editor').each(FT.reset_nested);" if @enable_nested_records
     content <<   "});" <<
                "});"
   end
@@ -107,7 +103,7 @@ private
   def editor_writer_method( options )
     "function(tr){" <<  
       "var e;" <<
-      "var html='" << @inline_editor.gsub(/\r|\n/, "") << "';" <<
+      "var html='" << @inline_editor.gsub(/\r|\n/, "").gsub(/ *</, "<").gsub(/> */, ">") << "';" <<
       "return html;" <<
     "}"
   end
@@ -115,7 +111,7 @@ private
 
   def after_edit_method( options )
     content = "function(tr,tr_edit){"
-    content << "tr_edit.select('table.nested').each(FT.reset_add_remove_for);" if @enable_nested_records
+    content << "tr_edit.select('.nested').each(FT.reset_add_remove_for);" if @enable_nested_records
     content << @after_init_edit if @after_init_edit
     content << "}"
   end

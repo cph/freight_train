@@ -14,6 +14,9 @@ class FreightTrain::Builders::RowBuilder
     @object_name = object_name
     @record = record
   end
+    
+  
+  delegate :concat, :alt_content_tag, :fields_for, :to => :@template
 
 
   def record
@@ -56,36 +59,27 @@ class FreightTrain::Builders::RowBuilder
   end
 
   def nested_fields_for(method, *args, &block)
-    options = args.extract_options!
-  
+    singular = method.to_s.singularize
+    options = args.extract_options!  
     css = options[:hidden] ? "nested hidden" : "nested"
-    @template.concat "<table class=\"#{css}\" attr=\"#{@object_name}[#{method}]\">"
-    #html_options.each{|k,v| @template.concat " #{k}=\"#{v}\""}
-    #@template.concat ">"
     
-    # <<<<<<< HEAD:lib/freight_train/builders/row_builder.rb
-    # i = 0
-    # children = @record.send method
-    # for child in children
-    #   @template.concat "<tr id=\"#{method.to_s.singularize}_#{i}\">"
-    # =======
-    # yield NestedTableBuilder.new( @template )
-    @template.concat "<table class=\"nested #{options[:hidden]?"hidden":""}\" attr=\"#{@object_name}[#{method}]\""
-    #html_options.each{|k,v| @template.concat " #{k}=\"#{v}\""}
-    @template.concat ">"
-    
-    i = 0
-    children = @record.send method
-    for child in children
-      klass = options[:class]
-      klass = klass.call(child) if klass.is_a?(Proc)
-      @template.concat "<tr id=\"#{method.to_s.singularize}_#{i}\"" << (klass ? " class=\"#{klass}\">" : ">")
-    # >>>>>>> master:lib/freight_train/builders/row_builder.rb
-      yield @@default_row_builder.new( @template, "#{@object_name}[#{method}]", child )
-      @template.concat "</tr>"
-      i += 1
+    alt_content_tag :table, :class => css do
+      alt_content_tag :tbody, :attr => "#{@object_name}[#{method}]" do
+        i = 0
+        children = @record.send method
+        for child in children
+          klass = options[:class]
+          klass = klass.call(child) if klass.is_a?(Proc)
+          temp = ["nested-row", singular]
+          temp << klass if klass
+          klass = temp.join(" ")
+          alt_content_tag :tr, :id => "#{singular}_#{i}", :class => klass do
+            yield @@default_row_builder.new( @template, "#{@object_name}[#{method}]", child )
+          end
+          i += 1
+        end
+      end
     end
-    @template.concat "</table>"
   end
 
 

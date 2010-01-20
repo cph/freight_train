@@ -62,9 +62,11 @@ module FreightTrain::Core
   end
 
 
-  def show_error( message, options={}, &block )
+  def show_error(*args)
+    options = args.extract_options!
+    message = args.first    
     render :update do |page|
-      page.show_error message, options
+      page.show_error(message, options) if message
       page.alert options[:alert] if options.key?(:alert)
       yield(page) if block_given?
     end

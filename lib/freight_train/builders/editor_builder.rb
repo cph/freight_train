@@ -43,6 +43,9 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     super
     @after_init_edit = @template.instance_variable_get("@after_init_edit")
   end
+  
+  
+  delegate :concat, :alt_content_tag, :alt_tag, :to => :@template
 
 
   def check_box(method, options={})
@@ -141,53 +144,50 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     
     attr_name = "#{@object_name}[#{method}]"
     name = "#{@object_name}[#{method}_attributes]"
+    singular = method.to_s.singularize
     @template.instance_variable_set "@enable_nested_records", true
 
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-    concat "<table class=\"nested editor\" name=\"#{name}\">"
-
-    # This FormBuilder expects 'tr' to refer to a TR that represents and object and contains
-    # TDs representing the object's attributes. For nested objects, the TR is a child of the
-    # root TR. Create a closure in which the variable 'tr' refers to the nested object while
-    # preserving the reference to the root TR.
-    concat code(
-      "(function(root_tr){" <<
-      "var nested_rows=root_tr.select('table[attr=\"#{attr_name}\"] tr');" <<
-      #"alert('#{attr_name}: '+nested_rows.length);" <<
-      "for(var i=0; i<nested_rows.length; i++){" << 
-        "var tr=nested_rows[i];"
-    )
-    @after_init_edit << "FT.for_each_row(tr,tr_edit,'table[attr=\"#{attr_name}\"] tr','table[name=\"#{name}\"] tr',function(tr,tr_edit){"
-
-    fields_for method, nil, *args do |f|
-#<<<<<<< HEAD:lib/freight_train/builders/editor_builder.rb
-      concat "<tr id=\"#{method.to_s.singularize}_'+i+'\">"
-      block.call(f)
-      concat "<td class=\"delete-nested\"><a class=\"delete-link\" href=\"#\" onclick=\"FT.delete_nested_object(this);return false;\"><div class=\"delete-nested\"></div></a></td>"
-      concat "<td class=\"add-nested\"><a class=\"add-link\" href=\"#\" onclick=\"FT.add_nested_object(this);return false;\"><div class=\"add-nested\"></div></a></td>"
-      concat "</tr>"
+    alt_content_tag :tbody, :class => "nested editor", :name => name do
+      #alt_content_tag :tbody do
+      
+        old_after_init_edit = @after_init_edit
+        @after_init_edit = ""
+  
+        # This FormBuilder expects 'tr' to refer to a TR that represents and object and contains
+        # TDs representing the object's attributes. For nested objects, the TR is a child of the
+        # root TR. Create a closure in which the variable 'tr' refers to the nested object while
+        # preserving the reference to the root TR.
+        concat code(
+          "(function(root_tr){" <<
+          "var nested_rows=root_tr.select('*[attr=\"#{attr_name}\"] .#{singular}');" <<
+          #"alert('#{attr_name}: '+nested_rows.length);" <<
+          "for(var i=0; i<nested_rows.length; i++){" << 
+            "var tr=nested_rows[i];"
+        )
+        fields_for method, nil, *args do |f|
+          alt_content_tag :tr, :class => "item", :id => "#{method.to_s.singularize}_'+i+'" do
+            yield f
+            alt_content_tag :td, :class => "delete-nested" do
+              concat "<a class=\"delete-link\" href=\"#\" onclick=\"FT.delete_nested_object(this);return false;\"></a>"
+            end
+            alt_content_tag :td, :class => "add-nested" do
+              concat "<a class=\"add-link\" href=\"#\" onclick=\"FT.add_nested_object(this);return false;\"></a>"
+            end
+          end
+        end
+        concat code( "}})(tr);" ) 
+        
+        if @after_init_edit.empty?
+          @after_init_edit = old_after_init_edit
+        else
+          @after_init_edit = old_after_init_edit + "FT.for_each_row(tr,tr_edit,'*[attr=\"#{attr_name}\"] .row','*[name=\"#{name}\"] .row',function(tr,tr_edit){#{@after_init_edit}});"
+        end
+        
+      #end
     end
-    @after_init_edit << "});"
-    concat code( "}})(tr);" )
-    
-    concat "</table>"
   end
 
-
-#=======
-#      @template.concat "<tr id=\"#{method.to_s.singularize}_'+i+'\">"
-#      block.call(f)
-#      @template.concat "<td><a class=\"delete-link\" href=\"#\" onclick=\"FT.delete_nested_object(this);return false;\"><div class=\"delete-nested\"></div></a></td>"
-#      @template.concat "<td><a class=\"add-link\" href=\"#\" onclick=\"FT.add_nested_object(this);return false;\"><div class=\"add-nested\"></div></a></td>"
-#      @template.concat "</tr>"
-#    end
-#    @after_init_edit << "});"
-#    @template.concat code( "}})(tr);" )
-    
-#    @template.concat "</table>"
-#  end
-
-#>>>>>>> temp2:lib/freight_train/builders/editor_builder.rb
 
 
   def select(method, choices, options = {}, html_options = {})
@@ -206,6 +206,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     code(
       "e=tr.down('*[attr=\"#{attr_name}\"]');" <<
       "if(!e){alert('#{attr_name} not found'); return null;}" <<
+    # "alert(e.innerHTML);" <<
       "html += e.innerHTML;"
     )
   end
@@ -217,7 +218,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     code(
       "e=tr.down('*[attr=\"#{attr_name}\"]');" <<
       "if(!e){alert('#{attr_name} not found'); return null;}" <<
-      #"alert(e.readAttribute('value'));" <<      
+    # "alert(e.innerHTML);" <<
       "var #{method}=e.readAttribute('value')||e.innerHTML;"
     ) << 
     @template.tag( "input", options.merge(
@@ -225,14 +226,30 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
       :name => "#{attr_name}",
       :value => "'+#{method}+'"))
   end
+  
+  
+  def last_child(&block)
+    @last_child = @template.capture(&block) if block_given?
+    
+    name = FreightTrain::Tags[:td] || :td
+    html = tag(name, {:class => "last-child"}, true)
+    html << (@last_child || default_last_child )
+    html << "</#{name}>"
+  end
 
   
 private
 
 
-  def concat(x)
-    @template.concat(x)
+  def default_last_child
+    '<button id="tag_submit" name="commit" type="submit">Save</button>' +
+    '<button onclick="InlineEditor.close();return false;">Cancel</button>'    
   end
+
+
+  #def concat(x)
+  #  @template.concat(x)
+  #end
 
 
   def code(string)

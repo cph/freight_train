@@ -6,16 +6,20 @@ module FreightTrain::Helpers::CoreHelper
     def initialize(sym, template, options)
       @sym, @template, @options = sym, template, options
     end
+    
+    delegate :concat, :alt_content_tag, :fields_for, :to => :@template
 
 
     def headings(*args, &block)
-      @template.concat "<tr class=\"row\">\n"
-      if block_given?
-        yield
-      elsif args.length > 0
-        args.each {|heading| @template.concat "<th>#{heading}</th>"}
+      alt_content_tag :tr, :class => "row heading" do
+        if block_given?
+          yield
+        elsif args.length > 0
+          args.each {|heading| alt_content_tag(:th, heading)}
+        end
+        alt_content_tag :th
       end
-      @template.concat "<th></th></tr>\n"
+      #@template.concat "<th></th></tr>\n"
     end
     
     
@@ -23,9 +27,12 @@ module FreightTrain::Helpers::CoreHelper
       raise ArgumentError, "Missing block" unless block_given?
       new_record = args.first || @template.instance_variable_get("@#{@sym}")
       
-      @template.concat "<tr id=\"add_row\" class=\"row editor new\">"
-      @template.fields_for new_record, &block
-      @template.concat "</tr>"
+      alt_content_tag :tr, :id => "add_row", :class => "row editor new" do
+        fields_for new_record, &block
+      end
+      #@template.concat "<tr id=\"add_row\" class=\"row editor new\">"
+      #@template.fields_for new_record, &block
+      #@template.concat "</tr>"
     end
     
     
@@ -37,7 +44,8 @@ module FreightTrain::Helpers::CoreHelper
       #@after_init_edit = "" # if !@after_init_edit
       @template.instance_variable_set("@after_init_edit", "")
       @template.instance_variable_set("@inline_editor", @template.capture do
-        yield builder.new( @sym, nil, @template, options, block)
+        yield (editor_builder = builder.new( @sym, nil, @template, options, block))
+        concat editor_builder.last_child
       end)
       #@template.instance_variable_set("@after_init_edit", @after_init_edit)
     end
@@ -66,21 +74,14 @@ module FreightTrain::Helpers::CoreHelper
     #if( options[:partial] )
 
     # table
-    concat "<table class=\"list\">\n<thead>\n"
-    
-    if block_given?
-
-      yield ListBuilder.new(instance_name, self, options)    
-
-    else
-    
+    alt_content_tag :table, :class => "list" do
+      alt_content_tag :thead do
+        yield ListBuilder.new(instance_name, self, options)        
+      end
+      alt_content_tag :tbody, :id => table_name do
+        concat render(:partial => instance_name, :collection => records) unless !records or (records.length==0)
+      end
     end
-
-    # show records
-    concat "</thead>\n<tbody id=\"#{table_name}\">\n"
-    concat render(:partial => instance_name, :collection => records) unless !records or (records.length==0)
-    concat "</tbody>\n"
-    concat "</table>\n"
     concat "</form>\n"
     
     if options[:paginate]
@@ -95,7 +96,26 @@ module FreightTrain::Helpers::CoreHelper
   alias_method :table_for, :list
 
 
-private
+
+
+  # this is a fix...
+  def alt_content_tag(name, *args, &block)
+    options = args.extract_options!
+    name = FreightTrain::Tags[name] || name
+    concat tag(name, options, true)
+    if block_given?
+      yield
+    elsif args.first
+      concat args.first
+    end
+    concat "</#{name}>"
+  end
+  
+  
+  def alt_tag(name, *args)
+    name = FreightTrain::Tags[name] || name
+    tag(name, *args)    
+  end
 
 
 end
