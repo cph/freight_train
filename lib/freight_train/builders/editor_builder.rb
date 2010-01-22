@@ -166,7 +166,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
             "var tr=nested_rows[i];"
         )
         fields_for method, nil, *args do |f|
-          alt_content_tag :tr, :class => "item", :id => "#{method.to_s.singularize}_'+i+'" do
+          alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_'+i+'" do
             yield f
             alt_content_tag :td, :class => "delete-nested" do
               concat "<a class=\"delete-link\" href=\"#\" onclick=\"FT.delete_nested_object(this);return false;\"></a>"
