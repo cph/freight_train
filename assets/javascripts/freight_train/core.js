@@ -18,16 +18,14 @@ var InlineEditor = (function(){
       // before_init callback can return false to cancel the edit
       observer.fire('before_init', tr);
 
-      // Find relevant tags
+      // Find the form
       var form = tr.up('.freight_train'); if(!form) return;
 
       // Get properties
       var id = tr.readAttribute('id');
-      //alert(id);
-      //alert(tr.innerHTML);
-      var editor_html = editor_writer(tr); if(!editor_html) return;	
-      //alert(editor_html);
-      //var row_class = tr.hasClassName('alt') ? 'row editor alt' : 'row editor';
+      
+      // Create editor
+      var tr_edit = editor_writer(tr); if(!tr_edit) return;	
 
       // Configure form
       form.onsubmit = function() {
@@ -38,13 +36,7 @@ var InlineEditor = (function(){
       // Hide the view-only row	 
       tr.hide();
       
-      // Create the editor row
-      // TODO: create these buttons outside of InlineEditor: make them the last part of EditorBuilder
-      html = editor_html;
-      var tr_edit = $(document.createElement('li'));
-      tr_edit.className = "row editor";
-      tr_edit.id = "edit_row";
-      tr_edit.update(html);
+      // Insert the editor row
       tr.insert({'after':tr_edit});
       
       //
