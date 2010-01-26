@@ -1,33 +1,3 @@
-/* Observer: this awesome class is described by The Grubbsian
-   http://www.thegrubbsian.com/?p=100 */
-
-var Observer = (function(){
-  var Observation = function(name, func) {
-    this.name = name;
-    this.func = func;
-  };
-  var constructor = function() {
-    this.observations = [];
-  };
-  constructor.prototype = {
-    observe: function(name, func) {
-      var exists = this.observations.findAll(function(i) {
-        return (i.name==name) && (i.func==func); }).length > 0;
-      if(!exists) { this.observations.push(new Observation(name, func)); }
-    },
-    unobserve: function(name, func) {
-      this.observations.remove(function(i) { return (i.name==name) && (i.func==func); });
-    },
-    fire: function(name, data, scope) {
-      if(!(data instanceof Array)) data = [data];
-      var funcs = this.observations.findAll(function(i) { return (i.name==name); });
-      funcs.forEach(function(i) { i.func.apply(scope, data); });
-    }
-  };
-  return constructor;    
-})();
-
-
 /* InlineEditor */
 
 var InlineEditor = (function(){
@@ -46,18 +16,18 @@ var InlineEditor = (function(){
       InlineEditor.close();
 
       // before_init callback can return false to cancel the edit
-      //if(before_init)
-      //  if(!before_init(tr))
-      //    return;
       observer.fire('before_init', tr);
 
       // Find relevant tags
-      var form = tr.up('.freight_train'); /*$('the_form');*/ if(!form) return;
+      var form = tr.up('.freight_train'); if(!form) return;
 
       // Get properties
       var id = tr.readAttribute('id');
+      //alert(id);
+      //alert(tr.innerHTML);
       var editor_html = editor_writer(tr); if(!editor_html) return;	
-      //var row_class = tr.hasClassName('alt') ? 'row editor alt' : 'row editor'				
+      //alert(editor_html);
+      //var row_class = tr.hasClassName('alt') ? 'row editor alt' : 'row editor';
 
       // Configure form
       form.onsubmit = function() {
@@ -67,68 +37,21 @@ var InlineEditor = (function(){
 
       // Hide the view-only row	 
       tr.hide();
-
-
-
-      // METHOD A: Firefox 3 strips table tags out of html at tr_edit.update(html)
-      /*
-      // Generate extra row
-      var tr_extra = $(document.createElement('tr'));
-      tr_extra.className = 'row';
-      tr_extra.setAttribute('id', 'extra_row');
-      tr_extra.setStyle({'display':'none'});
-
-      // Generate editor row
-      var tr_edit = $(document.createElement('tr'));
-      tr_edit.className = 'row editor';
-      //tr_edit.setAttribute('id', id + '_edit');
-      tr_edit.setAttribute('id', 'edit_row');
-      var html = editor_html + 
-        '<td class="last-child">' +
-          //'<input id="tag_submit" name="commit" type="submit" value="Save" />' +
-          '<button id="tag_submit" name="commit" type="submit">Save</button>' +
-          '<button onclick="InlineEditor.close();return false;">Cancel</button>' +
-        '</td>';
-      //alert(html);
+      
+      // Create the editor row
+      // TODO: create these buttons outside of InlineEditor: make them the last part of EditorBuilder
+      html = editor_html;
+      var tr_edit = $(document.createElement('li'));
+      tr_edit.className = "row editor";
+      tr_edit.id = "edit_row";
       tr_edit.update(html);
-
-      // Insert the editor row (using the DOM)
-      var parent = tr.parentNode;
-      var nextSibling = tr.nextSibling;
-      nextSibling ? parent.insertBefore(tr_edit,nextSibling) : parent.FTendChild(tr_edit);
-
-      // Add an even number of hidden rows to keep alternating CSS consistent
-      parent.insertBefore(tr_extra,tr_edit);
-      //*/
-
-
-
-      // METHOD B: In Chrome 2, after the table is updated, lines jump to the top of the list
-      ///*
-      // Generate html of extra row and editable row
-      // Add an even number of hidden rows to keep alternating CSS consistent
-      html =
-        //'<tr class="row" id="' + id + '_extra" style="display:none;"></tr>' +
-        '<tr class="row editor" id="edit_row">' +
-          editor_html + 
-          '<td class="last-child">' +
-            //'<input id="tag_submit" name="commit" type="submit" value="Save" />' +
-            '<button id="tag_submit" name="commit" type="submit">Save</button>' +
-            '<button onclick="InlineEditor.close();return false;">Cancel</button>' +
-          '</td>' +
-        '</tr>';
-
-      // Insert the html (IE7 fails when inserting TR objects this way; works to insert HTML string)
-      tr.insert( {'after': html} );
-      var tr_edit = $('edit_row');
-      //*/
-
-      // 
+      tr.insert({'after':tr_edit});
+      
+      //
       FT.submit_forms_on_enter(tr_edit);
 
       // after_init callback
-      //if(after_init) after_init(tr,tr_edit);
-      observer.fire("after_init", [tr, tr_edit]);
+      observer.fire('after_init', [tr, tr_edit]);
 
       // Set the current row being edited
       CURRENT_ROW_ID = id;
@@ -171,8 +94,7 @@ var FT = (function(){
 
   /* PRIVATE VARIABLES */
   var token = '';
-  var enable_date_selection = false;
-  var enable_nested_records = false;
+  var enable_nested_records = true;
   var observer = new Observer();
   
   /* PRIVATE METHODS */
@@ -183,8 +105,8 @@ var FT = (function(){
       e.addClassName('deleted');
       e.removeClassName('editable');
       e.stopObserving('mouseover');
-      FT.set_background_color(e.down('.tag-color'),'');
-      FT.set_background_color(e.down('.tag-bubble'),'');
+      e.select('.tag-color').each(function(tag) { tag.setStyle({'backgroundColor': ''}); });
+      e.select('.tag-bubble').each(function(tag) { tag.setStyle({'backgroundColor': ''}); });
       e.select('input').each(function(i) {
         i.disabled = true;
       });
@@ -193,6 +115,18 @@ var FT = (function(){
   var _hookup_row = function(model, row) {
     if(row.hasClassName('interactive')) FT.hover_row(row);
     model.hookup_row(row);
+  };
+  var set_add_command_on_click = function(form, add_row) {
+    if(!form) throw new Error('form must not be null');
+    add_row = add_row || form.down('#add_row');           if(!add_row) return;
+    var submit = add_row.down('input[type=\"submit\"]');  if(!submit) return;
+    submit.observe('click', function(click_event) {
+      InlineEditor.close(); // Don't let values in inline editor override values in creator
+      form.onsubmit = function(submit_event) {
+        FT.xhr(form.action,'post',form.serialize());
+        return false;
+      };
+    });
   };
   
   /* */
@@ -206,8 +140,7 @@ var FT = (function(){
     init: function(args) {
       args = args || {};
       if(args.token) token = args.token;
-      if(args.enable_date_selection) enable_date_selection = true;
-      if(args.enable_nested_records) enable_nested_records = true;      
+      //if(args.enable_nested_records) enable_nested_records = true;      
       document.observe('dom:loaded', function() {
         FT.hookup();
         observer.fire('load');
@@ -225,7 +158,7 @@ var FT = (function(){
       if(!form) throw new Error('form must not be null');
       var add_row=form.down('#add_row');
       if(add_row) {
-        FT.set_add_command_on_click(form,add_row);
+        set_add_command_on_click(form,add_row);
         FT.hookup_editor(add_row);
       //}else{
         //alert('\"add_row\" not found');
@@ -234,10 +167,9 @@ var FT = (function(){
     hookup_editor: function(editor) {
       if(!editor) throw new Error('editor must not be null');
       FT.submit_forms_on_enter(editor);
-      if(enable_date_selection)
-        FT.enable_date_selection(editor);
-      if(enable_nested_records)
-        FT.reset_add_remove_for_all(editor);
+      //if(enable_nested_records)
+      //  FT.reset_add_remove_for_all(editor);
+      observer.fire('hookup_form',editor);
     },
     hookup: function() {
       $$('.freight_train').each(function(train) {
@@ -247,9 +179,9 @@ var FT = (function(){
         if(model && model.hookup_row)
           train.select('.row').each(function(row){_hookup_row(model,row);});
       });
-      // do this for the whole page (might Apply to commands area)
-      if(enable_date_selection)
-        FT.enable_date_selection();
+      if(enable_nested_records)
+        FT.reset_add_remove_for_all();
+      observer.fire('hookup');
     },
     hookup_row: function(model_name, row) {
       if(!model_name) throw new Error('model_name must not be null');
@@ -259,11 +191,13 @@ var FT = (function(){
         _hookup_row(model, row);
     },
     destroy: function(msg,id,path) {
+      Event.stop(window.event);
       if(confirm(msg)) {
         render_deleted(id);
         FT.xhr(path,'delete');
+        return true;
       }
-      Event.stop(window.event);
+      return false;
     },
     xhr: function(url,method,params,args) {
       args = args || {};
@@ -274,12 +208,13 @@ var FT = (function(){
       if(params) args.parameters += '&' + params;
       new Ajax.Request(url, args);
     },
-    delete_record: function(id) {
-      FT.safe_remove(id);
+    delete_record: function(id) {      
+      var e=$(id); if(e) e.remove();
+      //FT.safe_remove(id);
       FT.restripe_rows();
     },
     restripe_rows: function() {
-      var rows = $$('tbody > tr.row');
+      var rows = $$('.row');
       //alert(rows[0].readAttribute('style'));
       var alt = false;
       for(var i=0; i<rows.length; i++)
@@ -336,11 +271,14 @@ var FT = (function(){
       row.observe(
         "click",
         function(event) {
-        var id = row.readAttribute("id");
-        var idn = id.match(/\d+/);
-        var url = url_root + '/' + idn; // + "/edit"
-        window.location = url;
+          var id = row.readAttribute("id");
+          var idn = id.match(/\d+/);
+          var url = url_root + '/' + idn; // + "/edit"
+          window.location = url;
         });
+    }, 
+    edit_row_fn: function(row, fn) {
+      row.observe("click", function() { fn(row); });
     }, 
     submit_forms_on_enter: function(parent) {
       // Create the handler only once, no matter how often this method is called
@@ -365,20 +303,8 @@ var FT = (function(){
         e.stopObserving("keypress", FT.submit_forms_on_enter.keypress);
         e.observe("keypress", FT.submit_forms_on_enter.keypress);
       });
-    }, 
-    set_add_command_on_click: function(form, add_row) {
-      if(!form) throw new Error('form must not be null');
-      //form = form || $('form');                 if(!form) return;
-      add_row = add_row || form.down('#add_row');           if(!add_row) return;
-      var submit = add_row.down('input[type=\"submit\"]');  if(!submit) return;
-      submit.observe('click', function(click_event) {
-        form.onsubmit = function(submit_event) {
-          //alert(form.action);
-          FT.xhr(form.action,'post',form.serialize());
-          return false;
-        };
-      });
     },
+    
     // todo: move to Select or HTMLSelectElement?
     select_value: function(selector,value) {
       if(!selector) {
@@ -386,10 +312,9 @@ var FT = (function(){
         return;
       }
       if(!value) {
-        alert("value not found");
+        //alert("value not found");
         return;
       }
-      //alert(value);
       var options = selector.options;
       var option;
       for(var i=0;i<options.length;i++) {
@@ -399,6 +324,14 @@ var FT = (function(){
           return;
         }
       }
+    },
+    
+    create_options: function(options) {
+      var html = '';
+      for(var i=0; i<options.length; i++) {
+        html += '<option value=\"' + options[i][0] + '\">' + options[i][1] + '</option>'
+      }
+      return html;
     },
     
     /* ARE THESE NEXT TWO STRICTLY FREIGHT TRAIN? */
@@ -428,15 +361,16 @@ var FT = (function(){
     },
     
     add_nested_object: function(sender) {
-      var tr = $(sender).up('tr'); if(!tr) return;
-      var table = tr.up('table.nested'); if(!table) return;
+      var tr = $(sender).up('.nested-row'); if(!tr) { alert('hi'); return; }
+      var table = tr.up('.nested'); if(!table) { alert('hi3'); return; }
       var new_tr = tr.cloneNode(true);
       table.appendChild(new_tr);
+      observer.fire('after_add_nested',[table,new_tr]);
       FT.reset_add_remove_for(table);
     }, 
     reset_nested: function(table) {
       if(table) {
-        var nested = table.select('tr');
+        var nested = table.select('.nested-row');
         for(var i=1;i<nested.length;i++) {
           nested[i].remove();
           FT.reset_add_remove_for(table);
@@ -444,15 +378,15 @@ var FT = (function(){
       }
     }, 
     delete_nested_object: function(sender) {
-      var tr = $(sender).up('tr'); if(!tr) return;
-      var table = tr.up('table.nested'); if(!table) return;
+      var tr = $(sender).up('.nested-row'); if(!tr) return;
+      var table = tr.up('.nested'); if(!table) return;
       tr.remove();
       FT.reset_add_remove_for(table);
     }, 
     reset_add_remove_for_all: function(parent) {
       var selector = function(x){ return parent ? parent.select(x) : $$(x); };
-      selector('table.nested.editor').each(FT.reset_add_remove_for);
-    }, 
+      selector('.nested.editor').each(FT.reset_add_remove_for);
+    },
     reset_add_remove_for: function(table) {
       var reset_nested_row = function(row,object_name,i,delete_visibility,add_visibility) {
         row.select('.field').each(function(e){
@@ -465,7 +399,7 @@ var FT = (function(){
       };
  
       var object_name=table.readAttribute('name');
-      var rows=table.select('tr');
+      var rows=table.select('.nested-row');
       var n=rows.length-1;
       if(n>0) {
         for(var i=0; i<n; i++) {
@@ -485,85 +419,28 @@ var FT = (function(){
     for_each_row: function(root_tr,root_tr_edit,root_tr_selector,root_tr_edit_selector,fn) {
       var nested_rows=root_tr.select(root_tr_selector);
       var nested_editor_rows=root_tr_edit.select(root_tr_edit_selector);
-      for(var i=0; i<nested_rows.length; i++)
-      {
-        var tr=nested_rows[i];
-        var tr_edit=nested_editor_rows[i];
-        fn(tr,tr_edit);
-      }
+      //if(nested_rows.length == 0) {
+      
+        // We need to have at least one row with default values
+        // or we have no way of adding/editing new values
+      //  var tr=nested_rows[i];
+      //  var tr_edit=nested_editor_rows[i];
+      //  fn(tr,tr_edit);
+      //}
+      //else {
+        for(var i=0; i<nested_rows.length; i++)
+        {
+          var tr=nested_rows[i];
+          var tr_edit=nested_editor_rows[i];
+          fn(tr,tr_edit);
+        }
+      //}
+    },
+    
+    /* SHOULD THIS GET MOVED OUT? */    
+    highlight: function(id) {
+      new Effect.Highlight(id);
     }
 
   };
 })();
-
-
-
-/* MOVE THESE OUT OF FREIGHT TRAIN */
-FT.safe_remove = function(id) {
-  var e=$(id); if(e) e.remove();
-};
-
-FT.enable_date_selection = function(parent) {
-  var selector = function(x){ return parent ? parent.select(x) : $$(x); };
-  selector('.date-field').each(function(field) {
-    new DateSelector(field, function(dateText) {
-      field.writeAttribute('value', dateText);
-    });
-  });
-};
-
-FT.auto_total = function(context,attr,prefix) {
-  context = $(context);
-  if(context) {
-   var total=context.down('#total');
-    // This is not very efficient!
-    while(!total) {
-      context=context.up(1);
-      if(!context) return;
-      total=context.down('#total');
-    }
-
-    //if(total) {
-      var amounts = context.select('#'+attr);
-      //alert(amounts.length);
-      var amount;
-      var resum = function() {
-        var sum=0;
-        var n;
-        for(var i=0; i<amounts.length; i++) {
-          amount=amounts[i];
-          n = parseFloat(amount.value.replace(/,/,''));
-          if(!isNaN(n)) sum += n; // else alert("nan");
-        }
-        total.value = "$" + sum.toFixed(2);
-        //if(prefix)
-        //  total.value = prefix + sum.toFixed(2);
-        //else
-        //  total.value = sum.toFixed(2);
-      }
-      for(var i=0; i<amounts.length; i++) {
-        var amount = amounts[i];
-        amount.onchange=resum;
-      }
-      resum();
-    //}
-  }
-};
-
-FT.set_background_color = function(e, color) {
-  e = $(e);
-  //alert(id);
-  //alert(color);
-  //var e = $('tag_' + id + '_color');
-  if(e) {
-  //if(Prototype.Browser.IE)
-    e.setStyle({'backgroundColor': color});
-  //else
-  //	e.setStyle('background-color', color);
-  }
-};
-
-/* MOVE TO RJS */
-FT.highlight = function(id) {
-  new Effect.Highlight(id);
-};
