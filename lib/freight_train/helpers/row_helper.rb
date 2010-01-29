@@ -55,7 +55,7 @@ private
     #concat "<td>#{commands_for(record, options[:commands])}</td>"
     #concat "  <td class=\"last-child\">#{commands_for(record, options[:commands])}</td>\n"
     alt_content_tag :td, :class => "last-child" do
-      commands_for(record, options[:commands])
+      concat commands_for(record, options[:commands])
     end
   end
 

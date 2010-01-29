@@ -1,87 +1,23 @@
-/* InlineEditor */
-
-var InlineEditor = (function(){
-  var CURRENT_ROW_ID = null;
-  var observer = new Observer();
-
-  //var constructor = function(url, tr, editor_writer, before_init, after_init) {
-  var constructor = function(url, tr, editor_writer) {
-    tr = $(tr);
-    if(!tr) return;
-
-    // if you click a row, switch to its editor
-    tr.observe('click',function(event) {
-
-      // close any existing editors
-      InlineEditor.close();
-
-      // before_init callback can return false to cancel the edit
-      observer.fire('before_init', tr);
-
-      // Find the form
-      var form = tr.up('.freight_train'); if(!form) return;
-
-      // Get properties
-      var id = tr.readAttribute('id');
-      
-      // Create editor
-      var tr_edit = editor_writer(tr); if(!tr_edit) return;	
-
-      // Configure form
-      form.onsubmit = function() {
-        FT.xhr(url, 'put', Form.serialize(form));
-        return false;
-      };
-
-      // Hide the view-only row	 
-      tr.hide();
-      
-      // Insert the editor row
-      tr.insert({'after':tr_edit});
-      
-      //
-      FT.submit_forms_on_enter(tr_edit);
-
-      // after_init callback
-      observer.fire('after_init', [tr, tr_edit]);
-
-      // Set the current row being edited
-      CURRENT_ROW_ID = id;
-    });
-  };
-
-  // Class methods
-  constructor.close = function() {
-    if(CURRENT_ROW_ID) {
-      var id = CURRENT_ROW_ID;
-      var e;
-      e = $('extra_row'); 	if(e) e.remove();
-      e = $('edit_row');  	if(e) e.remove();
-      e = $(id);          	if(e) e.show();
-      //e = $('edit_errors'); if(e) e.hide();
-      e = $('error');       if(e) e.hide();
-      CURRENT_ROW_ID = null;
-    }
-  };
-
-  // Class events
-  constructor.observe = function(name,func){observer.observe(name,func);};
-  constructor.unobserve = function(name,func){observer.unobserve(name,func);};
-
-  // Listen for the escape key
-  document.observe('dom:loaded', function() {
-    document.observe('keyup', function(event) {
-      if(CURRENT_ROW_ID && (event.keyCode==Event.KEY_ESC))
-        InlineEditor.close();
-    });
-  });
-
-  return constructor;  
-})();
-
-
-/* FT */
-
+// FreightTrain Core
+// =========================================================================================================
+//
+// Events:
+//   after_add_nested   raised after a nested item is created
+//   after_reset_nested raised after a nested item is either created or destroyed
+//   created            -- not documented -- TODO: can this be removed?
+//   hookup             raised after FreightTrain forms are initialized (or reinitialized)
+//   hookup_form        passed a form being initialized as a FreightTrain form
+//   load               raised right after FreightTrain is initialized on dom:loaded
+//
+//
+// For every FreightTrain instance created in a page, a namespace will be added to FT that is named after the model.
+//
+//   e.g. FT.Tag
+//
+// This namespace has one event that can be observed:
+//   hookup_row         passes each row to observers: both when the page is loaded and when new rows are added dynamically
+//
+//
 var FT = (function(){
 
   /* PRIVATE VARIABLES */
@@ -91,12 +27,14 @@ var FT = (function(){
   
   /* PRIVATE METHODS */
   var render_deleted = function(id) {
-    // make the item unresponsive to clicks and remove its background color
+    // make the item non-responsive to clicks and remove its background color
     var e=$(id);
     if(e) {
       e.addClassName('deleted');
       e.removeClassName('editable');
       e.stopObserving('mouseover');
+      
+      // TODO: These next two lines exhibit too much knowledge of an implementation of 360's color selector
       e.select('.tag-color').each(function(tag) { tag.setStyle({'backgroundColor': ''}); });
       e.select('.tag-bubble').each(function(tag) { tag.setStyle({'backgroundColor': ''}); });
       e.select('input').each(function(i) {
@@ -138,10 +76,12 @@ var FT = (function(){
         observer.fire('load');
       });
     },
+    
     observe: function(name, func) { observer.observe(name, func); },
     unobserve: function(name, func) { observer.unobserve(name, func); },
     
-    /* I don't know if I like making this a public method here: it's a callback for the server */
+    // TODO: I don't know if I like making this a public method here: it's a callback for the server
+    // TODO: What does this do and can it be removed?
     on_created: function() {
       observer.fire('created');
     },
