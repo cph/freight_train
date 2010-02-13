@@ -68,13 +68,16 @@ var FT = (function(){
   /* PUBLIC METHODS */
   return {
     init: function(args) {
+      document.observe('dom:loaded', function() {
+        init_now(args);
+      });
+    },
+    init_now: function(args) {
       args = args || {};
       if(args.token) token = args.token;
-      //if(args.enable_nested_records) enable_nested_records = true;      
-      document.observe('dom:loaded', function() {
-        FT.hookup();
-        observer.fire('load');
-      });
+      //if(args.enable_nested_records) enable_nested_records = true;
+      FT.hookup();
+      observer.fire('load');
     },
     
     observe: function(name, func) { observer.observe(name, func); },
@@ -123,7 +126,6 @@ var FT = (function(){
         _hookup_row(model, row);
     },
     destroy: function(msg,id,path) {
-      Event.stop(window.event);
       if(confirm(msg)) {
         render_deleted(id);
         FT.xhr(path,'delete');

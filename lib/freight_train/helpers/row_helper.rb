@@ -64,7 +64,7 @@ private
     #"<a class=\"delete-command\" href=\"javascript:Generated.delete_item(#{record.id});\">delete</a>"
     # use onclick so that event stops bubbling
     #"<a class=\"delete-command\" href=\"#\" onclick=\"Generated.delete_item(#{record.id});\">delete</a>"
-    "<a class=\"delete-command\" href=\"#\" onclick=\"FT.#{record.class.name}.destroy(#{record.id});\">delete</a>"
+    "<a class=\"delete-command\" href=\"#\" onclick=\"FT.#{record.class.name}.destroy(#{record.id}); return false;\">delete</a>"
   end
 
 
