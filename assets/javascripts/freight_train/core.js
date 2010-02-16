@@ -219,15 +219,15 @@ var FT = (function(){
       if(!FT.submit_forms_on_enter.keypress)
         FT.submit_forms_on_enter.keypress = function(event) {
           if(event.keyCode == Event.KEY_RETURN) {
+            //debugger;
             Event.stop(event);
-            var e = Event.element(event);										if(!e) return;
-            //alert("event element"); e.setStyle({border:'Solid 2px Red'});
-            var tr = e.up("tr");														if(!tr) return;
-            //alert("tr"); tr.setStyle({border:'Solid 2px Red'});
-            var submit = tr.down("*[type='submit']");		    if(!submit) return;
-            //alert("submit"); submit.setStyle({border:'Solid 2px Red'});
-            // Works in Chrome 2, IE 7, Firefox 3
-            submit.click();
+            var e = Event.element(event);
+            if(!e) return;
+            var tr = e.up(".row.editor");
+            if(!tr) return;
+            var submit = tr.down("*[type='submit']");
+            if(!submit) return;
+            submit.click(); // Works in Chrome 2, IE 7, Firefox 3
           }
         };
  
