@@ -32,7 +32,7 @@ class FreightTrain::Builders::RowBuilder
       # "($<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency -number, :unit=>""}</span>)"
       "<span class=\"negative\">($<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency -number, :unit=>""}</span>)</span>"
     else
-      "$<span attr=\"#{@object_name}[#{method}]\">#{number_to_currency number, :unit=>""}</span>"
+      "$<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency number, :unit=>""}</span>"
     end
   end
 
