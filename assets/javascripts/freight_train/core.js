@@ -69,7 +69,7 @@ var FT = (function(){
   return {
     init: function(args) {
       document.observe('dom:loaded', function() {
-        init_now(args);
+        FT.init_now(args);
       });
     },
     init_now: function(args) {
