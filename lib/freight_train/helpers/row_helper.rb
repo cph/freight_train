@@ -35,7 +35,7 @@ module FreightTrain::Helpers::RowHelper
       end
       html << "</span>"
     end
-    html
+    raw (html)
   end
 
 

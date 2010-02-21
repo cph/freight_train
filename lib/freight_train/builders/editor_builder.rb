@@ -45,12 +45,12 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
   end
   
   
-  delegate :concat, :alt_content_tag, :alt_tag, :to => :@template
+  delegate :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
 
 
   def check_box(method, options={})
     attr_name = "#{@object_name}[#{method}]"
-    code(
+    raw code(
       "e = tr.down('*[attr=\"#{attr_name}\"]');if(!e){alert('#{attr_name} not found');return null;}" <<
       "var checked = (e.readAttribute('value')=='true');"
     ) <<
@@ -83,7 +83,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     end
     o << "]"
     
-    "#{tag("select", html_options, true)}'+FT.create_options(#{o})+'</select>"
+    raw "#{tag("select", html_options, true)}'+FT.create_options(#{o})+'</select>"
   end
 
 
@@ -111,7 +111,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
   def hidden_field( method )
     options = { :type => "hidden" }
         
-    code(
+    raw code(
       "e=tr.select('*[attr=\"#{@object_name}[#{method}]\"]');" <<
       "if(e.length==1){"
     ) <<
@@ -158,7 +158,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
         # TDs representing the object's attributes. For nested objects, the TR is a child of the
         # root TR. Create a closure in which the variable 'tr' refers to the nested object while
         # preserving the reference to the root TR.
-        concat code(
+        safe_concat code(
           "(function(root_tr){" <<
           "var nested_rows=root_tr.select('*[attr=\"#{attr_name}\"] .#{singular}');" <<
           #"alert('#{attr_name}: '+nested_rows.length);" <<
@@ -169,14 +169,14 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
           alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_'+i+'" do
             yield f
             alt_content_tag :td, :class => "delete-nested" do
-              concat "<a class=\"delete-link\" href=\"#\" onclick=\"FT.delete_nested_object(this);return false;\"></a>"
+              safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"FT.delete_nested_object(this);return false;\"></a>"
             end
             alt_content_tag :td, :class => "add-nested" do
-              concat "<a class=\"add-link\" href=\"#\" onclick=\"FT.add_nested_object(this);return false;\"></a>"
+              safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"FT.add_nested_object(this);return false;\"></a>"
             end
           end
         end
-        concat code( "}})(tr);" ) 
+        safe_concat code( "}})(tr);" ) 
         
         if @after_init_edit.empty?
           @after_init_edit = old_after_init_edit
@@ -203,7 +203,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
 
   def text(method, options={})
     attr_name = "#{@object_name}[#{method}]"
-    code(
+    raw code(
       "e=tr.down('*[attr=\"#{attr_name}\"]');" <<
       "if(!e){alert('#{attr_name} not found'); return null;}" <<
     # "alert(e.innerHTML);" <<
@@ -215,7 +215,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
   def text_field(method, options={})
     attr_name = "#{@object_name}[#{method}]"
     options[:id] = method unless options[:id]
-    code(
+    raw code(
       "e=tr.down('*[attr=\"#{attr_name}\"]');" <<
       "if(!e){alert('#{attr_name} not found'); return null;}" <<
     # "alert(e.innerHTML);" <<
@@ -235,6 +235,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     html = tag(name, {:class => "last-child"}, true)
     html << (@last_child || default_last_child )
     html << "</#{name}>"
+    raw html
   end
 
   

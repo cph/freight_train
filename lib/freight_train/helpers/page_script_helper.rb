@@ -4,36 +4,36 @@ module FreightTrain::Helpers::PageScriptHelper
   def make_interactive( path, table_name, options )
     options[:destroy] = true unless options.key?(:destroy)
 
-    concat "<script type=\"text/javascript\">\n" << 
+    safe_concat "<script type=\"text/javascript\">\n" << 
            "//<![CDATA[\n"
 
            # create a namespace for record-specific functions
-    concat "FT.#{table_name.classify}=(function(){\n" <<
+    safe_concat "FT.#{table_name.classify}=(function(){\n" <<
            "  var path='#{path}';\n" <<
            "  var obsv=new Observer();\n" 
 
     if @inline_editor
-      concat "  var editor_writer=#{editor_writer_method(options)};\n"
-      concat "  InlineEditor.observe('after_init',#{after_edit_method(options)});\n"
+      safe_concat "  var editor_writer=#{editor_writer_method(options)};\n"
+      safe_concat "  InlineEditor.observe('after_init',#{after_edit_method(options)});\n"
     end
 
-    concat "  return {\n" <<
+    safe_concat "  return {\n" <<
            "    path: function(){return path;},\n" <<
            "    observe: function(n,f){obsv.observe(n,f);},\n" <<
            "    unobserve: function(n,f){obsv.unobserve(n,f);},\n" <<
            "    update_in_place: function(property,id,value){FT.xhr((path+'/'+id+'/update_'+property),'put',('#{table_name.singularize}['+property+'='+value));},\n"
-    concat "    #{destroy_method(table_name, options)},\n" if options[:destroy]
-    concat "    #{hookup_row_method options}\n" <<
+    safe_concat "    #{destroy_method(table_name, options)},\n" if options[:destroy]
+    safe_concat "    #{hookup_row_method options}\n" <<
            "  };\n" <<
            "})();\n"
 
     # methods in global namespace
     if options[:reset_on_create] != :none
       options[:reset_on_create] = :all unless options[:reset_on_create].is_a?(Array)
-      concat reset_on_create_method(table_name, options) << "\n"
+      safe_concat reset_on_create_method(table_name, options) << "\n"
     end
 
-    concat "//]]>\n" <<
+    safe_concat "//]]>\n" <<
            "</script>\n"
     @already_defined = true
   end
@@ -42,11 +42,11 @@ module FreightTrain::Helpers::PageScriptHelper
   # move as much of this as possible to core.js
   def ft_init(options={})
     unless @already_initialized
-      concat "<script type=\"text/javascript\">\n" << 
+      safe_concat "<script type=\"text/javascript\">\n" << 
              "//<![CDATA[\n" <<
              "FT.init({"
       # options go here
-      concat   "token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}')" <<
+      safe_concat   "token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}')" <<
              "});\n" <<
              "//]]>\n" <<
              "</script>\n"

@@ -7,7 +7,7 @@ module FreightTrain::Helpers::CoreHelper
       @sym, @template, @options = sym, template, options
     end
     
-    delegate :concat, :alt_content_tag, :fields_for, :to => :@template
+    delegate :concat, :safe_concat, :raw, :alt_content_tag, :fields_for, :to => :@template
 
 
     def headings(*args, &block)
@@ -67,9 +67,9 @@ module FreightTrain::Helpers::CoreHelper
     path = options[:path] || polymorphic_path(args)
 
     # put everything inside a form
-    concat "<form class=\"freight_train\" model=\"#{model_name}\" action=\"#{path}\" method=\"get\">"
-    concat "<input name='#{request_forgery_protection_token}' type='hidden' value='#{escape_javascript(form_authenticity_token)}'/>\n"
-    concat "<input name='originating_controller' type='hidden' value='#{controller_name}'/>\n"
+    safe_concat "<form class=\"freight_train\" model=\"#{model_name}\" action=\"#{path}\" method=\"get\">"
+    safe_concat "<input name='#{request_forgery_protection_token}' type='hidden' value='#{escape_javascript(form_authenticity_token)}'/>\n"
+    safe_concat "<input name='originating_controller' type='hidden' value='#{controller_name}'/>\n"
     
     #if( options[:partial] )
 
@@ -79,10 +79,10 @@ module FreightTrain::Helpers::CoreHelper
         yield ListBuilder.new(instance_name, self, options)        
       end
       alt_content_tag :tbody, :id => table_name do
-        concat render(:partial => instance_name, :collection => records) unless !records or (records.length==0)
+        safe_concat render(:partial => instance_name, :collection => records) unless !records or (records.length==0)
       end
     end
-    concat "</form>\n"
+    safe_concat "</form>\n"
     
     if options[:paginate]
       #concat "<tfoot>"
@@ -102,13 +102,13 @@ module FreightTrain::Helpers::CoreHelper
   def alt_content_tag(name, *args, &block)
     options = args.extract_options!
     name = FreightTrain::Tags[name] || name
-    concat tag(name, options, true)
+    safe_concat tag(name, options, true)
     if block_given?
       yield
     elsif args.first
-      concat args.first
+      safe_concat args.first
     end
-    concat "</#{name}>"
+    safe_concat "</#{name}>"
   end
   
   

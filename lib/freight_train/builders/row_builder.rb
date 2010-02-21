@@ -16,7 +16,7 @@ class FreightTrain::Builders::RowBuilder
   end
     
   
-  delegate :concat, :alt_content_tag, :fields_for, :to => :@template
+  delegate :concat, :raw, :alt_content_tag, :fields_for, :to => :@template
 
 
   def record
@@ -30,9 +30,9 @@ class FreightTrain::Builders::RowBuilder
     string = 
     if( number < 0 )
       # "($<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency -number, :unit=>""}</span>)"
-      "<span class=\"negative\">($<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency -number, :unit=>""}</span>)</span>"
+      raw "<span class=\"negative\">($<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency -number, :unit=>""}</span>)</span>"
     else
-      "$<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency number, :unit=>""}</span>"
+      raw "$<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency number, :unit=>""}</span>"
     end
   end
 
@@ -52,9 +52,9 @@ class FreightTrain::Builders::RowBuilder
   def hidden_field(method)
     value = @record.send method
     if value.is_a? Array
-      "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value.join("|")}\"></span>"
+      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value.join("|")}\"></span>"
     else
-      "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value}\"></span>"
+      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value}\"></span>"
     end
   end
 
@@ -84,7 +84,7 @@ class FreightTrain::Builders::RowBuilder
 
 
   def text_of(method)
-    "<span attr=\"#{@object_name}[#{method}]\">#{h @record.send(method)}</span>"
+    raw "<span attr=\"#{@object_name}[#{method}]\">#{h @record.send(method)}</span>"
   end
 
 
@@ -97,6 +97,7 @@ class FreightTrain::Builders::RowBuilder
     content = "<div class=\"toggle #{value ? "yes" : "no"}\" attr=\"#{@object_name}[#{method}]\" value=\"#{value}\""
     content << " title=\"#{options[:title]}\"" if options[:title]
     content << "></div>"
+    raw content
   end
 
 
@@ -106,7 +107,7 @@ class FreightTrain::Builders::RowBuilder
     value_value = value ? (value_method ? value.send(value_method) : value) : ""
     value_display = value ? (display_method ? value.send(display_method) : value) : ""
     method = options[:attr] if options[:attr]
-    "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value_value}\">#{value_display}</span>"    
+    raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value_value}\">#{value_display}</span>"    
   end
   
 
