@@ -234,7 +234,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     name = FreightTrain::Tags[:td] || :td
     html = tag(name, {:class => "last-child"}, true)
     html << (@last_child || default_last_child )
-    html << "</#{name}>"
+    html << raw("</#{name}>")
     raw html
   end
 
