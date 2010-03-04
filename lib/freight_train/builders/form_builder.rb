@@ -68,24 +68,26 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
       options[:value] = obj ? "#{obj}" : ""
       content << @template.tag( "input", options )
     end
-    content
+    raw content
   end
 
 
+  # todo: there's a lot of duplication between this method and the one in editor_builder; is there a good way to merge them?
   def nested_editor_for( object_name, *args, &block )
     @template.instance_variable_set "@enable_nested_records", true
     i = 0
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-    @template.concat "<table class=\"nested editor\" name=\"#{@object_name}[#{object_name.to_s}_attributes]\">"
+    @template.safe_concat "<table class=\"nested editor\" name=\"#{@object_name}[#{object_name.to_s}_attributes]\">"
     nested_fields_for object_name, *args do |f|
-      @template.concat "<tr id=\"#{object_name.to_s.singularize}_#{i}\">"
+      @template.safe_concat "<tr id=\"#{object_name.to_s.singularize}_#{i}\" class=\"nested-row\">"
       block.call(f)
-      @template.concat "<td><a class=\"delete-link\" href=\"#\" onclick=\"FT.delete_nested_object(this);return false;\"><div class=\"delete-nested\"></div></a></td>"
-      @template.concat "<td><a class=\"add-link\" href=\"#\" onclick=\"FT.add_nested_object(this);return false;\"><div class=\"add-nested\"></div></a></td>"
-      @template.concat "</tr>"
+
+      @template.safe_concat "<td><div class=\"delete-nested\"><a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a></div></td>"
+      @template.safe_concat "<td><div class=\"add-nested\"><a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a></div></td>"
+      @template.safe_concat "</tr>"
       i += 1
     end
-    @template.concat "</table>"
+    @template.safe_concat "</table>"
   end
 
   

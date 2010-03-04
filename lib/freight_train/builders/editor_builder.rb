@@ -169,10 +169,10 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
           alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_'+i+'" do
             yield f
             alt_content_tag :td, :class => "delete-nested" do
-              safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"FT.delete_nested_object(this);return false;\"></a>"
+              safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
             end
             alt_content_tag :td, :class => "add-nested" do
-              safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"FT.add_nested_object(this);return false;\"></a>"
+              safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
             end
           end
         end
