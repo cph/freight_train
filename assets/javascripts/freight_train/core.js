@@ -295,8 +295,8 @@ var FT = (function(){
     },
     
     add_nested_object: function(sender) {
-      var tr = $(sender).up('.nested-row'); if(!tr) { alert('hi'); return; }
-      var table = tr.up('.nested'); if(!table) { alert('hi3'); return; }
+      var tr = $(sender).up('.nested-row'); if(!tr) { alert('FT.add_nested_object: .nested-row not found'); return; }
+      var table = tr.up('.nested'); if(!table) { alert('FT.add_nested_object .nested not found'); return; }
       var new_tr = tr.cloneNode(true);
       table.appendChild(new_tr);
       observer.fire('after_add_nested',[table,new_tr]);
