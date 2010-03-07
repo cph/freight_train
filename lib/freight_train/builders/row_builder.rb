@@ -74,7 +74,11 @@ class FreightTrain::Builders::RowBuilder
           temp << klass if klass
           klass = temp.join(" ")
           alt_content_tag :tr, :id => "#{singular}_#{i}", :class => klass do
-            yield @@default_row_builder.new( @template, "#{@object_name}[#{method}]", child )
+            f = @@default_row_builder.new( @template, "#{@object_name}[#{method}]", child )
+            alt_content_tag :td, :class => "hidden", :style => "display:none;" do
+              concat f.hidden_field :id
+            end
+            yield f
           end
           i += 1
         end

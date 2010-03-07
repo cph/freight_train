@@ -118,6 +118,8 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
       
       @template.tag( "input", {
         :type=>"hidden",
+        :class => "field",
+        :id => method,
         :value=>"'+e[0].readAttribute('value')+'",
         :name=>"#{@object_name}[#{method}]"} ) <<
       
@@ -128,6 +130,8 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     
       @template.tag( "input", {
         :type=>"hidden",        
+        :class => "field",
+        :id => method,
         :value=>"'+e[i].readAttribute('value')+'",
         :name=>"#{@object_name}[#{method}][]"} ) <<
     
@@ -167,6 +171,11 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
         )
         fields_for method, nil, *args do |f|
           alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_'+i+'" do
+            alt_content_tag :td, :class => "hidden" do
+              safe_concat f.hidden_field :id
+              #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
+              safe_concat f.static_field :_destroy, 0
+            end
             yield f
             alt_content_tag :td, :class => "delete-nested" do
               safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
