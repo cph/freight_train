@@ -59,7 +59,7 @@ module FreightTrain::Helpers::CoreHelper
   def list( *args, &block )
     options = args.extract_options!    
     table_name = args.last.to_s
-    raise ArgumentError, "Missing table name" unless table_name.length > 0
+    raise ArgumentError, "Missing table name" if table_name.blank?
     model_name = table_name.classify
     instance_name = table_name.singularize
     
@@ -99,6 +99,7 @@ module FreightTrain::Helpers::CoreHelper
 
 
   # this is a fix...
+  #                 ...for what?
   def alt_content_tag(name, *args, &block)
     options = args.extract_options!
     name = FreightTrain.tag(name)

@@ -2,10 +2,10 @@ module FreightTrain::Core
   include FreightTrain::Helpers::FormattingHelper
   
   
-  # TODO: Can we simplify out :originating_controller?
+  # TODO: remove :originating_controller
 
 
-  def refresh_on_create( refresh, record, options={}, &block )
+  def refresh_on_create(refresh, record, options={}, &block)
     options[:originating_controller] = params[:originating_controller]
  
     # this causes an error when performed inside of render block (is it performed in context of view instead of controller?)
@@ -19,17 +19,17 @@ module FreightTrain::Core
       case refresh
       when :single
         page.add_record record, options
+        page.fire(:create, idof(record))
       else
         page.refresh_records record.class, options
       end
  
-      page.fire(:create, idof(record))
       yield(page) if block_given?
     end
   end
 
 
-  def refresh_on_update( refresh, record, options={}, &block )
+  def refresh_on_update(refresh, record, options={}, &block)
     options[:originating_controller] = params[:originating_controller]
 
     render :update do |page|
@@ -42,18 +42,18 @@ module FreightTrain::Core
         # it is creating a row or updating a row (whether it should write the TR tags or not).
         @update_row = true
         page.refresh_record record, options
+        page.fire(:update, idof(record))
       else
         options[:find] = get_finder(options[:find] || {})
         page.refresh_records record.class, options
-      end
-      
-      page.fire(:update, idof(record))
+      end      
+
       yield(page) if block_given?
     end
   end
 
 
-  def remove_deleted( record, &block )
+  def remove_deleted(record, &block)
     render :update do |page|
       page.fire(:destroy, idof(record))
       yield(page) if block_given?
@@ -72,12 +72,12 @@ module FreightTrain::Core
   end
 
 
-  def show_errors_for( record, options={}, &block )
+  def show_errors_for(record, options={}, &block)
     show_error(format_errors(record), options, &block)
   end 
 
 
-  def show_exception_for( record, options={}, &block )
+  def show_exception_for(record, options={}, &block)
     message = format_exception_for(record, options.merge(:action => @current_action))
     show_error(message, options, &block)
   end

@@ -12,7 +12,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
   
   
   def fire(event, id)
-    @lines << "$('#{id}').fire('ft:#{event}')";
+    @lines << "$('#{id}').fire('ft:#{event}');";
   end
 
 

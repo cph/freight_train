@@ -55,13 +55,16 @@ var FT = (function(){
   var set_add_command_on_click = function(form, add_row) {
     if(!form) throw new Error('form must not be null');
     add_row = add_row || form.down('#add_row');           if(!add_row) return;
-    var submit = add_row.down('input[type=\"submit\"]');  if(!submit) return;
-    submit.observe('click', function(click_event) {
-      InlineEditor.close(); // Don't let values in inline editor override values in creator
-      form.onsubmit = function(submit_event) {
-        FT.xhr(form.action,'post',form.serialize());
-        return false;
-      };
+    add_row.observe('click', function(click_event) {
+      var element = click_event.element();
+      if(element && (element.match('input[type="submit"]') || element.match('input[type="image"]'))) {
+        //alert('submitting remotely; check');
+        InlineEditor.close(); // Don't let values in inline editor override values in creator
+        form.onsubmit = function(submit_event) {
+          FT.xhr(form.action,'post',form.serialize());
+          return false;
+        };
+      }
     });
   };
   
