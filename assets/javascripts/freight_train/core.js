@@ -295,10 +295,16 @@ var FT = (function(){
     },
     
     add_nested_object: function(sender) {
-      var tr = $(sender).up('.nested-row'); if(!tr) { alert('hi'); return; }
-      var table = tr.up('.nested'); if(!table) { alert('hi3'); return; }
+      var tr = $(sender).up('.nested-row'); if(!tr) { alert('FT.add_nested_object: .nested-row not found'); return; }
+      var table = tr.up('.nested'); if(!table) { alert('FT.add_nested_object .nested not found'); return; }
       var new_tr = tr.cloneNode(true);
       table.appendChild(new_tr);
+      
+      var _destroy = new_tr.down('#_destroy');
+      if(_destroy) _destroy.value = 0;
+      var id = new_tr.down('#id');
+      if(id) id.value = '';
+      
       observer.fire('after_add_nested',[table,new_tr]);
       FT.reset_add_remove_for(table);
     }, 
@@ -314,7 +320,16 @@ var FT = (function(){
     delete_nested_object: function(sender) {
       var tr = $(sender).up('.nested-row'); if(!tr) return;
       var table = tr.up('.nested'); if(!table) return;
-      tr.remove();
+      
+      var id = tr.down('#id');
+      if(id && (id.value == '')) {
+        tr.remove();
+      }
+      else {
+        var _destroy = tr.down('#_destroy');
+        if(_destroy) _destroy.value = 1;
+        tr.hide();
+      }
       FT.reset_add_remove_for(table);
     }, 
     reset_add_remove_for_all: function(parent) {

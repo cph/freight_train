@@ -6,7 +6,7 @@ module FreightTrain::Helpers::FormattingHelper
       temp = "<ul>"
       object.errors.each do |k,v|
         temp << "<li>"
-        temp << "<p>#{k.humanize} #{v}</p>"
+        temp << "<p>#{k.to_s.humanize} #{v}</p>"
         if object.respond_to? k
           value = object.send k
           temp << format_errors(value)
