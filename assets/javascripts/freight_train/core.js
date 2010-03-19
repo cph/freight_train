@@ -1,18 +1,24 @@
 // FreightTrain Core
 // =========================================================================================================
 //
-// Events:
+// Events raised from FT:
 //   after_add_nested   raised after a nested item is created
 //   after_reset_nested raised after a nested item is either created or destroyed
-//   created            -- not documented -- TODO: can this be removed?
 //   hookup             raised after FreightTrain forms are initialized (or reinitialized)
 //   hookup_form        passed a form being initialized as a FreightTrain form
 //   load               raised right after FreightTrain is initialized on dom:loaded
 //
 //
+// Events raised from elements
+//   ft:create          raised by an element that's just been created by FreightTrain
+//   ft:delete          raised by an element that's just been deleted by FreightTrain
+//   ft:update          raised by an element that's just been updated by FreightTrain
+//
+//
 // For every FreightTrain instance created in a page, a namespace will be added to FT that is named after the model.
 //
 //   e.g. FT.Tag
+//
 //
 // This namespace has one event that can be observed:
 //   hookup_row         passes each row to observers: both when the page is loaded and when new rows are added dynamically
@@ -65,6 +71,15 @@ var FT = (function(){
     if(e) e.hide();
   });
   
+  document.observe('dom:loaded', function() {
+    document.body.observe('ft:destroy', function(event) {
+      var e = event.element();
+      if(e) e.remove();
+      FT.restripe_rows();
+    });
+  });
+
+  
   /* PUBLIC METHODS */
   return {
     init: function(args) {
@@ -82,12 +97,6 @@ var FT = (function(){
     
     observe: function(name, func) { observer.observe(name, func); },
     unobserve: function(name, func) { observer.unobserve(name, func); },
-    
-    // TODO: I don't know if I like making this a public method here: it's a callback for the server
-    // TODO: What does this do and can it be removed?
-    on_created: function() {
-      observer.fire('created');
-    },
     
     hookup_form: function(form) {
       if(!form) throw new Error('form must not be null');
@@ -141,11 +150,6 @@ var FT = (function(){
       args.parameters = token || "";
       if(params) args.parameters += '&' + params;
       new Ajax.Request(url, args);
-    },
-    delete_record: function(id) {      
-      var e=$(id); if(e) e.remove();
-      //FT.safe_remove(id);
-      FT.restripe_rows();
     },
     restripe_rows: function() {
       var rows = $$('.row');
@@ -384,12 +388,6 @@ var FT = (function(){
           fn(tr,tr_edit);
         }
       //}
-    },
-    
-    /* SHOULD THIS GET MOVED OUT? */    
-    highlight: function(id) {
-      new Effect.Highlight(id);
     }
-
   };
 })();

@@ -23,8 +23,7 @@ module FreightTrain::Core
         page.refresh_records record.class, options
       end
  
-      page.call "FT.highlight", idof(record)
-      page.call "FT.on_created"
+      page.fire(:create, idof(record))
       yield(page) if block_given?
     end
   end
@@ -47,8 +46,8 @@ module FreightTrain::Core
         options[:find] = get_finder(options[:find] || {})
         page.refresh_records record.class, options
       end
- 
-      page.call "FT.highlight", idof(record)
+      
+      page.fire(:update, idof(record))
       yield(page) if block_given?
     end
   end
@@ -56,7 +55,7 @@ module FreightTrain::Core
 
   def remove_deleted( record, &block )
     render :update do |page|
-      page.call "FT.delete_record", idof(record)
+      page.fire(:destroy, idof(record))
       yield(page) if block_given?
     end
   end

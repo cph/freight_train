@@ -9,6 +9,11 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
       refresh_records record.class, *args
     end
   end
+  
+  
+  def fire(event, id)
+    @lines << "$('#{id}').fire('ft:#{event}')";
+  end
 
 
   def add_record( record, *args )
