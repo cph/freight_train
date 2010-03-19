@@ -104,7 +104,7 @@ private
     "function(tr){" <<  
       "var e;" <<
       "var html='" << @inline_editor.gsub(/\r|\n/, "").gsub(/ *</, "<").gsub(/> */, ">") << "';" <<
-      "var tr_edit = $(document.createElement('#{FreightTrain::Tags[:tr]||:tr}'));" << 
+      "var tr_edit = $(document.createElement('#{FreightTrain.tag(:tr)}'));" << 
       "tr_edit.className = 'row editor';" << 
       "tr_edit.id = 'edit_row';" << 
       "tr_edit.update(html);" << 

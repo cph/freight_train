@@ -240,7 +240,7 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
   def last_child(&block)
     @last_child = @template.capture(&block) if block_given?
     
-    name = FreightTrain::Tags[:td] || :td
+    name = FreightTrain.tag(:td)
     html = tag(name, {:class => "last-child"}, true)
     html << (@last_child || default_last_child )
     html << raw("</#{name}>")

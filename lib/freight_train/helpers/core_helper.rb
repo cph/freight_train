@@ -101,7 +101,7 @@ module FreightTrain::Helpers::CoreHelper
   # this is a fix...
   def alt_content_tag(name, *args, &block)
     options = args.extract_options!
-    name = FreightTrain::Tags[name] || name
+    name = FreightTrain.tag(name)
     safe_concat tag(name, options, true)
     if block_given?
       yield
@@ -113,7 +113,7 @@ module FreightTrain::Helpers::CoreHelper
   
   
   def alt_tag(name, *args)
-    name = FreightTrain::Tags[name] || name
+    name = FreightTrain.tag(name)
     tag(name, *args)    
   end
 

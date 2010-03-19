@@ -3,14 +3,22 @@ module FreightTrain
   include FreightTrain::Core
   
   
-  Tags = {
-    :table => :table,
-    :thead => :thead,
-    :tbody => :tbody,
-    :tr => :tr,
-    :th => :th,
-    :td => :td
-  }
+  def FreightTrain.tag(tag)
+    tags[tag] || tag
+  end
+  def FreightTrain.tags
+    @@tags ||= {
+      :table => :table,
+      :thead => :thead,
+      :tbody => :tbody,
+      :tr => :tr,
+      :th => :th,
+      :td => :td
+    }
+  end
+  def FreightTrain.tags=(new_tags)
+    @@tags = new_tags
+  end
   
   
   def self.included(other_module)
