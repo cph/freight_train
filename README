@@ -1,13 +1,17 @@
-FreightTrain
-============
+= FreightTrain
 
 Introduction goes here.
 
+= Installation
 
-Example
-=======
+For Rails 3:
 
-Example goes here.
+    rails plugin install git://github.com/boblail/freight_train.git
+    
+For Rails 2:
+
+    script/plugin install git://github.com/boblail/freight_train.git
+
 
 
 Copyright (c) 2009 Bob Lail, released under the MIT license
