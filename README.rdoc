@@ -1,8 +1,13 @@
 = FreightTrain
 
-Introduction goes here.
+==== FreightTrain is a DSL for representing collections that can be edited inline.
 
-= Installation
+FreightTrain is especially useful for
+- Rendering light-weight models as lists or tables
+- Enabling users to create, update, and destroy objects with AJAX calls
+- Editing objects' attributes using JavaScript without sending a request to the server
+
+== Installation
 
 For Rails 3:
 
@@ -12,6 +17,141 @@ For Rails 2:
 
     script/plugin install git://github.com/boblail/freight_train.git
 
+To run on Rails 2, FreightTrain also requires {a backport of Rails 3's Responder}[http://github.com/boblail/rails3_responder].
+
+Finally, the path `assets\javascripts\freight_train` contains JavaScripts that should be copied to your `public` path. I recommend symlinking the folder like this:
+
+    cd public/javascripts; ln -s ../../vendor/plugins/freight_train/assets/javascripts/freight_train freight_train 
+
+== Getting Started
+
+=== Creating a sample application
+
+Let's say we're creating a simple to-do list application:
+
+    rails to-do-list; cd to-do-list
+    rails generate scaffold ToDoItem description:string
+    rake db:create db:migrate
+    rails server
+    
+And you should be able to see the scaffolded app at {http://localhost:3000/to_do_items}[http://localhost:3000/to_do_items]. Add a few items so we can play with them later.
+
+=== Setting up FreightTrain
+
+Now let's see what FreightTrain can do. Install the plugin as described above. Then add `include FreightTrain` to your `ApplicationController`. Mine now looks like this:
+
+    class ApplicationController < ActionController::Base
+      include FreightTrain
+      protect_from_forgery
+    end 
+
+...and the following JavaScript includes to your layout (`app/views/layouts/to_do_items.html.erb`):
+
+    <%= javascript_include_tag 'freight_train/observer.js' %>
+    <%= javascript_include_tag 'freight_train/inline_editor.js' %>
+    <%= javascript_include_tag 'freight_train/core.js' %>
+
+Now, open app/views/to_do_items/index.html.erb and replace the `<table>` tag and everything inside it with `<% table_for :to_do_items %>`. Your `index.html.erb` should look like this:
+
+    <h1>Listing to_do_items</h1>
+
+    <% table_for :to_do_items %>
+
+    <br />
+
+    <%= link_to 'New to_do_item', new_to_do_item_path %>
+
+The `list` command sets FreightTrain to work with the collection we've supplied, `:to_do_items`. FreightTrain will generate everything you need to list, edit, and delete the items belonging to that collection. But we need to tell FreightTrain how we'd like each item to be rendered. We do this by creating a partial for named to_do_item. Create the file `app/views/to_do_items/_to_do_item.html.erb` and add these three lines of code:
+
+    <% row_for to_do_item do |row| %>
+      <%= row.text_of :description %>
+    <% end %>
+
+Re-launch your server and you should see a simple one-column table that lists each item you've created.
+
+=== Editing and Deleting in FreightTrain
+
+To make FreightTrain interactive, we first need to set up our controller so that it lets FreightTrain respond to AJAX calls. To do this we add `uses_freight_train` to any controller that will use FreightTrain. This method causes the controller to use FreightTrain's Responder (For more information about Responders in Rails 3, read {Default RESTful Rendering}[http://edgerails.info/articles/what-s-new-in-edge-rails/2009/08/10/what-s-new-in-edge-rails-default-restful-rendering/] by Ryan Daigle on {EdgeRails}[edgerails.info].)
+
+Your scaffold-generated controller will need to be refactored to use the new `responds_with` convention:
+
+    class ToDoItemsController < ApplicationController
+      uses_freight_train
+      respond_to :html
+  
+      def index
+        @to_do_items = ToDoItem.all
+        respond_with @to_do_items
+      end
+
+      def new
+        @to_do_item = ToDoItem.new
+        respond_with @to_do_item
+      end
+
+      def create
+        @to_do_item = ToDoItem.new(params[:to_do_item])
+        @to_do_item.save
+        respond_with @to_do_item
+      end
+
+      def update
+        @to_do_item = ToDoItem.find(params[:id])
+        @to_do_item.update_attributes(params[:to_do_item])
+        respond_with @to_do_item
+      end
+
+      def destroy
+        @to_do_item = ToDoItem.find(params[:id])
+        @to_do_item.destroy
+        respond_with @to_do_item
+      end
+    end
+
+Now, let's build an editor for our to-do list items. In `index.html.erb`, we'll replace `<% table_for :to_do_items %>` with `<% table_for :to_do_items do |ft| %>` which gives us more control over the table that's created:
+
+    <% table_for :to_do_items do |ft| %>
+      <% ft.headings do %>
+        <th>Description</th>
+      <% end %>
+      <% ft.editor do |editor| %>
+        <td><%= editor.text_field :description %></td>
+      <% end %>
+    <% end %>
+    
+And we have to add one extra line to the bottom of the page (although I plan on refactoring and removing the need for this):
+
+    <% ft_init %>
+    
+Finally, FreightTrain supplies a JavaScript helper method to facilitate deleting records. That method is named `FT.#{Model Name}.destroy` (in our case `FT.ToDoItem.destroy`) and it accepts the numerical id of the object to destroy. You can call this method manually, or use a FreightTrain convenience parameter to scaffold a delete link. To scaffold the link, add `:commands => [:delete]` to `row_for` in the _to_do_item.html.erb partial so it looks like this:
+
+  <% row_for to_do_item, :commands => [:delete] do |row| %>
+    <%= row.text_of :description %>
+  <% end %>
 
 
-Copyright (c) 2009 Bob Lail, released under the MIT license
+
+
+
+=== Events
+
+When FreightTrain's Responder creates, updates, or destroys a record, it fires an event: `ft:create`, `ft:update`, and `ft:destroy` respectively. `ft:create` and `ft:update` are fired from the row affected.
+
+To use these events to highlight the changes that have been made to the page, add this code to the bottom of your layout:
+
+    <script type="text/javascript">
+      document.observe('dom:loaded', function(){
+        document.body.observe('ft:update', function(event){
+          var element = event.element();
+          if(element) {
+            element.highlight();
+          }
+        });
+      });
+    </script>
+
+
+
+
+
+
