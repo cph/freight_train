@@ -14,7 +14,7 @@ module FreightTrain::Core
     end
  
     render :update do |page|
-      page.hide "flash_error"
+      page.safe_hide "flash_error"
  
       case refresh
       when :single
@@ -33,7 +33,7 @@ module FreightTrain::Core
     options[:originating_controller] = params[:originating_controller]
 
     render :update do |page|
-      page.hide "flash_error"
+      page.safe_hide "flash_error"
       page.call "InlineEditor.close"
  
       case refresh

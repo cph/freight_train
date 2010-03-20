@@ -76,7 +76,7 @@ module FreightTrain::Helpers::CoreHelper
     # table
     alt_content_tag :table, :class => "list" do
       alt_content_tag :thead do
-        yield ListBuilder.new(instance_name, self, options)        
+        yield ListBuilder.new(instance_name, self, options) if block_given?
       end
       alt_content_tag :tbody, :id => table_name do
         safe_concat render(:partial => instance_name, :collection => records) unless !records or (records.length==0)

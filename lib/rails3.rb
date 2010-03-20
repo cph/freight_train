@@ -19,4 +19,4 @@ end
 
 
 # What is a reasonable way of checking to see if this needs to be included?
-ActionView::Base.send :include, SafeHtmlHelper unless false
+ActionView::Base.send :include, SafeHtmlHelper if Rails::VERSION::STRING.match /^[12]/

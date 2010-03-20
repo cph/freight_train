@@ -252,7 +252,7 @@ private
 
 
   def default_last_child
-    '<button id="tag_submit" name="commit" type="submit">Save</button>' +
+    raw '<button id="tag_submit" name="commit" type="submit">Save</button>' +
     '<button onclick="InlineEditor.close();return false;">Cancel</button>'    
   end
 

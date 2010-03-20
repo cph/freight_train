@@ -51,9 +51,7 @@ module FreightTrain
     
     # TODO: accept parameters e.g. :paginate => {:per_page => 20}
     def uses_freight_train
-      define_method "responder" do
-        FreightTrain::Responder
-      end
+      self.responder = FreightTrain::Responder
     end
 
 

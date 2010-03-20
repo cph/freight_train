@@ -14,7 +14,15 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
   def fire(event, id)
     @lines << "$('#{id}').fire('ft:#{event}');";
   end
-
+  
+  
+  def safe_hide(*ids)
+    for id in ids
+      @lines << "var element = $('#{id}');"
+      @lines << "if(element) { element.hide(); }"
+    end
+  end
+  
 
   def add_record( record, *args )
     options = args.extract_options!
