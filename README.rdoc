@@ -34,7 +34,7 @@ Let's say we're creating a simple to-do list application:
     rake db:create db:migrate
     rails server
     
-And you should be able to see the scaffolded app at {http://localhost:3000/to_do_items}[http://localhost:3000/to_do_items]. Add a few items so we can play with them later.
+And you should be able to see the scaffolded app at http://localhost:3000/to_do_items. Add a few items so we can play with them later.
 
 === Setting up FreightTrain
 
