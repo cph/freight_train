@@ -52,11 +52,70 @@ module FreightTrain::Helpers::CoreHelper
     
   end
 
+
   # todo: write usage here
   #
   #  :paginate => [true, false]     -
   #  :path =>                       -
-  def list( *args, &block )
+  def list(*args, &block)
+    tags = {
+      :table => :div,
+      :tbody => :ol,
+      :thead => :ol,
+      :tr => :li,
+      :th => :div,
+      :td => :div
+    }
+    ft_generate_html tags, *args, &block
+  end
+
+  # todo: write usage here
+  #
+  #  :paginate => [true, false]     -
+  #  :path =>                       -
+  def table_for(*args, &block)
+    tags = {
+      :table => :table,
+      :thead => :thead,
+      :tbody => :tbody,
+      :tr => :tr,
+      :th => :th,
+      :td => :td
+    }
+    ft_generate_html tags, *args, &block
+  end
+
+
+
+
+  # this is a fix...
+  #                 ...for what?
+  def alt_content_tag(name, *args, &block)
+    options = args.extract_options!
+    name = FreightTrain.tag(name)
+    safe_concat tag(name, options, true)
+    if block_given?
+      yield
+    elsif args.first
+      safe_concat args.first
+    end
+    safe_concat "</#{name}>"
+  end
+  
+  
+  def alt_tag(name, *args)
+    name = FreightTrain.tag(name)
+    tag(name, *args)    
+  end
+  
+  
+private
+
+
+  def ft_generate_html(tags, *args, &block)
+    # todo: pass these tags as a parameter; don't rely on ugly globals
+    FreightTrain.tags = tags
+    
     options = args.extract_options!    
     table_name = args.last.to_s
     raise ArgumentError, "Missing table name" if table_name.blank?
@@ -91,31 +150,7 @@ module FreightTrain::Helpers::CoreHelper
     end
 
     # generate javascript
-    make_interactive path, table_name, options
-  end
-  alias_method :table_for, :list
-
-
-
-
-  # this is a fix...
-  #                 ...for what?
-  def alt_content_tag(name, *args, &block)
-    options = args.extract_options!
-    name = FreightTrain.tag(name)
-    safe_concat tag(name, options, true)
-    if block_given?
-      yield
-    elsif args.first
-      safe_concat args.first
-    end
-    safe_concat "</#{name}>"
-  end
-  
-  
-  def alt_tag(name, *args)
-    name = FreightTrain.tag(name)
-    tag(name, *args)    
+    make_interactive path, table_name, options 
   end
 
 
