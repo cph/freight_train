@@ -4,7 +4,7 @@ module FreightTrain::Helpers::RowHelper
   # delegate :concat, :alt_content_tag, :fields_for, :to => :@template
 
 
-  def row_for( record, *args, &block )
+  def row_for(record, *args, &block)
     options = args.extract_options!
     singular = record.class.name.tableize.singularize
     
@@ -18,6 +18,7 @@ module FreightTrain::Helpers::RowHelper
       alt = !@template.instance_variable_get("@alt")
       @template.instance_variable_set("@alt", alt)
       css << "alt" if !alt
+      css << options[:class] if options[:class]
  
       alt_content_tag :tr, :class => css.join(" "), :id => idof(record) do
         row_guts_for(record, options, &block)

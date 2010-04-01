@@ -2,11 +2,13 @@ module FreightTrain::Core
   include FreightTrain::Helpers::FormattingHelper
   
   
-  # TODO: remove :originating_controller
+  # TODO: remove :originating_controller - check
+  # TODO: refactor these names?
 
 
   def refresh_on_create(refresh, record, options={}, &block)
-    options[:originating_controller] = params[:originating_controller]
+    #options[:originating_controller] = params[:originating_controller]
+    options.merge!(params[:ft] || {})
  
     # this causes an error when performed inside of render block (is it performed in context of view instead of controller?)
     unless refresh == :single
@@ -30,7 +32,8 @@ module FreightTrain::Core
 
 
   def refresh_on_update(refresh, record, options={}, &block)
-    options[:originating_controller] = params[:originating_controller]
+    #options[:originating_controller] = params[:originating_controller]
+    options.merge!(params[:ft] || {})
 
     render :update do |page|
       page.safe_hide "flash_error"
@@ -41,6 +44,7 @@ module FreightTrain::Core
         # this is kind of a clunky way of solving this problem; but I want row_for to know whether
         # it is creating a row or updating a row (whether it should write the TR tags or not).
         @update_row = true
+        #debugger
         page.refresh_record record, options
         page.fire(:update, idof(record))
       else
@@ -54,6 +58,8 @@ module FreightTrain::Core
 
 
   def remove_deleted(record, &block)
+    options.merge!(params[:ft] || {})
+    
     render :update do |page|
       page.fire(:destroy, idof(record))
       yield(page) if block_given?

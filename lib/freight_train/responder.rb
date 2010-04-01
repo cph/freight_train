@@ -8,8 +8,8 @@ class FreightTrain::Responder < ActionController::Responder
   
   def to_html
     if request.xhr?
-      create if post?
-      update if put?
+      create  if post?
+      update  if put?
       destroy if delete?
     end
   end
