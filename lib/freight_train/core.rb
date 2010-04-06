@@ -58,8 +58,6 @@ module FreightTrain::Core
 
 
   def remove_deleted(record, &block)
-    options.merge!(params[:ft] || {})
-    
     render :update do |page|
       page.fire(:destroy, idof(record))
       yield(page) if block_given?
