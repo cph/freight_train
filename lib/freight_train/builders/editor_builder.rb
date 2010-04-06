@@ -1,4 +1,4 @@
-class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
+class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilder
   include ActionView::Helpers::TagHelper
 
   @@default_editor_builder = FreightTrain::Builders::EditorBuilder
@@ -7,6 +7,12 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
   
   
   # TODO: Push this into a JavaScript library
+  #   1. allow base class to generate controls
+  #      a. use @after_init_edit method to assign values to controls
+  #      b. ** come up with mechanism to set field and id for nested values (or use another method to identify them) **
+  #   2. refactor to put @after_init_edit method into before- or after- filter
+  #      a. abstract value assignment for (e.g.) INPUT[TYPE="TEXT"] and SELECT and INPUT[TYPE="CHECKBOX"]
+  #      b. call generic value assignment in before/after filters and push logic to core.js
   
   
   # ===================================================================================================
@@ -221,6 +227,8 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
   end
 
 
+  # assign value after creation of control
+=begin
   def text_field(method, options={})
     attr_name = "#{@object_name}[#{method}]"
     options[:id] = method unless options[:id]
@@ -233,7 +241,17 @@ class FreightTrain::Builders::EditorBuilder < ActionView::Helpers::FormBuilder
     @template.tag( "input", options.merge(
       :type => "text",
       :name => "#{attr_name}",
-      :value => "'+#{method}+'"))
+      :value => "'+#{method}.toString()+'"))
+  end
+=end
+  def text_field(method, options={})
+    attr_name = "#{@object_name}[#{method}]"
+    @after_init_edit <<
+      "var e = tr.down('*[attr=\"#{attr_name}\"]');" <<
+      "var i = tr_edit.down('input[name=\"#{attr_name}\"]');" <<
+      "if(i && e) { i.value = e.readAttribute('value')||e.innerHTML; }" <<
+      "else{if(!e) alert('#{attr_name} not found');if(!i) alert('#{method} not found');}"
+    super method, options
   end
   
   
