@@ -51,7 +51,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   end
   
   
-  delegate :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
+  # delegate :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
 
 
   def check_box(method, options={})

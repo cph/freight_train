@@ -1,5 +1,8 @@
 class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
   attr_reader :object
+  
+  
+  delegate :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
 
 
   def check_list_for( method, values, &block )
