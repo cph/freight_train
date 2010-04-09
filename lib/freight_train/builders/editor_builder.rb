@@ -228,7 +228,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
 
   # assign value after creation of control
-=begin
+
   def text_field(method, options={})
     attr_name = "#{@object_name}[#{method}]"
     options[:id] = method unless options[:id]
@@ -243,7 +243,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
       :name => "#{attr_name}",
       :value => "'+#{method}.toString()+'"))
   end
-=end
+
+=begin
   def text_field(method, options={})
     attr_name = "#{@object_name}[#{method}]"
     @after_init_edit <<
@@ -253,6 +254,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
       "else{if(!e) alert('#{attr_name} not found');if(!i) alert('#{method} not found');}"
     super method, options
   end
+=end
   
   
   def last_child(&block)
