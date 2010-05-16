@@ -64,7 +64,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     replace_html table_name,
 #                :partial => (options[:partial] || ((ocn=options[:originating_controller]) ? "/#{ocn}/#{partial_name}" : partial_name)),
                  :partial => partial_name,                 
-                 :collection => collection.find(:all, (options[:find]||{}) )
+                 :collection => collection.all((options[:find]||{}) )
     @lines << "$('#{table_name}').select('.row').each(function(row){FT.hookup_row('#{model_name}',row);});"
   end
 

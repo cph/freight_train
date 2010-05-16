@@ -37,7 +37,7 @@ protected
   def destroy
     # nb! should require Rails 2.3.4 or greater!
     destroyed = resource.respond_to?(:destroyed?) ? resource.destroyed? : !resource.class.find_by_id(resource.id)
-    puts "DESTROYED: #{destroyed}"
+#   puts "DESTROYED: #{destroyed}"
     begin
       if destroyed
         remove_deleted resource
