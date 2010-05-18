@@ -2,7 +2,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
   attr_reader :object
   
   
-  delegate :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
+  delegate :capture, :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
 
 
   def check_list_for( method, values, &block )
@@ -80,17 +80,19 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     @template.instance_variable_set "@enable_nested_records", true
     i = 0
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-    @template.safe_concat "<table class=\"nested editor\" name=\"#{@object_name}[#{object_name.to_s}_attributes]\">"
-    nested_fields_for object_name, *args do |f|
-      @template.safe_concat "<tr id=\"#{object_name.to_s.singularize}_#{i}\" class=\"nested-row\">"
-      block.call(f)
+    "<table class=\"nested editor\" name=\"#{@object_name}[#{object_name.to_s}_attributes]\">" <<
+    (nested_fields_for object_name, *args do |f|
+      html = "<tr id=\"#{object_name.to_s.singularize}_#{i}\" class=\"nested-row\">" <<
+      # block.call(f) <<
+      capture(f, &block) <<
 
-      @template.safe_concat "<td><div class=\"delete-nested\"><a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a></div></td>"
-      @template.safe_concat "<td><div class=\"add-nested\"><a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a></div></td>"
-      @template.safe_concat "</tr>"
+      "<td><div class=\"delete-nested\"><a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a></div></td>" <<
+      "<td><div class=\"add-nested\"><a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a></div></td>" <<
+      "</tr>" <<
       i += 1
-    end
-    @template.safe_concat "</table>"
+      html
+    end) <<
+    "</table>"
   end
 
   

@@ -16,7 +16,7 @@ class FreightTrain::Builders::RowBuilder
   end
     
   
-  delegate :concat, :raw, :alt_content_tag, :fields_for, :to => :@template
+  delegate :capture, :concat, :raw, :alt_content_tag, :fields_for, :to => :@template
 
 
   def record
@@ -75,10 +75,10 @@ class FreightTrain::Builders::RowBuilder
           klass = temp.join(" ")
           alt_content_tag :tr, :id => "#{singular}_#{i}", :class => klass do
             f = @@default_row_builder.new( @template, "#{@object_name}[#{method}]", child )
-            alt_content_tag :td, :class => "hidden", :style => "display:none;" do
-              concat f.hidden_field :id
-            end
-            yield f
+            (alt_content_tag :td, :class => "hidden", :style => "display:none;" do
+              f.hidden_field :id
+            end) <<
+            capture(f, &block)
           end
           i += 1
         end

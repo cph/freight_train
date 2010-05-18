@@ -5,21 +5,21 @@ module FreightTrain::Helpers::CoreHelper
 
     def initialize(sym, template, options)
       @sym, @template, @options = sym, template, options
+      @html = ""
     end
     
-    delegate :concat, :safe_concat, :raw, :alt_content_tag, :fields_for, :to => :@template
+    delegate :capture,:concat, :safe_concat, :raw, :alt_content_tag, :fields_for, :to => :@template
 
 
     def headings(*args, &block)
       alt_content_tag :tr, :class => "row heading" do
         if block_given?
-          yield
+          capture(&block)
         elsif args.length > 0
-          args.each {|heading| alt_content_tag(:th, heading)}
+          args.collect{|heading| alt_content_tag(:th, heading)}.join
         end
         alt_content_tag :th
       end
-      #@template.concat "<th></th></tr>\n"
     end
     
     
@@ -40,15 +40,18 @@ module FreightTrain::Helpers::CoreHelper
       raise ArgumentError, "Missing block" unless block_given?
       options = args.extract_options!
       builder = FreightTrain::Builders::EditorBuilder.default_editor_builder
+      editor_builder = builder.new(@sym, nil, @template, options, block)
  
       #@after_init_edit = "" # if !@after_init_edit
       @template.instance_variable_set("@after_init_edit", "")
-      @template.instance_variable_set("@inline_editor", @template.capture do
-        yield (editor_builder = builder.new( @sym, nil, @template, options, block))
-        concat editor_builder.last_child
-      end)
+      @template.instance_variable_set("@inline_editor", capture(editor_builder, &block) + editor_builder.last_child)
       #@template.instance_variable_set("@after_init_edit", @after_init_edit)
     end
+    
+    
+    def to_s
+    end
+    
     
   end
 
@@ -94,6 +97,14 @@ module FreightTrain::Helpers::CoreHelper
   def alt_content_tag(name, *args, &block)
     options = args.extract_options!
     name = FreightTrain.tag(name)
+    content_tag(name, options) do
+      if block_given?
+        yield
+      elsif args.first
+        args.first
+      end
+    end
+=begin
     safe_concat tag(name, options, true)
     if block_given?
       yield
@@ -101,6 +112,7 @@ module FreightTrain::Helpers::CoreHelper
       safe_concat args.first
     end
     safe_concat "</#{name}>"
+=end
   end
   
   
@@ -129,32 +141,37 @@ private
 
     # put everything inside a form
     # todo: (re: model) supposed to start user-defined attributes with data-
-    safe_concat "<form class=\"freight_train\" model=\"#{model_name}\" action=\"#{path}\" method=\"get\">"
-    safe_concat "<input name=\"#{request_forgery_protection_token}\" type=\"hidden\" value=\"#{escape_javascript(form_authenticity_token)}\"/>\n"
-    safe_concat "<input name=\"ft[partial]\" type=\"hidden\" value=\"#{partial}\"/>\n"
+    raw(
+      "<form class=\"freight_train\" model=\"#{model_name}\" action=\"#{path}\" method=\"get\">" <<
+      "<input name=\"#{request_forgery_protection_token}\" type=\"hidden\" value=\"#{escape_javascript(form_authenticity_token)}\"/>\n" <<
+      "<input name=\"ft[partial]\" type=\"hidden\" value=\"#{partial}\"/>\n" <<
     # safe_concat "<input name=\"originating_controller\" type=\"hidden\" value=\"#{controller_name}\"/>\n"
     
     #if( options[:partial] )
 
     # table
-    alt_content_tag :table, :class => "list" do
-      alt_content_tag :thead do
-        yield ListBuilder.new(instance_name, self, options) if block_given?
-      end
-      alt_content_tag :tbody, :id => table_name do
-        safe_concat render(:partial => partial, :collection => records) unless !records or (records.length==0)
-      end
-    end
-    safe_concat "</form>\n"
+      (alt_content_tag :table, :class => "list" do
+        alt_content_tag :thead do
+          yield ListBuilder.new(instance_name, self, options) if block_given?
+        end
+        alt_content_tag :tbody, :id => table_name do
+          render(:partial => partial, :collection => records) unless !records or (records.length==0)
+        end
+      end) <<
+      "</form>\n" <<
     
-    if options[:paginate]
-      #concat "<tfoot>"
-      concat will_paginate(records).to_s
-      #concat "</tfoot>"
-    end
+      "#{will_paginate(records) if options[:paginate]}" <<
+=begin
+      if options[:paginate]
+        #concat "<tfoot>"
+        concat will_paginate(records).to_s
+        #concat "</tfoot>"
+      end
+=end
 
-    # generate javascript
-    make_interactive path, table_name, options 
+      # generate javascript
+      make_interactive(path, table_name, options)
+    )
   end
 
 

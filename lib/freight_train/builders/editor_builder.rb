@@ -96,6 +96,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   def fields_for( method, *args, &block )
     options = args.extract_options!
     yield @@default_editor_builder.new( "#{@object_name}[#{method}]", nil, @template, options, block )
+    #capture(@@default_editor_builder.new( "#{@object_name}[#{method}]", nil, @template, options, block ), &block)
   end
 
 
@@ -168,36 +169,38 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
         # TDs representing the object's attributes. For nested objects, the TR is a child of the
         # root TR. Create a closure in which the variable 'tr' refers to the nested object while
         # preserving the reference to the root TR.
-        safe_concat code(
+        html = code(
           "(function(root_tr){" <<
           "var nested_rows=root_tr.select('*[attr=\"#{attr_name}\"] .#{singular}');" <<
           #"alert('#{attr_name}: '+nested_rows.length);" <<
           "for(var i=0; i<nested_rows.length; i++){" << 
             "var tr=nested_rows[i];"
-        )
-        fields_for method, nil, *args do |f|
+        ) <<
+        (fields_for method, nil, *args do |f|
           alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_'+i+'" do
-            alt_content_tag :td, :class => "hidden" do
-              safe_concat f.hidden_field :id
+            (alt_content_tag :td, :class => "hidden" do
+              (f.hidden_field :id) <<
               #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
-              safe_concat f.static_field :_destroy, 0
-            end
-            yield f
-            alt_content_tag :td, :class => "delete-nested" do
-              safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
-            end
-            alt_content_tag :td, :class => "add-nested" do
-              safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
-            end
+              (f.static_field :_destroy, 0)
+            end) <<
+            (yield f) <<
+            (alt_content_tag :td, :class => "delete-nested" do
+              "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
+            end) <<
+            (alt_content_tag :td, :class => "add-nested" do
+              "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
+            end)
           end
-        end
-        safe_concat code( "}})(tr);" ) 
+        end) <<
+        code( "}})(tr);" )
         
         if @after_init_edit.empty?
           @after_init_edit = old_after_init_edit
         else
           @after_init_edit = old_after_init_edit + "FT.for_each_row(tr,tr_edit,'*[attr=\"#{attr_name}\"] .row','*[name=\"#{name}\"] .row',function(tr,tr_edit){#{@after_init_edit}});"
         end
+        
+        html
         
       #end
     end
