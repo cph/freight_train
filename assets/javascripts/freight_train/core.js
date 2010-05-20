@@ -122,7 +122,7 @@ var FT = (function(){
     hookup: function() {
       $$('.freight_train').each(function(train) {
         FT.hookup_form(train);
-        var model_name = train.readAttribute('model')
+        var model_name = train.readAttribute('data-model')
         var model = FT[model_name];
         if(model && model.hookup_row)
           train.select('.row').each(function(row){_hookup_row(model,row);});

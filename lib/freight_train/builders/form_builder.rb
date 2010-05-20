@@ -2,7 +2,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
   attr_reader :object
   
   
-  delegate :capture, :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
+  delegate :capture, :raw, :alt_content_tag, :alt_tag, :to => :@template
 
 
   def check_list_for( method, values, &block )
@@ -23,16 +23,15 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
         object = @object.send method_or_object
         if object.is_a? Array
           #@template.concat "<!-- array -->"
-          (0...object.length).each do |i|
+          ((0...object.length).collect do |i|
             name = "#{@object_name}[#{method_or_object}_attributes][#{i}]"
             @template.fields_for(name, object[i], *args, &block)
-          end
+          end).join
         else
           name = method_or_object
           #@template.concat "<!-- else -->"
           super(name, object, *args, &block)
-        end 
-        return
+        end
       end
     end
  
@@ -80,7 +79,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     @template.instance_variable_set "@enable_nested_records", true
     i = 0
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-    "<table class=\"nested editor\" name=\"#{@object_name}[#{object_name.to_s}_attributes]\">" <<
+    raw "<table class=\"nested editor\" name=\"#{@object_name}[#{object_name.to_s}_attributes]\">" <<
     (nested_fields_for object_name, *args do |f|
       html = "<tr id=\"#{object_name.to_s.singularize}_#{i}\" class=\"nested-row\">" <<
       # block.call(f) <<

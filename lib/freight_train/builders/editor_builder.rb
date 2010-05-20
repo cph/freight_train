@@ -262,12 +262,14 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   
   def last_child(&block)
     @last_child = @template.capture(&block) if block_given?
-    
+    alt_content_tag(:td, (@last_child || default_last_child), :class => "last-child")
+=begin
     name = FreightTrain.tag(:td)
     html = tag(name, {:class => "last-child"}, true)
     html << (@last_child || default_last_child )
     html << raw("</#{name}>")
     raw html
+=end
   end
 
   
@@ -275,7 +277,7 @@ private
 
 
   def default_last_child
-    raw '<button id="tag_submit" name="commit" type="submit">Save</button>' +
+    '<button id="tag_submit" name="commit" type="submit">Save</button>' +
     '<button onclick="InlineEditor.close();return false;">Cancel</button>'    
   end
 

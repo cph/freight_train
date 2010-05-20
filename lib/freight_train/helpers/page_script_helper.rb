@@ -5,7 +5,7 @@ module FreightTrain::Helpers::PageScriptHelper
     options[:destroy] = true unless options.key?(:destroy)
 
     html = "<script type=\"text/javascript\">\n" << 
-       "//<![CDATA[\n"
+       "//<![CDATA[\n" <<
 
        # create a namespace for record-specific functions
        "FT.#{table_name.classify}=(function(){\n" <<
@@ -87,7 +87,7 @@ private
   def reset_on_create_method( table_name, options )
     arg = options[:reset_on_create]
     content =  "FT.observe('created',function(){" <<
-                 "$$('form[model=\"#{table_name.classify}\"]').each(function(form){"
+                 "$$('form[data-model=\"#{table_name.classify}\"]').each(function(form){"
     if arg == :all
       content <<   "form.reset();"
     else
