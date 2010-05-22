@@ -72,27 +72,81 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     end
     raw content
   end
+  
+  
+  def static_field(method_or_object, *args)
+    hidden_field(method_or_object, *args)
+  end
 
 
-  # todo: there's a lot of duplication between this method and the one in editor_builder; is there a good way to merge them?
-  def nested_editor_for( object_name, *args, &block )
+  # !todo: there's _a lot_ of duplication between this method and the one in editor_builder; is there a good way to merge them?
+  def nested_editor_for( method, *args, &block )
+    attr_name = "#{@object_name}[#{method}]"
+    name = "#{@object_name}[#{method}_attributes]"
+    singular = method.to_s.singularize
     @template.instance_variable_set "@enable_nested_records", true
+  
     i = 0
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-    raw "<table class=\"nested editor\" name=\"#{@object_name}[#{object_name.to_s}_attributes]\">" <<
-    (nested_fields_for object_name, *args do |f|
-      html = "<tr id=\"#{object_name.to_s.singularize}_#{i}\" class=\"nested-row\">" <<
-      # block.call(f) <<
-      capture(f, &block) <<
+    alt_content_tag(:table, :class => "nested editor", :name => name) do
+      nested_fields_for(method, *args) do |f|
+        alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_#{i}" do
+          alt_content_tag(:td, :class => "hidden") {
+            f.hidden_field(:id) <<
+            #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
+            f.static_field(:_destroy, 0)
+          } <<
+          capture(f, &block) <<
+          alt_content_tag(:td, :class => "delete-nested") {
+            "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
+          } << 
+          alt_content_tag(:td, :class => "add-nested") {
+            "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
+          }
+        end
+        i += 1
+      end
+    end
+=begin
+    @template.safe_concat "<table class=\"nested editor\" name=\"#{@object_name}[#{object_name.to_s}_attributes]\">"
+    nested_fields_for object_name, *args do |f|
+      @template.safe_concat "<tr id=\"#{object_name.to_s.singularize}_#{i}\" class=\"nested-row\">"
+      block.call(f)
 
       "<td><div class=\"delete-nested\"><a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a></div></td>" <<
       "<td><div class=\"add-nested\"><a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a></div></td>" <<
       "</tr>" <<
       i += 1
-      html
-    end) <<
-    "</table>"
+    end
+    @template.safe_concat "</table>"
+=end
   end
+  
+  
+protected
+
+
+# !todo: almost -- this one just has the '+i+' in nested-row
+=begin
+  def fields_for_nested_editor(method_or_object, *args, &block)
+    fields_for(method, *args) do |f|
+      alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_'+i+'" do
+        alt_content_tag :td, :class => "hidden" do
+          safe_concat f.hidden_field :id
+          #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
+          safe_concat f.static_field :_destroy, 0
+        end
+        yield f
+        alt_content_tag :td, :class => "delete-nested" do
+          safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
+        end
+        alt_content_tag :td, :class => "add-nested" do
+          safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
+        end
+      end
+    end
+  end
+=end
 
   
 private

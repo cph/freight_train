@@ -93,7 +93,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   end
 
 
-  def fields_for( method, *args, &block )
+  def fields_for(method, *args, &block)
     options = args.extract_options!
     yield @@default_editor_builder.new( "#{@object_name}[#{method}]", nil, @template, options, block )
     #capture(@@default_editor_builder.new( "#{@object_name}[#{method}]", nil, @template, options, block ), &block)

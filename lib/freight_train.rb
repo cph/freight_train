@@ -8,12 +8,12 @@ module FreightTrain
   end
   def FreightTrain.tags
     @@tags ||= {
-      :table => :table,
-      :thead => :thead,
-      :tbody => :tbody,
-      :tr => :tr,
-      :th => :th,
-      :td => :td
+      :table => :div,
+      :tbody => :ol,
+      :thead => :ol,
+      :tr => :li,
+      :th => :div,
+      :td => :div
     }
   end
   def FreightTrain.tags=(new_tags)
