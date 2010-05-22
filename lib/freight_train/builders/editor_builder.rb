@@ -52,6 +52,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   
   
   # delegate :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
+  delegate :capture, :to => :@template
 
 
   def check_box(method, options={})
@@ -183,7 +184,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
               #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
               (f.static_field :_destroy, 0)
             end) <<
-            (yield f) <<
+            #(yield f) <<  # why is this a yield and not a capture?
+            capture(f, &block) <<
             (alt_content_tag :td, :class => "delete-nested" do
               "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
             end) <<
@@ -261,8 +263,12 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   
   
   def last_child(&block)
-    @last_child = @template.capture(&block) if block_given?
-    alt_content_tag(:td, (@last_child || default_last_child), :class => "last-child")
+    if block_given?
+      @last_child = @template.capture(&block)
+      return ""
+    else
+      alt_content_tag(:td, (@last_child || default_last_child), :class => "last-child")
+    end
 =begin
     name = FreightTrain.tag(:td)
     html = tag(name, {:class => "last-child"}, true)

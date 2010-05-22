@@ -356,7 +356,7 @@ var FT = (function(){
       };
  
       var object_name=table.readAttribute('name');
-      var rows=table.select('.nested-row');
+      var rows=table.select('.nested-row').reject(function(tr) {var _destroy; return ((_destroy=tr.down('#_destroy')) && (_destroy.value==1));});
       var n=rows.length-1;
       if(n>0) {
         for(var i=0; i<n; i++) {

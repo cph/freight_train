@@ -23,14 +23,14 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
         object = @object.send method_or_object
         if object.is_a? Array
           #@template.concat "<!-- array -->"
-          ((0...object.length).collect do |i|
+          return ((0...object.length).collect do |i|
             name = "#{@object_name}[#{method_or_object}_attributes][#{i}]"
             @template.fields_for(name, object[i], *args, &block)
           end).join
         else
           name = method_or_object
           #@template.concat "<!-- else -->"
-          super(name, object, *args, &block)
+          return super(name, object, *args, &block)
         end
       end
     end
@@ -39,7 +39,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
   end
 
 
-  def hidden_field( method_or_object, *args )  
+  def hidden_field(method_or_object, *args)
     options = args.extract_options!
  
     case method_or_object
@@ -80,7 +80,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
 
 
   # !todo: there's _a lot_ of duplication between this method and the one in editor_builder; is there a good way to merge them?
-  def nested_editor_for( method, *args, &block )
+  def nested_editor_for(method, *args, &block)
     attr_name = "#{@object_name}[#{method}]"
     name = "#{@object_name}[#{method}_attributes]"
     singular = method.to_s.singularize
@@ -90,7 +90,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
     alt_content_tag(:table, :class => "nested editor", :name => name) do
       nested_fields_for(method, *args) do |f|
-        alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_#{i}" do
+        html = alt_content_tag(:tr, :class => "nested-row", :id => "#{method.to_s.singularize}_#{i}") {
           alt_content_tag(:td, :class => "hidden") {
             f.hidden_field(:id) <<
             #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
@@ -103,8 +103,9 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
           alt_content_tag(:td, :class => "add-nested") {
             "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
           }
-        end
+        }
         i += 1
+        html
       end
     end
 =begin
