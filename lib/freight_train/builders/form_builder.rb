@@ -81,7 +81,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
 
 
   # !todo: there's _a lot_ of duplication between this method and the one in editor_builder; is there a good way to merge them?
-  def nested_editor_for( method, *args, &block )
+  def nested_editor_for(method, *args, &block)
     attr_name = "#{@object_name}[#{method}]"
     name = "#{@object_name}[#{method}_attributes]"
     singular = method.to_s.singularize
@@ -99,10 +99,10 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
           end
           yield f
           alt_content_tag :td, :class => "delete-nested" do
-            safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
+            safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
           end
           alt_content_tag :td, :class => "add-nested" do
-            safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
+            safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
           end
         end
       end
@@ -113,8 +113,8 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
       @template.safe_concat "<tr id=\"#{object_name.to_s.singularize}_#{i}\" class=\"nested-row\">"
       block.call(f)
 
-      @template.safe_concat "<td><div class=\"delete-nested\"><a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a></div></td>"
-      @template.safe_concat "<td><div class=\"add-nested\"><a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a></div></td>"
+      @template.safe_concat "<td><div class=\"delete-nested\"><a class=\"delete-link\" href=\"#\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a></div></td>"
+      @template.safe_concat "<td><div class=\"add-nested\"><a class=\"add-link\" href=\"#\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a></div></td>"
       @template.safe_concat "</tr>"
       i += 1
     end
@@ -138,10 +138,10 @@ protected
         end
         yield f
         alt_content_tag :td, :class => "delete-nested" do
-          safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
+          safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
         end
         alt_content_tag :td, :class => "add-nested" do
-          safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
+          safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
         end
       end
     end

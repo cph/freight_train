@@ -184,10 +184,10 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
             end
             yield f
             alt_content_tag :td, :class => "delete-nested" do
-              safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
+              safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
             end
             alt_content_tag :td, :class => "add-nested" do
-              safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
+              safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
             end
           end
         end
@@ -272,8 +272,8 @@ private
 
 
   def default_last_child
-    raw '<button id="tag_submit" name="commit" type="submit">Save</button>' +
-    '<button onclick="InlineEditor.close();return false;">Cancel</button>'    
+    raw '<button class="submit" name="commit" type="submit">Save</button>' +
+        '<button class="cancel" onclick="InlineEditor.close();return false;">Cancel</button>'    
   end
 
 
