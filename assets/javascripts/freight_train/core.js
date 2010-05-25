@@ -306,6 +306,7 @@ var FT = (function(){
       var tr = $(sender).up('.nested-row'); if(!tr) { alert('FT.add_nested_object: .nested-row not found'); return; }
       var table = tr.up('.nested'); if(!table) { alert('FT.add_nested_object .nested not found'); return; }
       var new_tr = tr.cloneNode(true);
+      new_tr.id = tr.id.replace(/(\d+)$/, function(fullMatch, n) { return (Number(n)+1); });
       table.appendChild(new_tr);
       
       var _destroy = new_tr.down('#_destroy');
@@ -315,7 +316,7 @@ var FT = (function(){
       
       observer.fire('after_add_nested',[table,new_tr]);
       FT.reset_add_remove_for(table);
-    }, 
+    },
     reset_nested: function(table) {
       if(table) {
         var nested = table.select('.nested-row');
