@@ -56,19 +56,22 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     end
  
     options[:type] = "hidden"
-    options[:id] = method
  
     content = ""
     content = "<!--#{@object.class}-->"
     if obj.is_a? Array
       options[:name] = "#{@object_name}[#{method}][]"
+      #options[:id] = options[:name].underscore
       for value in obj
-      options[:value] = value
-      content << @template.tag( "input", options )
+        value.nil? ? options.delete(:value) : (options[:value] = value)
+        content << @template.tag( "input", options )
       end
     else
       options[:name] = "#{@object_name}[#{method}]"
-      options[:value] = obj ? "#{obj}" : ""
+      # options[:id] = options[:name].underscore
+      obj = obj.to_s
+      obj.blank? ? options.delete(:value) : (options[:value] = obj)
+      # options[:value] = obj ? "#{obj}" : ""
       content << @template.tag( "input", options )
     end
     raw content
