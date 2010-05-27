@@ -48,7 +48,6 @@ class FreightTrain::Builders::RowBuilder
     end
   end
 
-
   def hidden_field(method)
     value = @record.send method
     if value.is_a? Array
@@ -73,8 +72,9 @@ class FreightTrain::Builders::RowBuilder
           temp = ["nested-row", singular]
           temp << klass if klass
           klass = temp.join(" ")
-          alt_content_tag :tr, :id => "#{singular}_#{i}", :class => klass do
-            f = @@default_row_builder.new( @template, "#{@object_name}[#{method}]", child )
+          name = "#{@object_name}[#{method}_attributes][#{i}]"
+          alt_content_tag :tr, :id => "#{singular}_#{i}", :class => klass, :name => name do
+            f = @@default_row_builder.new(@template, name, child)
             alt_content_tag :td, :class => "hidden", :style => "display:none;" do
               concat f.hidden_field :id
             end

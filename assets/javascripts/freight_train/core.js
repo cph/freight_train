@@ -277,7 +277,8 @@ var FT = (function(){
     },
     
     /* ARE THESE NEXT TWO STRICTLY FREIGHT TRAIN? */
-    copy_selected_value: function(tr,tr_edit,attr_name,method) {
+    copy_selected_value: function(tr,tr_edit,method) {
+      var attr_name = tr.readAttribute('name')+'['+method+']';
       var e=tr.down('*[attr="'+attr_name+'"]');
       var sel=tr_edit.down('#'+method);
       if(e && sel)
@@ -301,54 +302,57 @@ var FT = (function(){
       else
         alert(attr_name+' not found');
     },
-    
     add_nested_object: function(sender) {
       var tr = $(sender).up('.nested-row'); if(!tr) { alert('FT.add_nested_object: .nested-row not found'); return; }
       var table = tr.up('.nested'); if(!table) { alert('FT.add_nested_object .nested not found'); return; }
       var new_tr = tr.cloneNode(true);
       new_tr.id = tr.id.replace(/(\d+)$/, function(fullMatch, n) { return (Number(n)+1); });
       table.appendChild(new_tr);
-      
-      var _destroy = new_tr.down('#_destroy');
+         
+      var name = tr.readAttribute('name');
+      var _destroy = new_tr.down('[name="'+name+'[_destroy]"]');
       if(_destroy) _destroy.value = 0;
-      var id = new_tr.down('#id');
+      var id = new_tr.down('[name="'+name+'[id]"]');
       if(id) id.value = '';
       
-      observer.fire('after_add_nested',[table,new_tr]);
+      observer.fire('after_add_nested', [table,new_tr]);
       FT.reset_add_remove_for(table);
     },
-    reset_nested: function(table) {
-      if(table) {
-        var nested = table.select('.nested-row');
-        for(var i=1;i<nested.length;i++) {
-          nested[i].remove();
-          FT.reset_add_remove_for(table);
-        }
-      }
-    }, 
     delete_nested_object: function(sender) {
       var tr = $(sender).up('.nested-row'); if(!tr) return;
-      var table = tr.up('.nested'); if(!table) return;
+      var table = tr.up('.nested'); if(!table) return;      
+      var name = tr.readAttribute('name');
       
-      var id = tr.down('#id');
+      var id = tr.down('[name="'+name+'[id]"]');
       if(id && (id.value == '')) {
         tr.remove();
       }
       else {
-        var _destroy = tr.down('#_destroy');
+        var _destroy = tr.down('[name="'+name+'[_destroy]"]');
         if(_destroy) _destroy.value = 1;
         tr.hide();
       }
       FT.reset_add_remove_for(table);
     }, 
+    reset_nested: function(table) {
+      if(table) {
+        var nested = table.select('.nested-row');
+        for(var i=1;i<nested.length;i++) {
+          nested[i].remove();
+          FT.reset_add_remove_for(table); // !todo: I think this is wrong. Either 'table' should be 'nested[i]'
+                                          //        or this should occur outside the for loop.
+        }
+      }
+    },
     reset_add_remove_for_all: function(parent) {
       var selector = function(x){ return parent ? parent.select(x) : $$(x); };
       selector('.nested.editor').each(FT.reset_add_remove_for);
     },
     reset_add_remove_for: function(table) {
       var reset_nested_row = function(row,object_name,i,delete_visibility,add_visibility) {
-        row.select('.field').each(function(e){
-          e.writeAttribute('name',object_name+'['+i+']['+e.id+']');
+        row.select('input, textarea, select').each(function(e) {
+          //e.writeAttribute('name',object_name+'['+i+']['+e.id+']');
+          e.writeAttribute('name', e.readAttribute('name').gsub(/[(\d+)]/, i));
         });
         var delete_link = row.down('.delete-link');
         if(delete_link) delete_link.setStyle({visibility:delete_visibility});

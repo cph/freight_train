@@ -76,7 +76,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
   def collection_select(method, collection, value_method, text_method, options = {}, html_options = {})
     attr_name = "#{@object_name}[#{method}]"
-    @after_init_edit << "FT.copy_selected_value(tr,tr_edit,'#{attr_name}','#{method}');"
+    @after_init_edit << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
 
     html_options[:id] = method unless html_options[:id]
     html_options[:name] = attr_name
@@ -95,7 +95,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
   def fields_for(method, *args, &block)
     options = args.extract_options!
-    yield @@default_editor_builder.new( "#{@object_name}[#{method}]", nil, @template, options, block )
+    name = options[:name] || "#{@object_name}[#{method}]"
+    yield @@default_editor_builder.new(name, nil, @template, options, block)
   end
 
 
@@ -106,8 +107,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
   def static_field( method, value )
     @template.tag( "input", {
-      :id => method,
-      :class => "field",
+#     :id => method,
+#     :class => "field",
       :type=>"hidden",
       :value=>value,
       :name=>"#{@object_name}[#{method}]"} )
@@ -124,8 +125,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
       
       @template.tag( "input", {
         :type=>"hidden",
-        :class => "field",
-        :id => method,
+#       :class => "field",
+#       :id => method,
         :value=>"'+e[0].readAttribute('value')+'",
         :name=>"#{@object_name}[#{method}]"} ) <<
       
@@ -136,8 +137,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     
       @template.tag( "input", {
         :type=>"hidden",        
-        :class => "field",
-        :id => method,
+#       :class => "field",
+#       :id => method,
         :value=>"'+e[i].readAttribute('value')+'",
         :name=>"#{@object_name}[#{method}][]"} ) <<
     
@@ -161,8 +162,9 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     alt_content_tag :tbody, :class => "nested editor", :name => name do
       #alt_content_tag :tbody do
       
-        old_after_init_edit = @after_init_edit
-        @after_init_edit = ""
+        #old_after_init_edit = @after_init_edit
+        #@after_init_edit = ""
+        @after_init_edit << "FT.for_each_row(tr,tr_edit,'.#{singular}','.#{singular}',function(tr,tr_edit,i){"
   
         # This FormBuilder expects 'tr' to refer to a TR that represents and object and contains
         # TDs representing the object's attributes. For nested objects, the TR is a child of the
@@ -175,8 +177,11 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
           "for(var i=0; i<nested_rows.length; i++){" << 
             "var tr=nested_rows[i];"
         )
-        fields_for method, nil, *args do |f|
-          alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_'+i+'" do
+        fields_for method, nil, options.merge(:name => "#{name}['+i+']") do |f|
+          alt_content_tag :tr,
+            :class => "nested-row #{singular}",
+            :id => "#{method.to_s.singularize}_'+i+'",
+            :name => "#{name}['+i+']" do
             alt_content_tag :td, :class => "hidden" do
               safe_concat f.hidden_field :id
               #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
@@ -191,13 +196,17 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
             end
           end
         end
-        safe_concat code( "}})(tr);" ) 
+        safe_concat code("}})(tr);")
         
+        
+        @after_init_edit << "});"
+=begin
         if @after_init_edit.empty?
           @after_init_edit = old_after_init_edit
         else
-          @after_init_edit = old_after_init_edit + "FT.for_each_row(tr,tr_edit,'*[attr=\"#{attr_name}\"] .row','*[name=\"#{name}\"] .row',function(tr,tr_edit){#{@after_init_edit}});"
+          @after_init_edit = old_after_init_edit + "FT.for_each_row(tr,tr_edit,'*[attr=\"#{attr_name}\"] .row','*[name=\"#{name}\"] .row',function(tr,tr_edit,i){#{@after_init_edit}});"
         end
+=end
         
       #end
     end

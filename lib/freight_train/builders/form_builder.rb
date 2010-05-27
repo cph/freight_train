@@ -61,6 +61,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     content = "<!--#{@object.class}-->"
     if obj.is_a? Array
       options[:name] = "#{@object_name}[#{method}][]"
+      options["data-attr"] = method
       #options[:id] = options[:name].underscore
       for value in obj
         value.nil? ? options.delete(:value) : (options[:value] = value)
@@ -68,6 +69,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
       end
     else
       options[:name] = "#{@object_name}[#{method}]"
+      options["data-attr"] = method
       # options[:id] = options[:name].underscore
       obj = obj.to_s
       obj.blank? ? options.delete(:value) : (options[:value] = obj)
@@ -93,10 +95,10 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     i = 0
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
     alt_content_tag :table, :class => "nested editor", :name => name do
-      nested_fields_for method, *args do |f|
+      fields_for method, *args do |f|
         alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_#{i}" do
           alt_content_tag :td, :class => "hidden" do
-            safe_concat f.hidden_field :id
+            safe_concat f.hidden_field :id #, "data-attr" => :id
             #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
             safe_concat f.static_field :_destroy, 0
           end
@@ -155,11 +157,12 @@ protected
   
 private
 
-
+=begin
   def nested_fields_for(method_or_object, *args, &block)
     args << {:builder => FreightTrain::Builders::NestedFormBuilderWrapper}
     fields_for(method_or_object, *args, &block)    
   end
+=end
 
 
 end
