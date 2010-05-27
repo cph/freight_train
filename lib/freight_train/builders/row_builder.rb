@@ -63,7 +63,7 @@ class FreightTrain::Builders::RowBuilder
     css = options[:hidden] ? "nested hidden" : "nested"
     
     alt_content_tag :table, :class => css do
-      alt_content_tag :tbody, :attr => "#{@object_name}[#{method}]" do
+      alt_content_tag :tbody, :attr => "#{@object_name}[#{method}_attributes]" do
         i = 0
         children = @record.send method
         for child in children

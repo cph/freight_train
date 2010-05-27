@@ -304,12 +304,15 @@ var FT = (function(){
     },
     add_nested_object: function(sender) {
       var tr = $(sender).up('.nested-row'); if(!tr) { alert('FT.add_nested_object: .nested-row not found'); return; }
-      var table = tr.up('.nested'); if(!table) { alert('FT.add_nested_object .nested not found'); return; }
+      var table = tr.parentNode; if(!table) { alert('FT.add_nested_object .nested not found'); return; }
+      var n = table.childNodes.length;
+      
       var new_tr = tr.cloneNode(true);
       new_tr.id = tr.id.replace(/(\d+)$/, function(fullMatch, n) { return (Number(n)+1); });
+      new_tr.writeAttribute('name', new_tr.readAttribute('name').gsub(/[(\d+)]/, n));
       table.appendChild(new_tr);
          
-      var name = tr.readAttribute('name');
+      var name = new_tr.readAttribute('name');
       var _destroy = new_tr.down('[name="'+name+'[_destroy]"]');
       if(_destroy) _destroy.value = 0;
       var id = new_tr.down('[name="'+name+'[id]"]');
@@ -324,6 +327,7 @@ var FT = (function(){
       var name = tr.readAttribute('name');
       
       var id = tr.down('[name="'+name+'[id]"]');
+//    debugger;
       if(id && (id.value == '')) {
         tr.remove();
       }
@@ -349,7 +353,7 @@ var FT = (function(){
       selector('.nested.editor').each(FT.reset_add_remove_for);
     },
     reset_add_remove_for: function(table) {
-      var reset_nested_row = function(row,object_name,i,delete_visibility,add_visibility) {
+      var reset_nested_row = function(row,i,delete_visibility,add_visibility) {
         row.select('input, textarea, select').each(function(e) {
           //e.writeAttribute('name',object_name+'['+i+']['+e.id+']');
           e.writeAttribute('name', e.readAttribute('name').gsub(/[(\d+)]/, i));
@@ -360,17 +364,18 @@ var FT = (function(){
         if(add_link) add_link.setStyle({visibility:add_visibility});
       };
  
-      var object_name=table.readAttribute('name');
+      // var object_name=table.childNodes[0].readAttribute('name');
       var rows=table.select('.nested-row');
-      var n=rows.length-1;
+      var undeleted_rows=rows.findAll(Element.visible);
+      var n=undeleted_rows.length-1;
       if(n>0) {
         for(var i=0; i<n; i++) {
-          reset_nested_row(rows[i],object_name,i,'visible','hidden');
+          reset_nested_row(rows[i],i,'visible','hidden');
         }
-        reset_nested_row(rows[n],object_name,n,'visible','visible');
+        reset_nested_row(rows[n],n,'visible','visible');
       }
       else if(n==0) {
-        reset_nested_row(rows[0],object_name,0,'hidden','visible');
+        reset_nested_row(rows[0],0,'hidden','visible');
       }
  
       observer.fire('after_reset_nested',table);
@@ -381,6 +386,7 @@ var FT = (function(){
     for_each_row: function(root_tr,root_tr_edit,root_tr_selector,root_tr_edit_selector,fn) {
       var nested_rows=root_tr.select(root_tr_selector);
       var nested_editor_rows=root_tr_edit.select(root_tr_edit_selector);
+      //debugger;
       //if(nested_rows.length == 0) {
       
         // We need to have at least one row with default values

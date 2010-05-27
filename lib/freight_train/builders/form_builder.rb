@@ -16,6 +16,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
 
   # override: do arrays like attributes  
   def fields_for(method_or_object, *args, &block)
+    options = args.extract_options!
     #@template.concat "<!-- #{args.extract_options![:builder]} -->"
     if @object
       case method_or_object
@@ -24,13 +25,13 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
         if object.is_a? Array
           #@template.concat "<!-- array -->"
           (0...object.length).each do |i|
-            name = "#{@object_name}[#{method_or_object}_attributes][#{i}]"
-            @template.fields_for(name, object[i], *args, &block)
+            name = options[:name] || "#{@object_name}[#{method_or_object}_attributes][#{i}]"
+            @template.fields_for(name, object[i], options, &block)
           end
         else
-          name = method_or_object
+          name = options[:name] || method_or_object
           #@template.concat "<!-- else -->"
-          super(name, object, *args, &block)
+          super(name, object, options, &block)
         end 
         return
       end
@@ -94,23 +95,26 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
   
     i = 0
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-    alt_content_tag :table, :class => "nested editor", :name => name do
-      fields_for method, *args do |f|
-        alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_#{i}" do
-          alt_content_tag :td, :class => "hidden" do
-            safe_concat f.hidden_field :id #, "data-attr" => :id
-            #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
-            safe_concat f.static_field :_destroy, 0
+    alt_content_tag :table, :class => "nested editor" do
+      alt_content_tag :tbody, :attr => name do
+        name = "#{@object_name}[#{method}_attributes][#{i}]"
+        fields_for method, :name => name do |f|
+          alt_content_tag :tr, :class => "nested-row #{singular}", :id => "#{method.to_s.singularize}_#{i}", :name => name do
+            alt_content_tag :td, :class => "hidden" do
+              safe_concat f.hidden_field :id #, "data-attr" => :id
+              #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
+              safe_concat f.static_field :_destroy, 0
+            end
+            yield f
+            alt_content_tag :td, :class => "delete-nested" do
+              safe_concat "<a class=\"delete-link\" title=\"Delete\" href=\"#\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
+            end
+            alt_content_tag :td, :class => "add-nested" do
+              safe_concat "<a class=\"add-link\" title=\"Add\" href=\"#\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
+            end
           end
-          yield f
-          alt_content_tag :td, :class => "delete-nested" do
-            safe_concat "<a class=\"delete-link\" title=\"Delete\" href=\"#\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
-          end
-          alt_content_tag :td, :class => "add-nested" do
-            safe_concat "<a class=\"add-link\" title=\"Add\" href=\"#\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
-          end
+          i += 1
         end
-        i += 1
       end
     end
 =begin

@@ -172,7 +172,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
         # preserving the reference to the root TR.
         safe_concat code(
           "(function(root_tr){" <<
-          "var nested_rows=root_tr.select('*[attr=\"#{attr_name}\"] .#{singular}');" <<
+          "var nested_rows=root_tr.select('*[attr=\"#{name}\"] .#{singular}');" <<
           #"alert('#{attr_name}: '+nested_rows.length);" <<
           "for(var i=0; i<nested_rows.length; i++){" << 
             "var tr=nested_rows[i];"
