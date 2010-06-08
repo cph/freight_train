@@ -77,6 +77,7 @@ var FT = (function(){
   document.observe('dom:loaded', function() {
     // need to wrap document.body in $() so that it works on IE
     $(document.body).observe('ft:destroy', function(event) {
+      InlineEditor.close();
       var e = event.element();
       if(e) e.remove();
       FT.restripe_rows();
