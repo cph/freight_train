@@ -1,4 +1,5 @@
 class FreightTrain::Responder < ActionController::Responder
+  include FreightTrain::Helpers::FormattingHelper
   
   
   # methods in FreightTrain::Core
@@ -42,7 +43,11 @@ protected
       if destroyed
         remove_deleted resource
       else
-        show_error "Unable to destroy #{resource}"
+        if resource.errors.empty?
+          show_error "Unable to destroy #{resource.class.downcase}."
+        else
+          show_error format_errors(resource)
+        end
       end
     rescue
       show_error "#{$!}"

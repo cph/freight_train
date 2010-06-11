@@ -16,6 +16,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
 
   # override: do arrays like attributes  
   def fields_for(method_or_object, *args, &block)
+    options = args.extract_options!
     #@template.concat "<!-- #{args.extract_options![:builder]} -->"
     if @object
       case method_or_object
@@ -28,7 +29,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
             @template.fields_for(name, object[i], *args, &block)
           end).join
         else
-          name = method_or_object
+          name = options[:name] || method_or_object
           #@template.concat "<!-- else -->"
           return super(name, object, *args, &block)
         end
@@ -55,19 +56,24 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     end
  
     options[:type] = "hidden"
-    options[:id] = method
  
     content = ""
     content = "<!--#{@object.class}-->"
     if obj.is_a? Array
       options[:name] = "#{@object_name}[#{method}][]"
+      options["data-attr"] = method
+      #options[:id] = options[:name].underscore
       for value in obj
-      options[:value] = value
-      content << @template.tag( "input", options )
+        value.nil? ? options.delete(:value) : (options[:value] = value)
+        content << @template.tag( "input", options )
       end
     else
       options[:name] = "#{@object_name}[#{method}]"
-      options[:value] = obj ? "#{obj}" : ""
+      options["data-attr"] = method
+      # options[:id] = options[:name].underscore
+      obj = obj.to_s
+      obj.blank? ? options.delete(:value) : (options[:value] = obj)
+      # options[:value] = obj ? "#{obj}" : ""
       content << @template.tag( "input", options )
     end
     raw content
@@ -139,10 +145,10 @@ protected
         end
         yield f
         alt_content_tag :td, :class => "delete-nested" do
-          safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
+          safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
         end
         alt_content_tag :td, :class => "add-nested" do
-          safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
+          safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
         end
       end
     end
@@ -152,11 +158,12 @@ protected
   
 private
 
-
+=begin
   def nested_fields_for(method_or_object, *args, &block)
     args << {:builder => FreightTrain::Builders::NestedFormBuilderWrapper}
     fields_for(method_or_object, *args, &block)    
   end
+=end
 
 
 end

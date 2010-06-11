@@ -77,7 +77,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
   def collection_select(method, collection, value_method, text_method, options = {}, html_options = {})
     attr_name = "#{@object_name}[#{method}]"
-    @after_init_edit << "FT.copy_selected_value(tr,tr_edit,'#{attr_name}','#{method}');"
+    @after_init_edit << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
 
     html_options[:id] = method unless html_options[:id]
     html_options[:name] = attr_name
@@ -108,8 +108,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
   def static_field( method, value )
     @template.tag( "input", {
-      :id => method,
-      :class => "field",
+#     :id => method,
+#     :class => "field",
       :type=>"hidden",
       :value=>value,
       :name=>"#{@object_name}[#{method}]"} )
@@ -126,8 +126,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
       
       @template.tag( "input", {
         :type=>"hidden",
-        :class => "field",
-        :id => method,
+#       :class => "field",
+#       :id => method,
         :value=>"'+e[0].readAttribute('value')+'",
         :name=>"#{@object_name}[#{method}]"} ) <<
       
@@ -138,8 +138,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     
       @template.tag( "input", {
         :type=>"hidden",        
-        :class => "field",
-        :id => method,
+#       :class => "field",
+#       :id => method,
         :value=>"'+e[i].readAttribute('value')+'",
         :name=>"#{@object_name}[#{method}][]"} ) <<
     
@@ -163,8 +163,9 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     alt_content_tag :tbody, :class => "nested editor", :name => name do
       #alt_content_tag :tbody do
       
-        old_after_init_edit = @after_init_edit
-        @after_init_edit = ""
+        #old_after_init_edit = @after_init_edit
+        #@after_init_edit = ""
+        @after_init_edit << "FT.for_each_row(tr,tr_edit,'.#{singular}','.#{singular}',function(tr,tr_edit,i){"
   
         # This FormBuilder expects 'tr' to refer to a TR that represents and object and contains
         # TDs representing the object's attributes. For nested objects, the TR is a child of the
@@ -172,7 +173,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
         # preserving the reference to the root TR.
         html = code(
           "(function(root_tr){" <<
-          "var nested_rows=root_tr.select('*[attr=\"#{attr_name}\"] .#{singular}');" <<
+          "var nested_rows=root_tr.select('*[attr=\"#{name}\"] .#{singular}');" <<
           #"alert('#{attr_name}: '+nested_rows.length);" <<
           "for(var i=0; i<nested_rows.length; i++){" << 
             "var tr=nested_rows[i];"
@@ -196,11 +197,14 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
         end) <<
         code( "}})(tr);" )
         
+        @after_init_edit << "});"
+=begin
         if @after_init_edit.empty?
           @after_init_edit = old_after_init_edit
         else
-          @after_init_edit = old_after_init_edit + "FT.for_each_row(tr,tr_edit,'*[attr=\"#{attr_name}\"] .row','*[name=\"#{name}\"] .row',function(tr,tr_edit){#{@after_init_edit}});"
+          @after_init_edit = old_after_init_edit + "FT.for_each_row(tr,tr_edit,'*[attr=\"#{attr_name}\"] .row','*[name=\"#{name}\"] .row',function(tr,tr_edit,i){#{@after_init_edit}});"
         end
+=end
         
         html
         
