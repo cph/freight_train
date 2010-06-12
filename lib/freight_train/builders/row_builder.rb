@@ -60,9 +60,10 @@ class FreightTrain::Builders::RowBuilder
     singular = method.to_s.singularize
     options = args.extract_options!  
     css = options[:hidden] ? "nested hidden" : "nested"
+    name = "#{@object_name}[#{method}_attributes]"
     
     raw(alt_content_tag(:table, :class => css) do
-      alt_content_tag(:tbody, :attr => "#{@object_name}[#{method}]") do
+      alt_content_tag(:tbody, :attr => name) do
         i = -1
         children = @record.send method
         children.collect {|child|
@@ -75,7 +76,7 @@ class FreightTrain::Builders::RowBuilder
           klass = temp.join(" ")
           
           alt_content_tag(:tr, :id => "#{singular}_#{i}", :class => klass) do
-            f = @@default_row_builder.new(@template, "#{@object_name}[#{method}]", child)
+            f = @@default_row_builder.new(@template, name, child)
             alt_content_tag(:td, (f.hidden_field :id), :class => "hidden", :style => "display:none;") <<
             capture(f, &block)
           end
