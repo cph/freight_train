@@ -333,8 +333,9 @@ var FT = (function(){
         tr.remove();
       }
       else {
-        var _destroy = tr.down('[name="'+name+'[_destroy]"]');
-        if(_destroy) _destroy.value = 1;
+//      alert(name);
+        var _destroy = tr.down('[data-attr="_destroy"]');
+        _destroy.value = 1;
         tr.hide();
       }
       FT.reset_add_remove_for(table);
@@ -366,8 +367,13 @@ var FT = (function(){
       };
  
       var object_name=table.readAttribute('name');
-      var rows=table.select('.nested-row').reject(function(tr) {var _destroy; return ((_destroy=tr.down('#_destroy')) && (_destroy.value==1));});
+      var rows=table.select('.nested-row').reject(function(tr) {
+        var _destroy = tr.down('[data-attr="_destroy"]');
+//        alert(_destroy.value);
+        return (_destroy.value=='1');
+      });
       var n=rows.length-1;
+//    alert(rows.length);
       if(n>0) {
         for(var i=0; i<n; i++) {
           reset_nested_row(rows[i],i,'visible','hidden');
