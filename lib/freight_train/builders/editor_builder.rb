@@ -166,6 +166,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
     alt_content_tag(:table, :class => "nested editor") do
       alt_content_tag(:tbody, :name => name) do
+        name = "#{@object_name}[#{method}_attributes]['+i+']"
     
         #old_after_init_edit = @after_init_edit
         #@after_init_edit = ""
@@ -177,7 +178,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
         # preserving the reference to the root TR.
         html = code(
           "(function(root_tr){" <<
-          "var nested_rows=root_tr.select('*[attr=\"#{name}\"] .#{singular}');" <<
+          "var nested_rows=root_tr.select('.#{singular}');" <<
           #"alert('#{attr_name}: '+nested_rows.length);" <<
           "for(var i=0; i<nested_rows.length; i++){" << 
             "var tr=nested_rows[i];"
@@ -211,6 +212,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
         end
 =end
       
+        puts html
         html
       
       end

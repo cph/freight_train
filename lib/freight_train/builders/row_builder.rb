@@ -68,6 +68,7 @@ class FreightTrain::Builders::RowBuilder
         children = @record.send method
         children.collect {|child|
           i += 1
+          name = "#{@object_name}[#{method}_attributes][#{i}]"
           
           klass = options[:class]
           klass = klass.call(child) if klass.is_a?(Proc)
@@ -75,7 +76,7 @@ class FreightTrain::Builders::RowBuilder
           temp << klass if klass
           klass = temp.join(" ")
           
-          alt_content_tag(:tr, :id => "#{singular}_#{i}", :class => klass) do
+          alt_content_tag(:tr, :id => "#{singular}_#{i}", :class => klass, :name => name) do
             f = @@default_row_builder.new(@template, name, child)
             alt_content_tag(:td, (f.hidden_field :id), :class => "hidden", :style => "display:none;") <<
             capture(f, &block)
