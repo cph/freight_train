@@ -7,6 +7,8 @@ class FreightTrain::Builders::RowBuilder
   @@default_row_builder = FreightTrain::Builders::RowBuilder
   def self.default_row_builder; @@default_row_builder; end
   def self.default_row_builder=(val); @@default_row_builder=val; end
+  
+  attr_reader :object, :object_name, :record
 
 
   def initialize(template, object_name, record)
