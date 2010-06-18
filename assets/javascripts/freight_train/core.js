@@ -139,7 +139,7 @@ var FT = (function(){
         _hookup_row(model, row);
     },
     destroy: function(msg,id,path) {
-      if(confirm(msg)) {
+      if(!msg || confirm(msg)) {
         render_deleted(id);
         FT.xhr(path,'delete');
         return true;

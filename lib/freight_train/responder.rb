@@ -44,7 +44,7 @@ protected
         remove_deleted resource
       else
         if resource.errors.empty?
-          show_error "Unable to destroy #{resource.class.downcase}."
+          show_error "Unable to destroy #{resource.class.name.downcase}."
         else
           show_error format_errors(resource)
         end

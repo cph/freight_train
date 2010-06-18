@@ -3,10 +3,12 @@ module FreightTrain::Helpers::RowHelper
   
   # delegate :concat, :alt_content_tag, :fields_for, :to => :@template
 
-
+  attr_reader :model_name # !HACK!
+  
   def row_for(record, *args, &block)
     options = args.extract_options!
     singular = record.class.name.tableize.singularize
+#    model_name = instance_variable_get("@model_name") # !HACK!
     
     if @update_row
       row_guts_for(record, options, &block)
@@ -65,7 +67,7 @@ private
     #"<a class=\"delete-command\" href=\"javascript:Generated.delete_item(#{record.id});\">delete</a>"
     # use onclick so that event stops bubbling
     #"<a class=\"delete-command\" href=\"#\" onclick=\"Generated.delete_item(#{record.id});\">delete</a>"
-    "<a class=\"delete-command\" href=\"#\" onclick=\"Event.stop(event); FT.#{record.class.name}.destroy(#{record.id});\">delete</a>"
+    "<a class=\"delete-command\" href=\"#\" onclick=\"Event.stop(event); FT.#{model_name}.destroy(#{record.id});\">delete</a>"
   end
 
 

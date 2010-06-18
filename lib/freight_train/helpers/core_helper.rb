@@ -25,10 +25,12 @@ module FreightTrain::Helpers::CoreHelper
     
     def creator(*args, &block)
       raise ArgumentError, "Missing block" unless block_given?
-      new_record = args.first || @template.instance_variable_get("@#{@sym}")
+      if args.empty?
+        args = [@template.instance_variable_get("@#{@sym}") || @sym]
+      end
       
       alt_content_tag :tr, :id => "add_row", :class => "row editor new" do
-        fields_for new_record, &block
+        fields_for *args, &block
       end
       #@template.concat "<tr id=\"add_row\" class=\"row editor new\">"
       #@template.fields_for new_record, &block
@@ -118,13 +120,14 @@ private
     FreightTrain.tags = tags
     
     options = args.extract_options!    
-    table_name = args.last.to_s
-    raise ArgumentError, "Missing table name" if table_name.blank?
-    model_name = table_name.classify
-    instance_name = table_name.singularize
+    collection_name = args.last.to_s
+    raise ArgumentError, "Missing collection name" if collection_name.blank?
+    model_name = collection_name.classify
+    @template.instance_variable_set("@model_name", model_name) # !HACK!
+    instance_name = collection_name.singularize
     partial = options[:partial] || instance_name
     
-    records = instance_variable_get "@#{table_name}"
+    records = instance_variable_get "@#{collection_name}"
     path = options[:path] || polymorphic_path(args)
 
     # put everything inside a form
@@ -141,7 +144,7 @@ private
       alt_content_tag :thead do
         yield ListBuilder.new(instance_name, self, options) if block_given?
       end
-      alt_content_tag :tbody, :id => table_name do
+      alt_content_tag :tbody, :id => collection_name do
         safe_concat render(:partial => partial, :collection => records) unless !records or (records.length==0)
       end
     end
@@ -154,7 +157,7 @@ private
     end
 
     # generate javascript
-    make_interactive path, table_name, options 
+    make_interactive path, collection_name, options 
   end
 
 

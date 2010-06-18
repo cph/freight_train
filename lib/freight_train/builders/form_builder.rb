@@ -47,7 +47,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     case method_or_object
     when String, Symbol
       method = method_or_object
-      obj = @object.send method
+      obj = @object ? @object.send(method) : nil
     when Array
       obj = method_or_object
       method = ActionController::RecordIdentifier.singular_class_name(obj.first)
@@ -63,7 +63,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     if obj.is_a? Array
       options[:name] = "#{@object_name}[#{method}][]"
       options["data-attr"] = method
-      #options[:id] = options[:name].underscore
+      options[:id] = options[:name].parameterize.underscore
       for value in obj
         value.nil? ? options.delete(:value) : (options[:value] = value)
         content << @template.tag( "input", options )
@@ -71,7 +71,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     else
       options[:name] = "#{@object_name}[#{method}]"
       options["data-attr"] = method
-      # options[:id] = options[:name].underscore
+      options[:id] = options[:name].parameterize.underscore
       obj = obj.to_s
       obj.blank? ? options.delete(:value) : (options[:value] = obj)
       # options[:value] = obj ? "#{obj}" : ""
