@@ -2,7 +2,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
   attr_reader :object
   
   
-  delegate :capture, :raw, :alt_content_tag, :alt_tag, :to => :@template
+  delegate :capture, :raw, :raw_or_concat, :alt_content_tag, :alt_tag, :to => :@template
 
 
   def check_list_for( method, values, &block )
@@ -94,7 +94,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
   
     i = 0
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-    alt_content_tag(:table, :class => "nested editor") do
+    raw_or_concat(alt_content_tag(:table, :class => "nested editor") {
       alt_content_tag(:tbody, :attr => name) do
         name = "#{@object_name}[#{method}_attributes][#{i}]"
 #       nested_fields_for(method, *args) do |f|
@@ -118,7 +118,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
           html
         end
       end
-    end
+    })
 =begin
     @template.safe_concat "<table class=\"nested editor\" name=\"#{@object_name}[#{object_name.to_s}_attributes]\">"
     nested_fields_for object_name, *args do |f|
