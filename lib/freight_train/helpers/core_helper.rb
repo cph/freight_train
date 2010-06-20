@@ -115,6 +115,9 @@ module FreightTrain::Helpers::CoreHelper
 private
 
 
+  # 
+  # one rule about this is that 'collection_name' must be the same as 'table_name'
+  #
   def ft_generate_html(tags, *args, &block)
     # todo: pass these tags as a parameter; don't rely on ugly globals
     FreightTrain.tags = tags
@@ -123,7 +126,6 @@ private
     collection_name = args.last.to_s
     raise ArgumentError, "Missing collection name" if collection_name.blank?
     model_name = collection_name.classify
-    @template.instance_variable_set("@model_name", model_name) # !HACK!
     instance_name = collection_name.singularize
     partial = options[:partial] || instance_name
     
@@ -135,9 +137,6 @@ private
     safe_concat "<form class=\"freight_train\" model=\"#{model_name}\" action=\"#{path}\" method=\"get\">"
     safe_concat "<input name=\"#{request_forgery_protection_token}\" type=\"hidden\" value=\"#{escape_javascript(form_authenticity_token)}\"/>\n"
     safe_concat "<input name=\"ft[partial]\" type=\"hidden\" value=\"#{partial}\"/>\n"
-    # safe_concat "<input name=\"originating_controller\" type=\"hidden\" value=\"#{controller_name}\"/>\n"
-    
-    #if( options[:partial] )
 
     # table
     alt_content_tag :table, :class => "list" do
