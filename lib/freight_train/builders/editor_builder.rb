@@ -234,6 +234,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
       "html += e.innerHTML;"
     )
   end
+  alias :text_of :text
 
 
   # assign value after creation of control

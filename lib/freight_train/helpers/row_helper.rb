@@ -22,7 +22,7 @@ module FreightTrain::Helpers::RowHelper
       css << "alt" if !alt
       css << options[:class] if options[:class]
  
-      alt_content_tag :tr, :class => css.join(" "), :id => idof(record) do
+      alt_content_tag :tr, :class => css.join(" "), :id => idof(record), :name => singular do
         row_guts_for(record, options, &block)
       end
     end
