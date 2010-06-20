@@ -2,7 +2,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
   attr_reader :object
   
   
-  delegate :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
+  delegate :capture, :raw, :alt_content_tag, :alt_tag, :to => :@template
 
 
   def check_list_for( method, values, &block )
@@ -24,16 +24,15 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
         object = @object.send method_or_object
         if object.is_a? Array
           #@template.concat "<!-- array -->"
-          (0...object.length).each do |i|
+          return ((0...object.length).collect do |i|
             name = options[:name] || "#{@object_name}[#{method_or_object}_attributes][#{i}]"
-            @template.fields_for(name, object[i], options, &block)
-          end
+            @template.fields_for(name, object[i], *args, &block)
+          end).join
         else
           name = options[:name] || method_or_object
           #@template.concat "<!-- else -->"
-          super(name, object, options, &block)
-        end 
-        return
+          return super(name, object, *args, &block)
+        end
       end
     end
  
@@ -41,7 +40,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
   end
 
 
-  def hidden_field( method_or_object, *args )  
+  def hidden_field(method_or_object, *args)
     options = args.extract_options!
  
     case method_or_object
@@ -95,25 +94,28 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
   
     i = 0
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-    alt_content_tag :table, :class => "nested editor" do
-      alt_content_tag :tbody, :attr => name do
+    alt_content_tag(:table, :class => "nested editor") do
+      alt_content_tag(:tbody, :attr => name) do
         name = "#{@object_name}[#{method}_attributes][#{i}]"
+#       nested_fields_for(method, *args) do |f|
         fields_for method, :name => name do |f|
-          alt_content_tag :tr, :class => "nested-row #{singular}", :id => "#{method.to_s.singularize}_#{i}", :name => name do
-            alt_content_tag :td, :class => "hidden" do
-              safe_concat f.hidden_field :id #, "data-attr" => :id
+          name = "#{@object_name}[#{method}_attributes][#{i}]"
+          html = alt_content_tag(:tr, :class => "nested-row #{singular}", :id => "#{method.to_s.singularize}_#{i}", :name => name) {
+            alt_content_tag(:td, :class => "hidden") {
+              f.hidden_field(:id) <<
               #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
-              safe_concat f.static_field :_destroy, 0
-            end
-            yield f
-            alt_content_tag :td, :class => "delete-nested" do
-              safe_concat "<a class=\"delete-link\" title=\"Delete\" href=\"#\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
-            end
-            alt_content_tag :td, :class => "add-nested" do
-              safe_concat "<a class=\"add-link\" title=\"Add\" href=\"#\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
-            end
-          end
+              f.static_field(:_destroy, 0)
+            } <<
+            capture(f, &block) <<
+            alt_content_tag(:td, :class => "delete-nested") {
+              "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
+            } << 
+            alt_content_tag(:td, :class => "add-nested") {
+              "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
+            }
+          }
           i += 1
+          html
         end
       end
     end
@@ -123,9 +125,9 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
       @template.safe_concat "<tr id=\"#{object_name.to_s.singularize}_#{i}\" class=\"nested-row\">"
       block.call(f)
 
-      @template.safe_concat "<td><div class=\"delete-nested\"><a class=\"delete-link\" href=\"#\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a></div></td>"
-      @template.safe_concat "<td><div class=\"add-nested\"><a class=\"add-link\" href=\"#\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a></div></td>"
-      @template.safe_concat "</tr>"
+      "<td><div class=\"delete-nested\"><a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a></div></td>" <<
+      "<td><div class=\"add-nested\"><a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a></div></td>" <<
+      "</tr>" <<
       i += 1
     end
     @template.safe_concat "</table>"

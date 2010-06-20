@@ -1,57 +1,61 @@
 module FreightTrain::Helpers::PageScriptHelper
 
 
-  def make_interactive( path, table_name, options )
+  def make_interactive(path, table_name, options)
     options[:destroy] = true unless options.key?(:destroy)
 
-    safe_concat "<script type=\"text/javascript\">\n" << 
-           "//<![CDATA[\n"
+    html = "<script type=\"text/javascript\">\n" << 
+       "//<![CDATA[\n" <<
 
-           # create a namespace for record-specific functions
-    safe_concat "FT.#{table_name.classify}=(function(){\n" <<
-           "  var path='#{path}';\n" <<
-           "  var obsv=new Observer();\n" 
+       # create a namespace for record-specific functions
+       "FT.#{table_name.classify}=(function(){\n" <<
+       "  var path='#{path}';\n" <<
+       "  var obsv=new Observer();\n" 
 
     if @inline_editor
-      safe_concat "  var editor_writer=#{editor_writer_method(options)};\n"
-      safe_concat "  InlineEditor.observe('after_init',#{after_edit_method(options)});\n"
+      html << "  var editor_writer=#{editor_writer_method(options)};\n"
+      html << "  InlineEditor.observe('after_init',#{after_edit_method(options)});\n"
     end
 
-    safe_concat "  return {\n" <<
+      html << "  return {\n" <<
            "    path: function(){return path;},\n" <<
            "    observe: function(n,f){obsv.observe(n,f);},\n" <<
            "    unobserve: function(n,f){obsv.unobserve(n,f);},\n" <<
            "    update_in_place: function(property,id,value){FT.xhr((path+'/'+id+'/update_'+property),'put',('#{table_name.singularize}['+property+'='+value));},\n"
-    safe_concat "    #{destroy_method(table_name, options)},\n" if options[:destroy]
-    safe_concat "    #{hookup_row_method options}\n" <<
+      html << "    #{destroy_method(table_name, options)},\n" if options[:destroy]
+      html << "    #{hookup_row_method options}\n" <<
            "  };\n" <<
            "})();\n"
 
     # methods in global namespace
     if options[:reset_on_create] != :none
       options[:reset_on_create] = :all unless options[:reset_on_create].is_a?(Array)
-      safe_concat reset_on_create_method(table_name, options) << "\n"
+      html << reset_on_create_method(table_name, options) << "\n"
     end
 
-    safe_concat "//]]>\n" <<
+      html << "//]]>\n" <<
            "</script>\n"
     @already_defined = true
+    html
   end
 
 
   # move as much of this as possible to core.js
   def ft_init(options={})
-    unless @already_initialized
-      safe_concat "<script type=\"text/javascript\">\n" << 
-             "//<![CDATA[\n" <<
-             "FT.init({"
-      # options go here
-      safe_concat   "token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}')" <<
-             "});\n" <<
-             "//]]>\n" <<
-             "</script>\n"
+    if @already_initialized
+      return ""
+    else
       @already_initialized = true
     end
+    <<-HTML
+    <script type="text/javascript">
+      //<![CDATA[
+      FT.init({
+        token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}')
+      });
+      //]]>
+    </script>
+    HTML
   end
 
 
@@ -85,7 +89,7 @@ private
   def reset_on_create_method( table_name, options )
     arg = options[:reset_on_create]
     content =  "FT.observe('created',function(){" <<
-                 "$$('form[model=\"#{table_name.classify}\"]').each(function(form){"
+                 "$$('form[data-model=\"#{table_name.classify}\"]').each(function(form){"
     if arg == :all
       content <<   "form.reset();"
     else

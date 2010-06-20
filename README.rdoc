@@ -121,7 +121,7 @@ Now, let's build an editor for our to-do list items. In `index.html.erb`, we'll 
     
 And we have to add one extra line to the bottom of the page (although I plan on refactoring and removing the need for this):
 
-    <% ft_init %>
+    
     
 Finally, FreightTrain supplies a JavaScript helper method to facilitate deleting records. That method is named `FT.#{Model Name}.destroy` (in our case `FT.ToDoItem.destroy`) and it accepts the numerical id of the object to destroy. You can call this method manually, or use a FreightTrain convenience parameter to scaffold a delete link. To scaffold the link, add `:commands => [:delete]` to `row_for` in the _to_do_item.html.erb partial so it looks like this:
 

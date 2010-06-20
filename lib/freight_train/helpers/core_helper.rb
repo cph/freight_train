@@ -5,21 +5,16 @@ module FreightTrain::Helpers::CoreHelper
 
     def initialize(sym, template, options)
       @sym, @template, @options = sym, template, options
+      @html = ""
     end
     
-    delegate :concat, :safe_concat, :raw, :alt_content_tag, :fields_for, :to => :@template
+    delegate :capture, :raw, :raw_or_concat, :alt_content_tag, :fields_for, :to => :@template
 
 
     def headings(*args, &block)
-      alt_content_tag :tr, :class => "row heading" do
-        if block_given?
-          yield
-        elsif args.length > 0
-          args.each {|heading| alt_content_tag(:th, heading)}
-        end
-        alt_content_tag :th
-      end
-      #@template.concat "<th></th></tr>\n"
+      headings = block_given? ? capture(&block) : args.collect{|heading| alt_content_tag(:th, heading)}.join
+      headings << alt_content_tag(:th)
+      alt_content_tag(:tr, headings, :class => "row heading")      
     end
     
     
@@ -29,12 +24,9 @@ module FreightTrain::Helpers::CoreHelper
         args = [@template.instance_variable_get("@#{@sym}") || @sym]
       end
       
-      alt_content_tag :tr, :id => "add_row", :class => "row editor new" do
+      raw_or_concat(alt_content_tag(:tr, :id => "add_row", :class => "row editor new") {
         fields_for *args, &block
-      end
-      #@template.concat "<tr id=\"add_row\" class=\"row editor new\">"
-      #@template.fields_for new_record, &block
-      #@template.concat "</tr>"
+      })
     end
     
     
@@ -42,15 +34,19 @@ module FreightTrain::Helpers::CoreHelper
       raise ArgumentError, "Missing block" unless block_given?
       options = args.extract_options!
       builder = FreightTrain::Builders::EditorBuilder.default_editor_builder
+      editor_builder = builder.new(@sym, nil, @template, options, block)
  
       #@after_init_edit = "" # if !@after_init_edit
       @template.instance_variable_set("@after_init_edit", "")
-      @template.instance_variable_set("@inline_editor", @template.capture do
-        yield (editor_builder = builder.new( @sym, nil, @template, options, block))
-        concat editor_builder.last_child
-      end)
+      @template.instance_variable_set("@inline_editor", capture(editor_builder, &block) + editor_builder.last_child)
       #@template.instance_variable_set("@after_init_edit", @after_init_edit)
+      "" # @inline_editor is saved for later; don't print it out here
     end
+    
+    
+    def to_s
+    end
+    
     
   end
 
@@ -96,13 +92,9 @@ module FreightTrain::Helpers::CoreHelper
   def alt_content_tag(name, *args, &block)
     options = args.extract_options!
     name = FreightTrain.tag(name)
-    safe_concat tag(name, options, true)
-    if block_given?
-      yield
-    elsif args.first
-      safe_concat args.first
-    end
-    safe_concat "</#{name}>"
+    content = block_given? ? capture(&block) : args.first
+    content_tag(name, content, options)
+    #content_tag(name, *args, &block)
   end
   
   
@@ -133,30 +125,33 @@ private
     path = options[:path] || polymorphic_path(args)
 
     # put everything inside a form
-    # todo: (re: model) supposed to start user-defined attributes with data-
-    safe_concat "<form class=\"freight_train\" model=\"#{model_name}\" action=\"#{path}\" method=\"get\">"
-    safe_concat "<input name=\"#{request_forgery_protection_token}\" type=\"hidden\" value=\"#{escape_javascript(form_authenticity_token)}\"/>\n"
-    safe_concat "<input name=\"ft[partial]\" type=\"hidden\" value=\"#{partial}\"/>\n"
-
-    # table
-    alt_content_tag :table, :class => "list" do
-      alt_content_tag :thead do
-        yield ListBuilder.new(instance_name, self, options) if block_given?
-      end
-      alt_content_tag :tbody, :id => collection_name do
-        safe_concat render(:partial => partial, :collection => records) unless !records or (records.length==0)
-      end
-    end
-    safe_concat "</form>\n"
+    raw_or_concat(
+      "<form class=\"freight_train\" data-model=\"#{model_name}\" action=\"#{path}\" method=\"get\">" <<
+      "<input name=\"#{request_forgery_protection_token}\" type=\"hidden\" value=\"#{escape_javascript(form_authenticity_token)}\"/>\n" <<
+      "<input name=\"ft[partial]\" type=\"hidden\" value=\"#{partial}\"/>\n" <<
     
-    if options[:paginate]
-      #concat "<tfoot>"
-      concat will_paginate(records).to_s
-      #concat "</tfoot>"
-    end
+      # table
+      alt_content_tag(:table, :class => "list") {
+=begin        
+        head = block_given? ? capture(ListBuilder.new(instance_name, self, options), &block) : ""
+        body = (records and !records.empty?) ? render(:partial => partial, :collection => records) : ""
+        alt_content_tag(:thead, head) <<
+        alt_content_tag(:body, body, :id => collection_name)
+=end
+        alt_content_tag(:thead) {
+          capture(ListBuilder.new(instance_name, self, options), &block) if block_given?
+        } <<
+        alt_content_tag(:tbody, :id => collection_name) {
+          render(:partial => partial, :collection => records) unless !records or records.empty?
+        }        
+      } <<
+      "</form>\n" <<
+    
+      "#{will_paginate(records) if options[:paginate]}" <<
 
-    # generate javascript
-    make_interactive path, collection_name, options 
+      # generate javascript
+      make_interactive(path, collection_name, options)
+    )
   end
 
 

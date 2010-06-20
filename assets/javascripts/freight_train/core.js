@@ -77,6 +77,7 @@ var FT = (function(){
   document.observe('dom:loaded', function() {
     // need to wrap document.body in $() so that it works on IE
     $(document.body).observe('ft:destroy', function(event) {
+      InlineEditor.close();
       var e = event.element();
       if(e) e.remove();
       FT.restripe_rows();
@@ -122,7 +123,7 @@ var FT = (function(){
     hookup: function() {
       $$('.freight_train').each(function(train) {
         FT.hookup_form(train);
-        var model_name = train.readAttribute('model')
+        var model_name = train.readAttribute('data-model')
         var model = FT[model_name];
         if(model && model.hookup_row)
           train.select('.row').each(function(row){_hookup_row(model,row);});
@@ -327,13 +328,12 @@ var FT = (function(){
       var name = tr.readAttribute('name');
       
       var id = tr.down('[name="'+name+'[id]"]');
-//    debugger;
       if(id && (id.value == '')) {
         tr.remove();
       }
       else {
-        var _destroy = tr.down('[name="'+name+'[_destroy]"]');
-        if(_destroy) _destroy.value = 1;
+        var _destroy = tr.down('[data-attr="_destroy"]');
+        _destroy.value = 1;
         tr.hide();
       }
       FT.reset_add_remove_for(table);
@@ -364,10 +364,12 @@ var FT = (function(){
         if(add_link) add_link.setStyle({visibility:add_visibility});
       };
  
-      // var object_name=table.childNodes[0].readAttribute('name');
-      var rows=table.select('.nested-row');
-      var undeleted_rows=rows.findAll(Element.visible);
-      var n=undeleted_rows.length-1;
+      var object_name=table.readAttribute('name');
+      var rows=table.select('.nested-row').reject(function(tr) {
+        var _destroy = tr.down('[data-attr="_destroy"]');
+        return (_destroy.value=='1');
+      });
+      var n=rows.length-1;
       if(n>0) {
         for(var i=0; i<n; i++) {
           reset_nested_row(rows[i],i,'visible','hidden');

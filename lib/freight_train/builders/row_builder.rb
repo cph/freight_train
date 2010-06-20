@@ -18,7 +18,7 @@ class FreightTrain::Builders::RowBuilder
   end
     
   
-  delegate :concat, :raw, :alt_content_tag, :fields_for, :to => :@template
+  delegate :capture, :raw, :alt_content_tag, :fields_for, :to => :@template
 
 
   def record
@@ -41,12 +41,11 @@ class FreightTrain::Builders::RowBuilder
   def fields_for(method, &block)
     value = @record.send method
     if value.is_a? Array
-      (0...value.length).each do |i|
-        #yield @@default_row_builder.new( @template, "#{@object_name}[#{method}][#{i}]", value[i] )
-        yield @@default_row_builder.new( @template, "#{@object_name}[#{method}]", value[i] )
-      end
+      raw ((0...value.length).collect {|i|
+        capture(@@default_row_builder.new(@template, "#{@object_name}[#{method}]", value[i]), &block)
+      }).join
     else
-      yield @@default_row_builder.new( @template, "#{@object_name}[#{method}]", value )
+      raw capture(@@default_row_builder.new(@template, "#{@object_name}[#{method}]", value), &block)
     end
   end
 
@@ -63,29 +62,30 @@ class FreightTrain::Builders::RowBuilder
     singular = method.to_s.singularize
     options = args.extract_options!  
     css = options[:hidden] ? "nested hidden" : "nested"
+    name = "#{@object_name}[#{method}_attributes]"
     
-    alt_content_tag :table, :class => css do
-      alt_content_tag :tbody, :attr => "#{@object_name}[#{method}_attributes]" do
-        i = 0
+    raw(alt_content_tag(:table, :class => css) do
+      alt_content_tag(:tbody, :attr => name) do
+        i = -1
         children = @record.send method
-        for child in children
+        children.collect {|child|
+          i += 1
+          name = "#{@object_name}[#{method}_attributes][#{i}]"
+          
           klass = options[:class]
           klass = klass.call(child) if klass.is_a?(Proc)
           temp = ["nested-row", singular]
           temp << klass if klass
           klass = temp.join(" ")
-          name = "#{@object_name}[#{method}_attributes][#{i}]"
-          alt_content_tag :tr, :id => "#{singular}_#{i}", :class => klass, :name => name do
+          
+          alt_content_tag(:tr, :id => "#{singular}_#{i}", :class => klass, :name => name) do
             f = @@default_row_builder.new(@template, name, child)
-            alt_content_tag :td, :class => "hidden", :style => "display:none;" do
-              concat f.hidden_field :id
-            end
-            yield f
+            alt_content_tag(:td, (f.hidden_field :id), :class => "hidden", :style => "display:none;") <<
+            capture(f, &block)
           end
-          i += 1
-        end
+        }.join
       end
-    end
+    end)
   end
 
 

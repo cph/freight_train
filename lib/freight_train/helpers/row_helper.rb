@@ -11,7 +11,7 @@ module FreightTrain::Helpers::RowHelper
     singular = record.class.name.tableize.singularize
     
     if @update_row
-      row_guts_for(record, options, &block)
+      raw_or_concat row_guts_for(record, options, &block)
     else
       css = ["row", singular]
       css.concat options[:disabled] ? ["disabled"] : ["interactive", "editable"]
@@ -22,9 +22,9 @@ module FreightTrain::Helpers::RowHelper
       css << "alt" if !alt
       css << options[:class] if options[:class]
  
-      alt_content_tag :tr, :class => css.join(" "), :id => idof(record), :name => singular do
+      raw_or_concat( alt_content_tag(:tr, :class => css.join(" "), :id => idof(record), :name => singular) {
         row_guts_for(record, options, &block)
-      end
+      })
     end
   end
 
@@ -52,14 +52,12 @@ private
 
   def row_guts_for(record, options, &block)
     name = ActionController::RecordIdentifier.singular_class_name(record)
-    yield FreightTrain::Builders::RowBuilder.default_row_builder.new(self, name, record)
+    capture(FreightTrain::Builders::RowBuilder.default_row_builder.new(self, name, record), &block) <<
 
     # IE7 doesn't support the CSS selector :last-child, therefore, we do this explicitly
-    #concat "<td>#{commands_for(record, options[:commands])}</td>"
-    #concat "  <td class=\"last-child\">#{commands_for(record, options[:commands])}</td>\n"
-    alt_content_tag :td, :class => "last-child" do
-      concat commands_for(record, options[:commands])
-    end
+    (alt_content_tag :td, :class => "last-child" do
+      commands_for(record, options[:commands])
+    end)
   end
 
 

@@ -9,11 +9,11 @@ require 'mime_responds' unless defined?(ActionController::Responder)
 
 
 module SafeHtmlHelper
-  def safe_concat(html)
-    concat html
-  end
   def raw(html)
     html
+  end
+  def raw_or_concat(html)
+    concat html
   end
 end
 

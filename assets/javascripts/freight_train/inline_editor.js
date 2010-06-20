@@ -24,7 +24,12 @@ var InlineEditor = (function(){
 
     // if you click a row, switch to its editor
     // TODO: add selection of rows using up and down arrows and toggling of row with space or enter
-    element.observe('click',function(event) {
+    element.observe('click', function(event) {
+      
+      // Ignore if a link or button was clicked
+      var tag = Event.findElement(event).tagName.toLowerCase();
+      if($A(['input', 'button', 'a']).member(tag))
+        return;
 
       // close any existing editors
       InlineEditor.close();

@@ -47,11 +47,12 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
   def initialize(object_name, object, template, options, proc)
     super
-    @after_init_edit = @template.instance_variable_get("@after_init_edit")
+    @after_init_edit = @template.instance_variable_get("@after_init_edit") || ""
   end
   
   
   # delegate :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
+  delegate :capture, :to => :@template
 
 
   def check_box(method, options={})
@@ -96,7 +97,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   def fields_for(method, *args, &block)
     options = args.extract_options!
     name = options[:name] || "#{@object_name}[#{method}]"
-    yield @@default_editor_builder.new(name, nil, @template, options, block)
+    #yield @@default_editor_builder.new( "#{@object_name}[#{method}]", nil, @template, options, block )
+    capture(@@default_editor_builder.new(name, nil, @template, options, block), &block)
   end
 
 
@@ -109,6 +111,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     @template.tag( "input", {
 #     :id => method,
 #     :class => "field",
+      'data-attr' => method,
       :type=>"hidden",
       :value=>value,
       :name=>"#{@object_name}[#{method}]"} )
@@ -127,6 +130,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
         :type=>"hidden",
 #       :class => "field",
 #       :id => method,
+        'data-attr' => method,
         :value=>"'+e[0].readAttribute('value')+'",
         :name=>"#{@object_name}[#{method}]"} ) <<
       
@@ -139,6 +143,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
         :type=>"hidden",        
 #       :class => "field",
 #       :id => method,
+        'data-attr' => method,
         :value=>"'+e[i].readAttribute('value')+'",
         :name=>"#{@object_name}[#{method}][]"} ) <<
     
@@ -159,46 +164,45 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     @template.instance_variable_set "@enable_nested_records", true
 
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-    alt_content_tag :tbody, :class => "nested editor", :name => name do
-      #alt_content_tag :tbody do
-      
+    alt_content_tag(:table, :class => "nested editor") do
+      alt_content_tag(:tbody, :name => name) do
+        name = "#{@object_name}[#{method}_attributes]['+i+']"
+    
         #old_after_init_edit = @after_init_edit
         #@after_init_edit = ""
         @after_init_edit << "FT.for_each_row(tr,tr_edit,'.#{singular}','.#{singular}',function(tr,tr_edit,i){"
-  
+
         # This FormBuilder expects 'tr' to refer to a TR that represents and object and contains
         # TDs representing the object's attributes. For nested objects, the TR is a child of the
         # root TR. Create a closure in which the variable 'tr' refers to the nested object while
         # preserving the reference to the root TR.
-        safe_concat code(
+        html = code(
           "(function(root_tr){" <<
-          "var nested_rows=root_tr.select('*[attr=\"#{name}\"] .#{singular}');" <<
+          "var nested_rows=root_tr.select('.#{singular}');" <<
           #"alert('#{attr_name}: '+nested_rows.length);" <<
           "for(var i=0; i<nested_rows.length; i++){" << 
             "var tr=nested_rows[i];"
-        )
-        fields_for method, nil, options.merge(:name => "#{name}['+i+']") do |f|
-          alt_content_tag :tr,
-            :class => "nested-row #{singular}",
-            :id => "#{method.to_s.singularize}_'+i+'",
-            :name => "#{name}['+i+']" do
-            alt_content_tag :td, :class => "hidden" do
-              safe_concat f.hidden_field :id
+        ) <<
+#       (fields_for method, nil, *args do |f|
+        (fields_for method, :name => name do |f|
+          alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_'+i+'", :name => name do
+            (alt_content_tag :td, :class => "hidden" do
+              (f.hidden_field :id) <<
               #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
-              safe_concat f.static_field :_destroy, 0
-            end
-            yield f
-            alt_content_tag :td, :class => "delete-nested" do
-              safe_concat "<a class=\"delete-link\" title=\"Delete\" href=\"#\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
-            end
-            alt_content_tag :td, :class => "add-nested" do
-              safe_concat "<a class=\"add-link\" title=\"Add\" href=\"#\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
-            end
+              (f.static_field :_destroy, 0)
+            end) <<
+            #(yield f) <<  # why is this a yield and not a capture?
+            capture(f, &block) <<
+            (alt_content_tag :td, :class => "delete-nested" do
+              "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
+            end) <<
+            (alt_content_tag :td, :class => "add-nested" do
+              "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
+            end)
           end
-        end
-        safe_concat code("}})(tr);")
-        
-        
+        end) <<
+        code( "}})(tr);" )
+      
         @after_init_edit << "});"
 =begin
         if @after_init_edit.empty?
@@ -207,8 +211,11 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
           @after_init_edit = old_after_init_edit + "FT.for_each_row(tr,tr_edit,'*[attr=\"#{attr_name}\"] .row','*[name=\"#{name}\"] .row',function(tr,tr_edit,i){#{@after_init_edit}});"
         end
 =end
-        
-      #end
+      
+        puts html
+        html
+      
+      end
     end
   end
 
@@ -268,13 +275,19 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   
   
   def last_child(&block)
-    @last_child = @template.capture(&block) if block_given?
-    
+    if block_given?
+      @last_child = @template.capture(&block)
+      return ""
+    else
+      alt_content_tag(:td, (@last_child || default_last_child), :class => "last-child")
+    end
+=begin
     name = FreightTrain.tag(:td)
     html = tag(name, {:class => "last-child"}, true)
     html << (@last_child || default_last_child )
     html << raw("</#{name}>")
     raw html
+=end
   end
 
   
@@ -282,8 +295,8 @@ private
 
 
   def default_last_child
-    raw '<button class="submit" name="commit" type="submit">Save</button>' +
-        '<button class="cancel" onclick="InlineEditor.close();return false;">Cancel</button>'    
+    '<button id="tag_submit" name="commit" type="submit">Save</button>' +
+    '<button onclick="InlineEditor.close();return false;">Cancel</button>'    
   end
 
 
