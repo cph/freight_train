@@ -194,10 +194,10 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
             #(yield f) <<  # why is this a yield and not a capture?
             capture(f, &block) <<
             (alt_content_tag :td, :class => "delete-nested" do
-              "<a class=\"delete-link\" href=\"#\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
+              "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
             end) <<
             (alt_content_tag :td, :class => "add-nested" do
-              "<a class=\"add-link\" href=\"#\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
+              "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
             end)
           end
         end) <<
