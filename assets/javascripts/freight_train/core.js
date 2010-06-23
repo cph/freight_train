@@ -313,12 +313,14 @@ var FT = (function(){
       new_tr.writeAttribute('name', new_tr.readAttribute('name').gsub(/[(\d+)]/, n));
       table.appendChild(new_tr);
          
-      var name = new_tr.readAttribute('name');
-      var _destroy = new_tr.down('[name="'+name+'[_destroy]"]');
+      //var name = new_tr.readAttribute('name');
+      //var _destroy = new_tr.down('[name="'+name+'[_destroy]"]');
+      var _destroy = new_tr.down('[data-attr="_destroy"]');
       if(_destroy) _destroy.value = 0;
-      var id = new_tr.down('[name="'+name+'[id]"]');
+      //var id = new_tr.down('[name="'+name+'[id]"]');
+      var id = new_tr.down('[data-attr="id"]');
       if(id) id.value = '';
-      
+            
       observer.fire('after_add_nested', [table,new_tr]);
       FT.reset_add_remove_for(table);
     },
@@ -327,18 +329,21 @@ var FT = (function(){
       var table = tr.up('.nested'); if(!table) return;      
       var name = tr.readAttribute('name');
       
-      var id = tr.down('[name="'+name+'[id]"]');
+      //var id = tr.down('[name="'+name+'[id]"]');
+      var id = tr.down('[data-attr="id"]');
       if(id && (id.value == '')) {
         tr.remove();
       }
       else {
-        var _destroy = tr.down('[data-attr="_destroy"]');
+        //var _destroy = tr.down('[data-attr="_destroy"]');
+          var _destroy = tr.down('[data-attr="_destroy"]');
         _destroy.value = 1;
         tr.hide();
       }
       FT.reset_add_remove_for(table);
     }, 
     reset_nested: function(table) {
+      table = $(table);
       if(table) {
         var nested = table.select('.nested-row');
         for(var i=1;i<nested.length;i++) {
@@ -349,7 +354,7 @@ var FT = (function(){
       }
     },
     reset_add_remove_for_all: function(parent) {
-      var selector = function(x){ return parent ? parent.select(x) : $$(x); };
+      var selector = function(x){ return parent ? $(parent).select(x) : $$(x); };
       selector('.nested.editor').each(FT.reset_add_remove_for);
     },
     reset_add_remove_for: function(table) {
