@@ -6,7 +6,10 @@ module FreightTrain::Helpers::CoreHelper
     def initialize(sym, template, options)
       @sym, @template, @options = sym, template, options
       @html = ""
+      @footer_html = ""
     end
+    
+    attr_reader :footer_html
     
     delegate :capture, :raw, :raw_or_concat, :alt_content_tag, :fields_for, :to => :@template
 
@@ -14,7 +17,14 @@ module FreightTrain::Helpers::CoreHelper
     def headings(*args, &block)
       headings = block_given? ? capture(&block) : args.collect{|heading| alt_content_tag(:th, heading)}.join
       headings << alt_content_tag(:th)
-      alt_content_tag(:tr, headings, :class => "row heading")      
+      output = alt_content_tag(:tr, headings, :class => "row heading")
+      raw_or_concat(output) if block_given?
+      output
+    end
+    
+    
+    def footer(*args, &block)
+      @footer_html = capture(&block)
     end
     
     
@@ -131,19 +141,26 @@ private
       "<input name=\"ft[partial]\" type=\"hidden\" value=\"#{partial}\"/>\n" <<
     
       # table
-      alt_content_tag(:table, :class => "list") {
+      alt_content_tag(:table, :class => "list #{options[:class]}") {
 =begin        
         head = block_given? ? capture(ListBuilder.new(instance_name, self, options), &block) : ""
         body = (records and !records.empty?) ? render(:partial => partial, :collection => records) : ""
         alt_content_tag(:thead, head) <<
         alt_content_tag(:body, body, :id => collection_name)
 =end
-        alt_content_tag(:thead) {
-          capture(ListBuilder.new(instance_name, self, options), &block) if block_given?
+        lb = ListBuilder.new(instance_name, self, options)
+        header = capture(lb, &block) if block_given?
+        footer = lb.footer_html
+        html = alt_content_tag(:thead) {
+          header
         } <<
         alt_content_tag(:tbody, :id => collection_name) {
           render(:partial => partial, :collection => records) unless !records or records.empty?
-        }        
+        }
+        html << alt_content_tag(:tfoot) {
+          footer
+        } if footer
+        html
       } <<
       "</form>\n" <<
     
