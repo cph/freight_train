@@ -8,9 +8,9 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   
   # TODO: Push this into a JavaScript library
   #   1. allow base class to generate controls
-  #      a. use @after_init_edit method to assign values to controls
+  #      a. use @after_init method to assign values to controls
   #      b. ** come up with mechanism to set field and id for nested values (or use another method to identify them) **
-  #   2. refactor to put @after_init_edit method into before- or after- filter
+  #   2. refactor to put @after_init method into before- or after- filter
   #      a. abstract value assignment for (e.g.) INPUT[TYPE="TEXT"] and SELECT and INPUT[TYPE="CHECKBOX"]
   #      b. call generic value assignment in before/after filters and push logic to core.js
   
@@ -47,12 +47,15 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
   def initialize(object_name, object, template, options, proc)
     super
-    @after_init_edit = @template.instance_variable_get("@after_init_edit") || ""
+    @after_init = ""
   end
   
   
   # delegate :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
   delegate :capture, :to => :@template
+  
+  
+  attr_reader :after_init
 
 
   def check_box(method, options={})
@@ -68,7 +71,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
   def check_list_for(method, values, &block)
     attr_name = "#{@object_name}[#{method}]"
-    @after_init_edit << "FT.check_selected_values(tr,tr_edit,'#{attr_name}');"
+    @after_init << "FT.check_selected_values(tr,tr_edit,'#{attr_name}');"
     for value in values
       yield FreightTrain::Builders::CheckListBuilder.new(attr_name, [], value, @template)
     end
@@ -77,7 +80,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
   def collection_select(method, collection, value_method, text_method, options = {}, html_options = {})
     attr_name = "#{@object_name}[#{method}]"
-    @after_init_edit << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
+    @after_init << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
 
     html_options[:id] = method unless html_options[:id]
     html_options[:name] = attr_name
@@ -97,8 +100,10 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   def fields_for(method, *args, &block)
     options = args.extract_options!
     name = options[:name] || "#{@object_name}[#{method}]"
-    #yield @@default_editor_builder.new( "#{@object_name}[#{method}]", nil, @template, options, block )
-    capture(@@default_editor_builder.new(name, nil, @template, options, block), &block)
+    editor = @@default_editor_builder.new(name, nil, @template, options, block)
+    html = capture(editor, &block)
+    @after_init << editor.after_init
+    html
   end
 
 
@@ -162,36 +167,31 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     name = "#{@object_name}[#{method}_attributes]"
     singular = method.to_s.singularize
     @template.instance_variable_set "@enable_nested_records", true
+    
+    @after_init << "FT.for_each_row(tr,tr_edit,'.#{singular}',function(tr,tr_edit,name){"
 
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-    alt_content_tag(:table, :class => "nested editor") do
+    html = alt_content_tag(:table, :class => "nested editor") {
       alt_content_tag(:tbody, :name => name) do
-        name = "#{@object_name}[#{method}_attributes]['+i+']"
+        # name = "#{@object_name}[#{method}_attributes]['+i+']"
+        name = "'+tr.readAttribute('name')+'";
     
-        #old_after_init_edit = @after_init_edit
-        #@after_init_edit = ""
-        @after_init_edit << "FT.for_each_row(tr,tr_edit,'.#{singular}','.#{singular}',function(tr,tr_edit,i){"
-
         # This FormBuilder expects 'tr' to refer to a TR that represents and object and contains
         # TDs representing the object's attributes. For nested objects, the TR is a child of the
         # root TR. Create a closure in which the variable 'tr' refers to the nested object while
         # preserving the reference to the root TR.
-        html = code(
+        code(
           "(function(root_tr){" <<
           "var nested_rows=root_tr.select('.#{singular}');" <<
-          #"alert('#{attr_name}: '+nested_rows.length);" <<
           "for(var i=0; i<nested_rows.length; i++){" << 
             "var tr=nested_rows[i];"
         ) <<
-#       (fields_for method, nil, *args do |f|
         (fields_for method, :name => name do |f|
-          alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_'+i+'", :name => name do
+          alt_content_tag :tr, :class => "nested-row #{singular}", :id => "#{method.to_s.singularize}_'+i+'", :name => name do
             (alt_content_tag :td, :class => "hidden" do
               (f.hidden_field :id) <<
-              #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
               (f.static_field :_destroy, 0)
             end) <<
-            #(yield f) <<  # why is this a yield and not a capture?
             capture(f, &block) <<
             (alt_content_tag :td, :class => "delete-nested" do
               "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
@@ -202,28 +202,19 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
           end
         end) <<
         code( "}})(tr);" )
-      
-        @after_init_edit << "});"
-=begin
-        if @after_init_edit.empty?
-          @after_init_edit = old_after_init_edit
-        else
-          @after_init_edit = old_after_init_edit + "FT.for_each_row(tr,tr_edit,'*[attr=\"#{attr_name}\"] .row','*[name=\"#{name}\"] .row',function(tr,tr_edit,i){#{@after_init_edit}});"
-        end
-=end
-      
-        puts html
-        html
-      
       end
-    end
+    }
+    
+    @after_init << "});"
+    
+    raw_or_concat(html)
   end
 
 
 
   def select(method, choices, options = {}, html_options = {})
     attr_name = "#{@object_name}[#{method}]"
-    @after_init_edit <<
+    @after_init <<
       "var e = tr.down('*[attr=\"#{attr_name}\"]');" <<
       "var sel = tr_edit.down('select[name=\"#{attr_name}\"]');" <<
       "if(sel && e) FT.select_value(sel,e.readAttribute('value'));" <<
@@ -264,7 +255,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 =begin
   def text_field(method, options={})
     attr_name = "#{@object_name}[#{method}]"
-    @after_init_edit <<
+    @after_init <<
       "var e = tr.down('*[attr=\"#{attr_name}\"]');" <<
       "var i = tr_edit.down('input[name=\"#{attr_name}\"]');" <<
       "if(i && e) { i.value = e.readAttribute('value')||e.innerHTML; }" <<
@@ -298,11 +289,6 @@ private
     '<button id="tag_submit" name="commit" type="submit">Save</button>' +
     '<button onclick="InlineEditor.close();return false;">Cancel</button>'    
   end
-
-
-  #def concat(x)
-  #  @template.concat(x)
-  #end
 
 
   def code(string)

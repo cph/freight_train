@@ -46,11 +46,9 @@ module FreightTrain::Helpers::CoreHelper
       builder = FreightTrain::Builders::EditorBuilder.default_editor_builder
       editor_builder = builder.new(@sym, nil, @template, options, block)
  
-      #@after_init_edit = "" # if !@after_init_edit
-      @template.instance_variable_set("@after_init_edit", "")
-      @template.instance_variable_set("@inline_editor", capture(editor_builder, &block) + editor_builder.last_child)
-      #@template.instance_variable_set("@after_init_edit", @after_init_edit)
-      "" # @inline_editor is saved for later; don't print it out here
+      @template.instance_variable_set("@inline_editor",   capture(editor_builder, &block) + editor_builder.last_child)
+      @template.instance_variable_set("@after_init_edit", editor_builder.after_init)
+      "" # @inline_editor and @after_init_edit are saved for later; don't print either out here
     end
     
     

@@ -13,7 +13,7 @@ module FreightTrain::Helpers::PageScriptHelper
        "  var obsv=new Observer();\n" 
 
     if @inline_editor
-      html << "  var editor_writer=#{editor_writer_method(options)};\n"
+      html << "  var editor_writer=#{editor_writer_method(table_name, options)};\n"
       html << "  InlineEditor.observe('after_init',#{after_edit_method(options)});\n"
     end
 
@@ -104,12 +104,12 @@ private
   end
   
 
-  def editor_writer_method( options )
+  def editor_writer_method(table_name, options)
     "function(tr){" <<  
       "var e;" <<
       "var html='" << @inline_editor.gsub(/\r|\n/, "").gsub(/ *</, "<").gsub(/> */, ">") << "';" <<
       "var tr_edit = $(document.createElement('#{FreightTrain.tag(:tr)}'));" << 
-      "tr_edit.className = 'row editor';" << 
+      "tr_edit.className = 'row editor #{table_name}';" << 
       "tr_edit.id = 'edit_row';" << 
       "tr_edit.update(html);" << 
       "return tr_edit;" <<

@@ -390,9 +390,9 @@ var FT = (function(){
     },
     
     /* SHOULD THIS GET A BETTER NAME OR BE PUT IN A SUB-NAMESPACE? */     
-    for_each_row: function(root_tr,root_tr_edit,root_tr_selector,root_tr_edit_selector,fn) {
-      var nested_rows=root_tr.select(root_tr_selector);
-      var nested_editor_rows=root_tr_edit.select(root_tr_edit_selector);
+    for_each_row: function(root_tr, root_tr_edit, selector, fn) {
+      var nested_rows=root_tr.select(selector);
+      var nested_editor_rows=root_tr_edit.select(selector);
       //debugger;
       //if(nested_rows.length == 0) {
       
@@ -407,7 +407,7 @@ var FT = (function(){
         {
           var tr=nested_rows[i];
           var tr_edit=nested_editor_rows[i];
-          fn(tr,tr_edit);
+          fn(tr,tr_edit,tr_edit.readAttribute('name'));
         }
       //}
     }
