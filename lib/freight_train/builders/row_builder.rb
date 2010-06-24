@@ -18,7 +18,7 @@ class FreightTrain::Builders::RowBuilder
   end
     
   
-  delegate :capture, :raw, :alt_content_tag, :fields_for, :to => :@template
+  delegate :capture, :raw, :raw_or_concat, :alt_content_tag, :fields_for, :to => :@template
 
 
   def record
@@ -29,12 +29,10 @@ class FreightTrain::Builders::RowBuilder
   # todo: move to extension of freight_train in this app?  
   def currency_of(method)
     number = @record.send method
-    string = 
     if( number < 0 )
-      # "($<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency -number, :unit=>""}</span>)"
-      raw "<span class=\"negative\">($<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency -number, :unit=>""}</span>)</span>"
+      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\" class=\"negative\">($#{number_to_currency -number, :unit=>""})</span>"
     else
-      raw "$<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">#{number_to_currency number, :unit=>""}</span>"
+      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">$#{number_to_currency number, :unit=>""}</span>"
     end
   end
 
@@ -64,7 +62,7 @@ class FreightTrain::Builders::RowBuilder
     css = options[:hidden] ? "nested hidden" : "nested"
     name = "#{@object_name}[#{method}_attributes]"
     
-    raw(alt_content_tag(:table, :class => css) do
+    raw_or_concat(alt_content_tag(:table, :class => css) do
       alt_content_tag(:tbody, :attr => name) do
         i = -1
         children = @record.send method

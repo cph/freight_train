@@ -6,7 +6,7 @@ module FreightTrain::Helpers::CoreHelper
     def initialize(sym, template, options)
       @sym, @template, @options = sym, template, options
       @html = ""
-      @footer_html = ""
+      @footer_html = nil
     end
     
     attr_reader :footer_html
@@ -159,7 +159,7 @@ private
         }
         html << alt_content_tag(:tfoot) {
           footer
-        } if footer
+        } unless footer.blank?
         html
       } <<
       "</form>\n" <<
