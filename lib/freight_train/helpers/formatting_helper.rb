@@ -1,7 +1,14 @@
 module FreightTrain::Helpers::FormattingHelper
 
 
+  # !todo: this is simply copied for lail_extensions' FormattingHelper!
   def format_errors( object )
+    if object and object.respond_to?("errors") and !(messages = object.errors.all_messages).empty?
+      "<ul>" + messages.collect{|msg| "<li>#{msg}</li>"}.join + "</ul>"
+    else
+      ""
+    end    
+=begin
     if object and object.respond_to? "errors"
       temp = "<ul>"
       object.errors.each do |k,v|
@@ -17,6 +24,7 @@ module FreightTrain::Helpers::FormattingHelper
     else
       ""
     end
+=end    
   end
 
 
