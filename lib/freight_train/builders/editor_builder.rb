@@ -194,10 +194,10 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
             end) <<
             capture(f, &block) <<
             (alt_content_tag :td, :class => "delete-nested" do
-              "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"event.stop();FT.delete_nested_object(this);return false;\"></a>"
+              "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
             end) <<
             (alt_content_tag :td, :class => "add-nested" do
-              "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"event.stop();FT.add_nested_object(this);return false;\"></a>"
+              "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
             end)
           end
         end) <<
