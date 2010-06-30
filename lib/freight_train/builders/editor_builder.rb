@@ -78,7 +78,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   end
 
 
-  def collection_select(method, collection, value_method, text_method, options = {}, html_options = {})
+  def collection_select(method, collection, value_method = :id, text_method = :to_s, options = {}, html_options = {})
     choices = collection.collect {|i| [i.send(value_method), i.send(text_method)]}
     select(method, choices, options, html_options)
     # attr_name = "#{@object_name}[#{method}]"
