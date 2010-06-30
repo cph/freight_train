@@ -7,7 +7,8 @@ module FreightTrain::Helpers::RowHelper
 # attr_reader :model_name # !HACK!
   
   def row_for(record, *args, &block)
-    options = args.extract_options!
+    options = args.extract_options!.reverse_merge!(
+      :last_child => true)
     singular = record.class.name.tableize.singularize
     
     if @update_row
@@ -28,20 +29,6 @@ module FreightTrain::Helpers::RowHelper
     end
   end
 
-
-  def commands_for( record, commands )
-    html = ""
-    if commands
-      html << "<span class=\"commands\">"
-      commands.each do |command|
-        html << send("#{command}_command_for", record)
-      end
-      html << "</span>"
-    end
-    raw (html)
-  end
-
-
   def idof( record )
     "#{record.class.name.underscore}_#{record.id}"
   end
@@ -52,18 +39,16 @@ private
 
   def row_guts_for(record, options, &block)
     name = ActionController::RecordIdentifier.singular_class_name(record)
-    capture(FreightTrain::Builders::RowBuilder.default_row_builder.new(self, name, record), &block) <<
-
-    # IE7 doesn't support the CSS selector :last-child, therefore, we do this explicitly
-    (alt_content_tag :td, :class => "last-child" do
-      commands_for(record, options[:commands])
+    builder = FreightTrain::Builders::RowBuilder.default_row_builder.new(self, name, record, options)
+    html = capture(builder, &block)
+    html << last_child(builder, options) unless !options[:last_child] or builder.commands_called?
+    html
+  end
+  
+  def last_child(builder, options)
+    (alt_content_tag :td, :class => "last-child" do # IE7 doesn't support the CSS selector :last-child
+      builder.commands_for(options[:commands])
     end)
   end
-
-
-  def delete_command_for( record )
-    "<a class=\"delete-command\" href=\"#\" onclick=\"Event.stop(event); FT.#{record.class.name}.destroy(#{record.id});\">delete</a>"
-  end
-
 
 end

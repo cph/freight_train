@@ -11,10 +11,9 @@ class FreightTrain::Builders::RowBuilder
   attr_reader :object, :object_name, :record
 
 
-  def initialize(template, object_name, record)
-    @template = template
-    @object_name = object_name
-    @record = record
+  def initialize(template, object_name, record, options)
+    @template, @object_name, @record, @options = template, object_name, record, options
+    @commands_called = false
   end
     
   
@@ -113,6 +112,28 @@ class FreightTrain::Builders::RowBuilder
     method = options[:attr] if options[:attr]
     raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value_value}\">#{value_display}</span>"    
   end
+  
+  def commands_called?
+    @commands_called
+  end
+  
+  def commands_for(commands)
+    @commands_called = true
+    html = ""
+    if commands
+      html << "<span class=\"commands\">"
+      commands.each do |command|
+        html << send("#{command}_command")
+      end
+      html << "</span>"
+    end
+    raw (html)
+  end
+  
+  def delete_command
+    @commands_called = true
+    "<a class=\"delete-command\" href=\"#\" onclick=\"Event.stop(event); FT.#{@record.class.name}.destroy(#{record.id});\">delete</a>"
+  end  
   
 
 end

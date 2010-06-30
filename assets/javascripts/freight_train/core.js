@@ -272,7 +272,12 @@ var FT = (function(){
     create_options: function(options) {
       var html = '';
       for(var i=0; i<options.length; i++) {
-        html += '<option value=\"' + options[i][0] + '\">' + options[i][1] + '</option>'
+        var option = options[i];
+        if(typeof(options) == Array) {
+          html += '<option value=\"' + option[0] + '\">' + option[1] + '</option>';
+        } else {
+          html += '<option value=\"' + option + '\">' + option + '</option>';
+        }
       }
       return html;
     },
@@ -281,9 +286,9 @@ var FT = (function(){
     copy_selected_value: function(tr,tr_edit,method) {
       var attr_name = tr.readAttribute('name')+'['+method+']';
       var e=tr.down('*[attr="'+attr_name+'"]');
-      var sel=tr_edit.down('#'+method);
+      var sel=tr_edit.down('select[name="'+attr_name+'"]');
       if(e && sel)
-        FT.select_value(sel,e.readAttribute('value'));
+        FT.select_value(sel, e.readAttribute('value')||e.innerHTML);
       else {
         if(!e) alert(attr_name+' not found');
         if(!sel) alert('selector "'+method+'" ('+attr_name+') not found');

@@ -79,21 +79,23 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
 
   def collection_select(method, collection, value_method, text_method, options = {}, html_options = {})
-    attr_name = "#{@object_name}[#{method}]"
-    @after_init << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
-
-    html_options[:id] = method unless html_options[:id]
-    html_options[:name] = attr_name
-    
-    o = "["
-    collection.each do |i|
-      o << "," if (o.length > 1)
-      # prevent options that contain apostrophes from screwing things up
-      o << "['#{i.send(value_method).to_s.gsub( Regexp.new("'"), "\\\\'")}','#{i.send(text_method).to_s.gsub( Regexp.new("'"), "\\\\'")}']"
-    end
-    o << "]"
-    
-    raw "#{tag("select", html_options, true)}'+FT.create_options(#{o})+'</select>"
+    choices = collection.collect {|i| [i.send(value_method), i.send(text_method)]}
+    select(method, choices, options, html_options)
+    # attr_name = "#{@object_name}[#{method}]"
+    # @after_init << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
+    # 
+    # html_options[:id] = method unless html_options[:id]
+    # html_options[:name] = attr_name
+    # 
+    # o = "["
+    # collection.each do |i|
+    #   o << "," if (o.length > 1)
+    #   # prevent options that contain apostrophes from screwing things up
+    #   o << "['#{i.send(value_method).to_s.gsub( Regexp.new("'"), "\\\\'")}','#{i.send(text_method).to_s.gsub( Regexp.new("'"), "\\\\'")}']"
+    # end
+    # o << "]"
+    # 
+    # raw "#{tag("select", html_options, true)}'+FT.create_options(#{o})+'</select>"
   end
 
 
@@ -214,12 +216,17 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
   def select(method, choices, options = {}, html_options = {})
     attr_name = "#{@object_name}[#{method}]"
-    @after_init <<
-      "var e = tr.down('*[attr=\"#{attr_name}\"]');" <<
-      "var sel = tr_edit.down('select[name=\"#{attr_name}\"]');" <<
-      "if(sel && e) FT.select_value(sel,e.readAttribute('value'));" <<
-      "else{if(!e) alert('#{attr_name} not found');if(!sel) alert('#{method} not found');}"
-    super
+    # @after_init <<
+    #   "var e = tr.down('*[attr=\"#{attr_name}\"]');" <<
+    #   "var sel = tr_edit.down('select[name=\"#{attr_name}\"]');" <<
+    #   "if(sel && e) FT.select_value(sel,e.readAttribute('value'));" <<
+    #   "else{if(!e) alert('#{attr_name} not found');if(!sel) alert('#{method} not found');}"
+    # super
+    
+    @after_init << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
+    html_options[:name] = attr_name
+    html_options[:attr] = attr_name
+    raw "#{tag("select", html_options, true)}'+FT.create_options(#{choices.to_json})+'</select>"    
   end
 
 
@@ -264,12 +271,16 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   end
 =end
   
+  def last_child_called?
+    @last_child_called
+  end
   
   def last_child(&block)
     if block_given?
       @last_child = @template.capture(&block)
       return ""
     else
+      @last_child_called = true
       alt_content_tag(:td, (@last_child || default_last_child), :class => "last-child")
     end
 =begin

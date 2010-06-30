@@ -42,11 +42,14 @@ module FreightTrain::Helpers::CoreHelper
     
     def editor(*args, &block)
       raise ArgumentError, "Missing block" unless block_given?
-      options = args.extract_options!
+      options = args.extract_options!.reverse_merge!(
+        :last_child => true)
       builder = FreightTrain::Builders::EditorBuilder.default_editor_builder
       editor_builder = builder.new(@sym, nil, @template, options, block)
  
-      @template.instance_variable_set("@inline_editor",   capture(editor_builder, &block) + editor_builder.last_child)
+      editor_html = capture(editor_builder, &block)
+      editor_html << editor_builder.last_child unless !options[:last_child] or editor.last_child_called?
+      @template.instance_variable_set("@inline_editor", editor_html)
       @template.instance_variable_set("@after_init_edit", editor_builder.after_init)
       "" # @inline_editor and @after_init_edit are saved for later; don't print either out here
     end
