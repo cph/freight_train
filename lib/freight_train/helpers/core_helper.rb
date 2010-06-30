@@ -48,7 +48,7 @@ module FreightTrain::Helpers::CoreHelper
       editor_builder = builder.new(@sym, nil, @template, options, block)
  
       editor_html = capture(editor_builder, &block)
-      editor_html << editor_builder.last_child unless !options[:last_child] or editor.last_child_called?
+      editor_html << editor_builder.last_child unless !options[:last_child] or editor_builder.last_child_called?
       @template.instance_variable_set("@inline_editor", editor_html)
       @template.instance_variable_set("@after_init_edit", editor_builder.after_init)
       "" # @inline_editor and @after_init_edit are saved for later; don't print either out here
