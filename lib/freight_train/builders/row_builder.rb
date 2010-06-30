@@ -11,11 +11,11 @@ class FreightTrain::Builders::RowBuilder
   attr_reader :object, :object_name, :record
 
 
-  def initialize(template, object_name, record, options)
+  def initialize(template, object_name, record, options={})
     @template, @object_name, @record, @options = template, object_name, record, options
     @commands_called = false
   end
-    
+  
   
   delegate :capture, :raw, :raw_or_concat, :alt_content_tag, :fields_for, :to => :@template
 
