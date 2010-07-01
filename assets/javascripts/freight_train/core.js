@@ -115,7 +115,7 @@ var FT = (function(){
     },
     hookup_editor: function(editor) {
       if(!editor) throw new Error('editor must not be null');
-      FT.submit_forms_on_enter(editor);
+      // FT.submit_forms_on_enter(editor);
       //if(enable_nested_records)
       //  FT.reset_add_remove_for_all(editor);
       observer.fire('hookup_form',editor);
@@ -223,30 +223,30 @@ var FT = (function(){
     edit_row_fn: function(row, fn) {
       row.observe("click", function() { fn(row); });
     }, 
-    submit_forms_on_enter: function(parent) {
-      // Create the handler only once, no matter how often this method is called
-      if(!FT.submit_forms_on_enter.keypress)
-        FT.submit_forms_on_enter.keypress = function(event) {
-          if(event.keyCode == Event.KEY_RETURN) {
-            //debugger;
-            Event.stop(event);
-            var e = Event.element(event);
-            if(!e) return;
-            var tr = e.up(".row.editor");
-            if(!tr) return;
-            var submit = tr.down("*[type='submit']");
-            if(!submit) return;
-            submit.click(); // Works in Chrome 2, IE 7, Firefox 3
-          }
-        };
- 
-      var selector = function(x){ return parent ? parent.select(x) : $$(x); };
-      selector('input, select').each(function(e) {
-        // Register the event handler only once per input element, no matter how often this method is called
-        e.stopObserving("keypress", FT.submit_forms_on_enter.keypress);
-        e.observe("keypress", FT.submit_forms_on_enter.keypress);
-      });
-    },
+    // submit_forms_on_enter: function(parent) {
+    //   // Create the handler only once, no matter how often this method is called
+    //   if(!FT.submit_forms_on_enter.keypress)
+    //     FT.submit_forms_on_enter.keypress = function(event) {
+    //       if(event.keyCode == Event.KEY_RETURN) {
+    //         //debugger;
+    //         Event.stop(event);
+    //         var e = Event.element(event);
+    //         if(!e) return;
+    //         var tr = e.up(".row.editor");
+    //         if(!tr) return;
+    //         var submit = tr.down("*[type='submit']");
+    //         if(!submit) return;
+    //         submit.click(); // Works in Chrome 2, IE 7, Firefox 3
+    //       }
+    //     };
+    //  
+    //   var selector = function(x){ return parent ? parent.select(x) : $$(x); };
+    //   selector('input, select').each(function(e) {
+    //     // Register the event handler only once per input element, no matter how often this method is called
+    //     e.stopObserving("keypress", FT.submit_forms_on_enter.keypress);
+    //     e.observe("keypress", FT.submit_forms_on_enter.keypress);
+    //   });
+    // },
     
     // todo: move to Select or HTMLSelectElement?
     select_value: function(selector,value) {

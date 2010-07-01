@@ -38,17 +38,6 @@ var InlineEditor = (function(){
       // TODO: can return false to cancel the edit?
       observer.fire('before_init', element);
 
-      // TODO: Configuration of the form is a FreightTrain concern; move that out of here (into before_init?)
-      // TODO: In that case 'url' is not a required parameter!
-      var form = element.up('.freight_train'); if(!form) return;
-      form.onsubmit = function() {
-        FT.xhr(url, 'put', Form.serialize(form));
-        return false;
-      };
-
-      // Get properties
-      //var id = element.readAttribute('id');
-      
       // Create editor
       var editor = editor_writer(element); if(!editor) return;	
 
@@ -58,14 +47,40 @@ var InlineEditor = (function(){
       // Insert the editor
       element.insert({'after':editor});
       
-      // TODO: This call is important so that hitting 'enter' doesn't submit the CREATE form; resolve this differently...
-      FT.submit_forms_on_enter(editor);
+      // Save the contents of the editor...
+      function save() {
+        var params = Form.serialize(editor);
+        FT.xhr(url, 'put', params);
+      }
+
+      // ...on clicking a submit button
+      var submit = editor.down('*[type="submit"]');
+      if(submit) {
+        submit.observe('click', function(event) {
+          Event.stop(event);
+          save();
+        });
+      }
+      
+      // ...or on hitting the Return key
+      editor.observe('keydown', function(event) {
+        // window.console.log('kd: ' + event.which);
+        if(event.keyCode == Event.KEY_RETURN) {
+          Event.stop(event);
+          save();
+        }
+      });
+      
+      // Finally, select the first Form element in the editor
+      var first_input = editor.down('input, select, textarea');
+      if(first_input) {
+        first_input.focus();
+      }
 
       // after_init callback
       observer.fire('after_init', [element, editor]);
 
       // Set the current row being edited
-      // CURRENT_ROW_ID = id;
       CURRENT_ELEMENT = element;
       CURRENT_EDITOR = editor;
     });
@@ -80,18 +95,6 @@ var InlineEditor = (function(){
       CURRENT_ELEMENT =   null;
       CURRENT_EDITOR =    null;
     }
-    /*
-    if(CURRENT_ROW_ID) {
-      var id = CURRENT_ROW_ID;
-      var e;
-      //e = $('extra_row'); 	if(e) e.remove();
-      e = $('edit_row');  	if(e) e.remove();
-      e = $(id);          	if(e) e.show();
-      //e = $('edit_errors'); if(e) e.hide();
-      e = $('error');       if(e) e.hide();
-      CURRENT_ROW_ID = null;
-    }
-    */
   };
   constructor.observe = function(name,func){observer.observe(name,func);};
   constructor.unobserve = function(name,func){observer.unobserve(name,func);};
