@@ -17,6 +17,16 @@ module SafeHtmlHelper
   end
 end
 
+module Rails3HtmlHelper
+  def raw_or_concat(html)
+    raw(html)
+  end
+end
+
 
 # What is a reasonable way of checking to see if this needs to be included?
-ActionView::Base.send :include, SafeHtmlHelper if Rails::VERSION::STRING.match /^[12]/
+if Rails::VERSION::STRING.match /^[12]/
+  ActionView::Base.send :include, SafeHtmlHelper
+else
+  ActionView::Base.send :include, Rails3HtmlHelper
+end
