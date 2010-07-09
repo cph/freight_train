@@ -15,7 +15,14 @@ module FreightTrain::Helpers::RowHelper
       raw_or_concat row_guts_for(record, options, &block)
     else
       css = ["row", singular]
-      css.concat options[:disabled] ? ["disabled"] : ["interactive", "editable"]
+      disabled = (options.key?(:disabled) ? options[:disabled] : false)
+      interactive = (options.key?(:interactive) ? options[:interactive] : true)
+      editable = (options.key?(:editable) ? options[:editable] : true)
+      interactive = true if editable
+      interactive, editable = false, false if disabled
+      css << "disabled" if disabled
+      css << "interactive" if interactive
+      css << "editable" if editable
  
       # this makes striping work on IE7 and Firefox 3
       alt = !@template.instance_variable_get("@alt")
