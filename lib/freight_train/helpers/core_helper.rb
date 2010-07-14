@@ -16,7 +16,7 @@ module FreightTrain::Helpers::CoreHelper
 
     def headings(*args, &block)
       headings = block_given? ? capture(&block) : args.collect{|heading| alt_content_tag(:th, heading)}.join
-      headings << alt_content_tag(:th)
+      # headings << alt_content_tag(:th)  <-- doing this automatically is too unexpected and too difficult to hack if unneeded
       output = alt_content_tag(:tr, headings, :class => "row heading")
       raw_or_concat(output) if block_given?
       output
