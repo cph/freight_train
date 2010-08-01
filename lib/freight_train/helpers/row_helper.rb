@@ -45,7 +45,8 @@ private
 
 
   def row_guts_for(record, options, &block)
-    name = ActionController::RecordIdentifier.singular_class_name(record)
+    # name = ActionController::RecordIdentifier.singular_class_name(record)
+    name = record.class.name.tableize.singularize
     builder = FreightTrain::Builders::RowBuilder.default_row_builder.new(self, name, record, options)
     html = capture(builder, &block)
     html << last_child(builder, options) unless !options[:last_child] or builder.commands_called?

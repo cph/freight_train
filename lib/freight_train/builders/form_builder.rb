@@ -49,10 +49,12 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
       obj = @object ? @object.send(method) : nil
     when Array
       obj = method_or_object
-      method = ActionController::RecordIdentifier.singular_class_name(obj.first)
+      # method = ActionController::RecordIdentifier.singular_class_name(obj.first)
+      method = obj.first.class.name.tableize.singularize
     else
       obj = method_or_object
-      method = ActionController::RecordIdentifier.singular_class_name(obj)
+      # method = ActionController::RecordIdentifier.singular_class_name(obj)
+      method = obj.class.name.tableize.singularize
     end
  
     options[:type] = "hidden"
