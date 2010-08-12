@@ -334,19 +334,17 @@ var FT = (function(){
       var table = tr.up('.nested'); if(!table) return;      
       var name = tr.readAttribute('name');
       
-      //var id = tr.down('[name="'+name+'[id]"]');
       var id = tr.down('[data-attr="id"]');
       if(id && (id.value == '')) {
         tr.remove();
       }
       else {
-        //var _destroy = tr.down('[data-attr="_destroy"]');
-          var _destroy = tr.down('[data-attr="_destroy"]');
+        var _destroy = tr.down('[data-attr="_destroy"]');
         _destroy.value = 1;
         tr.hide();
       }
       FT.reset_add_remove_for(table);
-    }, 
+    },
     reset_nested: function(table) {
       table = $(table);
       if(table) {
@@ -363,11 +361,12 @@ var FT = (function(){
       selector('.nested.editor').each(FT.reset_add_remove_for);
     },
     reset_add_remove_for: function(table) {
-      var reset_nested_row = function(row,i,delete_visibility,add_visibility) {
+      function renumber_row(row, i) {
         row.select('input, textarea, select').each(function(e) {
-          //e.writeAttribute('name',object_name+'['+i+']['+e.id+']');
           e.writeAttribute('name', e.readAttribute('name').gsub(/[(\d+)]/, i));
         });
+      };
+      function reset_add_remove_for_row(row, delete_visibility, add_visibility) {
         var delete_link = row.down('.delete-link');
         if(delete_link) delete_link.setStyle({visibility:delete_visibility});
         var add_link = row.down('.add-link');
@@ -375,19 +374,24 @@ var FT = (function(){
       };
  
       var object_name=table.readAttribute('name');
-      var rows=table.select('.nested-row').reject(function(tr) {
-        var _destroy = tr.down('[data-attr="_destroy"]');
+      var rows=table.select('.nested-row');
+      for(var i=0; i<rows.length; i++) {
+        renumber_row(rows[i], i);
+      }
+      
+      rows=rows.reject(function(row) {
+        var _destroy = row.down('[data-attr="_destroy"]');
         return (_destroy.value=='1');
       });
       var n=rows.length-1;
       if(n>0) {
         for(var i=0; i<n; i++) {
-          reset_nested_row(rows[i],i,'visible','hidden');
+          reset_add_remove_for_row(rows[i],'visible','hidden');
         }
-        reset_nested_row(rows[n],n,'visible','visible');
+        reset_add_remove_for_row(rows[n],'visible','visible');
       }
       else if(n==0) {
-        reset_nested_row(rows[0],0,'hidden','visible');
+        reset_add_remove_for_row(rows[0],'hidden','visible');
       }
  
       observer.fire('after_reset_nested',table);
