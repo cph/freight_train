@@ -274,7 +274,7 @@ var FT = (function(){
       for(var i=0; i<options.length; i++) {
         var option = options[i];
         if(option instanceof Array) {
-          html += '<option value=\"' + option[0] + '\">' + option[1] + '</option>';
+          html += '<option value=\"' + option[1] + '\">' + option[0] + '</option>';
         } else {
           html += '<option value=\"' + option + '\">' + option + '</option>';
         }

@@ -79,7 +79,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
 
 
   def collection_select(method, collection, value_method = :id, text_method = :to_s, options = {}, html_options = {})
-    choices = collection.collect {|i| [i.send(value_method), i.send(text_method)]}
+    choices = collection.collect {|i| [i.send(text_method), i.send(value_method)]}
     select(method, choices, options, html_options)
     # attr_name = "#{@object_name}[#{method}]"
     # @after_init << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
