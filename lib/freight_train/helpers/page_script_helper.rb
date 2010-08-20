@@ -107,7 +107,7 @@ private
   def editor_writer_method(table_name, options)
     "function(tr){" <<  
       "var e;" <<
-      "var html='" << @inline_editor.gsub(/\r|\n/, "").gsub(/ *</, "<").gsub(/> */, ">") << "';" <<
+      "var html='" << @inline_editor.gsub(/\r|\n/, " ").gsub(/\s+</, " <").gsub(/>\s+/, "> ") << "';" <<
       "var tr_edit = $(document.createElement('#{FreightTrain.tag(:tr)}'));" << 
       "tr_edit.className = 'row editor #{table_name}';" << 
       "tr_edit.id = 'edit_row';" << 

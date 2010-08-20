@@ -122,7 +122,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
       :type=>"hidden",
       :value=>value,
       :name=>"#{@object_name}[#{method}]"} )
-  end  
+  end
 
 
   def hidden_field( method )
