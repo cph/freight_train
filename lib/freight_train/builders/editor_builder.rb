@@ -297,8 +297,8 @@ private
 
 
   def default_last_child
-    '<button id="tag_submit" name="commit" type="submit">Save</button>' +
-    '<button onclick="InlineEditor.close();return false;">Cancel</button>'    
+    '<button class="save" title="Save" id="tag_submit" name="commit" type="submit">Save</button>' +
+    '<button class="cancel" title="Cancel" onclick="InlineEditor.close();return false;">Cancel</button>'    
   end
 
 
