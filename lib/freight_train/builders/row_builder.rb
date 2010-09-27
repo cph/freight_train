@@ -26,12 +26,12 @@ class FreightTrain::Builders::RowBuilder
 
 
   # todo: move to extension of freight_train in this app?  
-  def currency_of(method)
+  def currency_of(method, options={})
     number = @record.send method
     if( number < 0 )
-      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\" class=\"negative\">($#{number_to_currency -number, :unit=>""})</span>"
+      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\" class=\"#{options[:class]} negative\">($#{number_to_currency -number, :unit=>""})</span>"
     else
-      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\">$#{number_to_currency number, :unit=>""}</span>"
+      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\" class=\"#{options[:class]}\">$#{number_to_currency number, :unit=>""}</span>"
     end
   end
 
@@ -86,8 +86,8 @@ class FreightTrain::Builders::RowBuilder
   end
 
 
-  def text_of(method)
-    raw "<span attr=\"#{@object_name}[#{method}]\">#{h @record.send(method)}</span>"
+  def text_of(method, options={})
+    raw "<span attr=\"#{@object_name}[#{method}]\" class=\"#{options[:class]}\">#{h @record.send(method)}</span>"
   end
 
 
