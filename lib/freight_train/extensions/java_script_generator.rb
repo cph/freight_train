@@ -54,17 +54,14 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
   end
 
 
-  def refresh_records( model, *args )
+  def refresh_records(model, *args)
     options = args.extract_options!.with_indifferent_access
     
-    collection = args.first || model
+    collection = args.first || model.all(options[:find]||{})
     model_name = model.name
     table_name = model_name.tableize
     partial_name = options[:partial] || model_name.underscore
-    replace_html table_name,
-#                :partial => (options[:partial] || ((ocn=options[:originating_controller]) ? "/#{ocn}/#{partial_name}" : partial_name)),
-                 :partial => partial_name,                 
-                 :collection => collection.all((options[:find]||{}) )
+    replace_html(table_name, :partial => partial_name, :collection => collection)
     @lines << "$('#{table_name}').select('.row').each(function(row){FT.hookup_row('#{model_name}',row);});"
   end
 

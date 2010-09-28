@@ -5,7 +5,7 @@ class FreightTrain::Responder < ActionController::Responder
   # methods in FreightTrain::Core
   delegate :refresh_on_create, :refresh_on_update, :remove_deleted, :show_error, :show_errors_for, :show_exception_for,
            :to => :controller
-
+  
   
   def to_html
     if request.xhr?
