@@ -74,7 +74,10 @@ var InlineEditor = (function(){
       // Finally, select the first Form element in the editor
       var first_input = editor.down('input, select, textarea');
       if(first_input) {
-        first_input.focus();
+        try {
+          first_input.focus();
+        } catch(e) {
+        }
       }
 
       // after_init callback
