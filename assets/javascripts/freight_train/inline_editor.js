@@ -18,10 +18,10 @@ var InlineEditor = (function(){
   var CURRENT_ELEMENT = null;
   var CURRENT_EDITOR = null;
   var observer = new Observer();
-
+  
   var constructor = function(url, element, editor_writer) {
     element = $(element); if(!element) return;
-
+    
     // if you click a row, switch to its editor
     // TODO: add selection of rows using up and down arrows and toggling of row with space or enter
     element.observe('click', function(event) {
@@ -30,17 +30,17 @@ var InlineEditor = (function(){
       var tag = Event.findElement(event).tagName.toLowerCase();
       if($A(['input', 'button', 'a']).member(tag))
         return;
-
+      
       // close any existing editors
       InlineEditor.close();
-
+      
       // before_init callback
       // TODO: can return false to cancel the edit?
       observer.fire('before_init', element);
-
+      
       // Create editor
       var editor = editor_writer(element); if(!editor) return;	
-
+      
       // Hide the view-only element
       element.hide();
       
