@@ -26,21 +26,22 @@ module FreightTrain::Helpers::PageScriptHelper
       html << "    #{hookup_row_method options}\n" <<
            "  };\n" <<
            "})();\n"
-
+           
     # methods in global namespace
     if options[:reset_on_create] != :none
       options[:reset_on_create] = :all unless options[:reset_on_create].is_a?(Array)
       html << reset_on_create_method(table_name, options) << "\n"
     end
-
+      
       html << "//]]>\n" <<
            "</script>\n"
     @already_defined = true
     html
   end
-
-
-  # move as much of this as possible to core.js
+  
+  
+  
+  # !todo: move as much of this as possible to core.js
   def ft_init(options={})
     if @already_initialized
       return ""
@@ -60,16 +61,18 @@ module FreightTrain::Helpers::PageScriptHelper
 
 
 private
-
-
+  
+  
+  
   def destroy_method( table_name, options )
     msg = options.key?(:confirm) ? options[:confirm] : "Delete #{table_name.to_s.singularize.titleize}?"
     "destroy: function(idn){" <<
       "return FT.destroy(#{msg ? "'#{msg}'" : "false"},('#{table_name.to_s.singularize}_'+idn),(path+'/'+idn));" <<
     "}"
   end
-
-
+  
+  
+  
   def hookup_row_method( options )
     content = "hookup_row: function(row){"
     if @inline_editor
@@ -84,13 +87,14 @@ private
     content << "obsv.fire('hookup_row',row);"
     content << "}"
   end
-
-
+  
+  
+  
   def reset_on_create_method( table_name, options )
     arg = options[:reset_on_create]
-    content =  "FT.observe('created',function(){" <<
+    content =  "document.body.observe('ft:create', function(event) {" <<
                  "$$('form[data-model=\"#{table_name.classify}\"]').each(function(form){"
-    if arg == :all
+    if (arg == :all)
       content <<   "form.reset();"
     else
       content <<   "var e;"
@@ -98,12 +102,20 @@ private
     end
     
     # make this intuitive
-    content <<     "form.select('#add_row .nested.editor').each(FT.reset_nested);" if @enable_nested_records
-    content <<   "});" <<
+    content <<     "e = form.down('#add_row');" <<
+                   "if(e) {"
+    content <<       "e.select('.nested.editor').each(FT.reset_nested);" if @enable_nested_records
+    content <<       "var first_input = e.select('input, select, textarea').find(function(input) {" <<
+                       "return input.visible() && (input.type != 'hidden');" <<
+                     "});" <<
+                     "if(first_input)first_input.select();" <<
+                   "}" <<
+                 "});" <<
                "});"
   end
   
-
+  
+  
   def editor_writer_method(table_name, options)
     "function(tr){" <<  
       "var e;" <<
@@ -115,8 +127,9 @@ private
       "return tr_edit;" <<
     "}"
   end
-
-
+  
+  
+  
   def after_edit_method( options )
     content = "function(tr,tr_edit){"
     content << "tr_edit.select('.nested').each(FT.reset_add_remove_for);" if @enable_nested_records
@@ -124,5 +137,6 @@ private
     content << "}"
   end
   
-
+  
+  
 end
