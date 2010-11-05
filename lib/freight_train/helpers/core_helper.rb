@@ -12,8 +12,8 @@ module FreightTrain::Helpers::CoreHelper
     attr_reader :footer_html
     
     delegate :capture, :raw, :raw_or_concat, :alt_content_tag, :fields_for, :to => :@template
-
-
+    
+    
     def headings(*args, &block)
       headings = block_given? ? capture(&block) : args.collect{|heading| alt_content_tag(:th, heading)}.join
       # headings << alt_content_tag(:th)  <-- doing this automatically is too unexpected and too difficult to hack if unneeded
