@@ -90,28 +90,14 @@ private
   
   
   
-  def reset_on_create_method( table_name, options )
+  def reset_on_create_method(table_name, options)
     arg = options[:reset_on_create]
-    content =  "document.body.observe('ft:create', function(event) {" <<
-                 "$$('form[data-model=\"#{table_name.classify}\"]').each(function(form){"
-    if (arg == :all)
-      content <<   "form.reset();"
-    else
-      content <<   "var e;"
-      arg.each{|id| content << "e=form.down('##{id}');if(e)e.value='';"}
-    end
-    
-    # make this intuitive
-    content <<     "e = form.down('#add_row');" <<
-                   "if(e) {"
-    content <<       "e.select('.nested.editor').each(FT.reset_nested);" if @enable_nested_records
-    content <<       "var first_input = e.select('input, select, textarea').find(function(input) {" <<
-                       "return input.visible() && (input.type != 'hidden');" <<
-                     "});" <<
-                     "if(first_input)first_input.select();" <<
-                   "}" <<
-                 "});" <<
-               "});"
+    "document.body.observe('ft:create', function(event) {" <<
+      "$$('form[data-model=\"#{table_name.classify}\"] #add_row').each(function(row){" <<
+        "FT.reset_form_fields_in(row" << ((arg == :all) ? "" : ", {only: #{arg.to_json}}") << ");" <<
+        "FT.select_first_field_in(row);" <<
+      "});" <<
+    "});"
   end
   
   
