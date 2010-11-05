@@ -324,6 +324,9 @@ var FT = (function(){
            input.selectedIndex = 0;
          }
       });
+      parent.select('.nested.editor').each(function(table) {
+        FT.reset_nested(table);
+      });
     },
     select_first_field_in: function(parent) {
       var first_input = parent.select('input, select, textarea').find(function(input) {
@@ -398,7 +401,7 @@ var FT = (function(){
         var add_link = row.down('.add-link');
         if(add_link) add_link.setStyle({visibility:add_visibility});
       };
- 
+      
       var object_name=table.readAttribute('name');
       var rows=table.select('.nested-row');
       for(var i=0; i<rows.length; i++) {
