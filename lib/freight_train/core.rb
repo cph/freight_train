@@ -44,7 +44,6 @@ module FreightTrain::Core
         # this is kind of a clunky way of solving this problem; but I want row_for to know whether
         # it is creating a row or updating a row (whether it should write the TR tags or not).
         @update_row = true
-        #debugger
         page.refresh_record record, options
         page.fire(:update, idof(record))
       else

@@ -308,6 +308,31 @@ var FT = (function(){
       else
         alert(attr_name+' not found');
     },
+    reset_form_fields_in: function(parent, options) {
+      options = options || {};
+      if(options.only) {options.only = $A(options.only);}
+      if(options.except) {options.except = $A(options.except);}
+      parent.select('input[type="text"], textarea').each(function(input) {
+        if(!(options.only && !options.only.include(input.id)) &&
+           !(options.except && options.except.include(input.id))) {
+           input.value = '';
+         }
+      });
+      parent.select('select').each(function(input) {
+        if(!(options.only && !options.only.include(input.id)) &&
+           !(options.except && options.except.include(input.id))) {
+           input.selectedIndex = 0;
+         }
+      });
+    },
+    select_first_field_in: function(parent) {
+      var first_input = parent.select('input, select, textarea').find(function(input) {
+        return input.visible() && (input.type != 'hidden');
+      });
+      if(first_input) {
+        first_input.select();
+      }
+    },
     add_nested_object: function(sender) {
       var tr = $(sender).up('.nested-row'); if(!tr) { alert('FT.add_nested_object: .nested-row not found'); return; }
       var table = tr.parentNode; if(!table) { alert('FT.add_nested_object .nested not found'); return; }
@@ -318,13 +343,14 @@ var FT = (function(){
       new_tr.writeAttribute('name', new_tr.readAttribute('name').gsub(/[(\d+)]/, n));
       table.appendChild(new_tr);
          
-      //var name = new_tr.readAttribute('name');
-      //var _destroy = new_tr.down('[name="'+name+'[_destroy]"]');
       var _destroy = new_tr.down('[data-attr="_destroy"]');
       if(_destroy) _destroy.value = 0;
-      //var id = new_tr.down('[name="'+name+'[id]"]');
+      
       var id = new_tr.down('[data-attr="id"]');
       if(id) id.value = '';
+      
+      FT.reset_form_fields_in(new_tr);
+      FT.select_first_field_in(new_tr);
             
       observer.fire('after_add_nested', [table,new_tr]);
       FT.reset_add_remove_for(table);
