@@ -92,7 +92,7 @@ private
   
   def reset_on_create_method(table_name, options)
     arg = options[:reset_on_create]
-    "document.body.observe('ft:create', function(event) {" <<
+    "$(document.body).observe('ft:create', function(event) {" <<
       "$$('form[data-model=\"#{table_name.classify}\"] #add_row').each(function(row){" <<
         "FT.reset_form_fields_in(row" << ((arg == :all) ? "" : ", {only: #{arg.to_json}}") << ");" <<
         "FT.select_first_field_in(row);" <<
