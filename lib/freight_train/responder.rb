@@ -7,6 +7,7 @@ class FreightTrain::Responder < ActionController::Responder
            :to => :controller
   
   
+  
   def to_html
     if request.xhr?
       create  if post?
@@ -16,8 +17,10 @@ class FreightTrain::Responder < ActionController::Responder
   end
   
   
+  
 protected
-
+  
+  
   
   def create
     if has_errors?
@@ -53,6 +56,7 @@ protected
       show_error "#{$!}"
     end
   end
-
-
+  
+  
+  
 end

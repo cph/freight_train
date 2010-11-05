@@ -1,8 +1,9 @@
 module FreightTrain::Helpers::CoreHelper
-
-
+  
+  
+  
   class ListBuilder
-
+    
     def initialize(sym, template, options)
       @sym, @template, @options = sym, template, options
       @html = ""
@@ -12,19 +13,23 @@ module FreightTrain::Helpers::CoreHelper
     attr_reader :footer_html
     
     delegate :capture, :raw, :raw_or_concat, :alt_content_tag, :fields_for, :to => :@template
-
-
-    def headings(*args, &block)
+    
+    
+    def header(*args, &block)
       headings = block_given? ? capture(&block) : args.collect{|heading| alt_content_tag(:th, heading)}.join
       # headings << alt_content_tag(:th)  <-- doing this automatically is too unexpected and too difficult to hack if unneeded
-      output = alt_content_tag(:tr, headings, :class => "row heading")
+      output = alt_content_tag(:tr, headings, :class => "header")
       raw_or_concat(output) if block_given?
       output
     end
+    alias :headings :header
+    
     
     
     def footer(*args, &block)
-      @footer_html = capture(&block)
+      @footer_html = block_given? ? capture(&block) : args.collect{|footer| alt_content_tag(:td, footer)}.join
+      @footer_html = "<ol>#{alt_content_tag(:tr, @footer_html, :class => "footer")}</ol>"
+      nil
     end
     
     
