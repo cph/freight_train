@@ -153,7 +153,7 @@ var FT = (function(){
       args.evalScripts = true;
       args.method = method;
       args.parameters = token || "";
-      if(params) args.parameters += '&' + params;
+      if(params) args.parameters += '&' + params + '&freight_train=true';
       new Ajax.Request(url, args);
     },
     restripe_rows: function() {
