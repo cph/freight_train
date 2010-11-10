@@ -28,7 +28,7 @@ module FreightTrain::Helpers::CoreHelper
     
     def footer(*args, &block)
       @footer_html = block_given? ? capture(&block) : args.collect{|footer| alt_content_tag(:td, footer)}.join
-      @footer_html = "<ol>#{alt_content_tag(:tr, @footer_html, :class => "footer")}</ol>"
+      @footer_html = "#{alt_content_tag(:tr, @footer_html, :class => "footer")}"
       nil
     end
     
@@ -76,6 +76,7 @@ module FreightTrain::Helpers::CoreHelper
       :table => :div,
       :tbody => :ol,
       :thead => :ol,
+      :tfood => :ol,
       :tr => :li,
       :th => :div,
       :td => :div
@@ -93,6 +94,7 @@ module FreightTrain::Helpers::CoreHelper
       :table => :table,
       :thead => :thead,
       :tbody => :tbody,
+      :tfood => :tfood,
       :tr => :tr,
       :th => :th,
       :td => :td
