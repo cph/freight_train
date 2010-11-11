@@ -76,7 +76,7 @@ module FreightTrain::Helpers::CoreHelper
       :table => :div,
       :tbody => :ol,
       :thead => :ol,
-      :tfood => :ol,
+      :tfoot => :ol,
       :tr => :li,
       :th => :div,
       :td => :div
@@ -94,7 +94,7 @@ module FreightTrain::Helpers::CoreHelper
       :table => :table,
       :thead => :thead,
       :tbody => :tbody,
-      :tfood => :tfood,
+      :tfoot => :tfoot,
       :tr => :tr,
       :th => :th,
       :td => :td
