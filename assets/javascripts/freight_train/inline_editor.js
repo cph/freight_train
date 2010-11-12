@@ -22,14 +22,7 @@ var InlineEditor = (function(){
   var constructor = function(url, element, editor_writer) {
     element = $(element); if(!element) return;
     
-    // if you click a row, switch to its editor
-    // TODO: add selection of rows using up and down arrows and toggling of row with space or enter
-    element.observe('click', function(event) {
-      
-      // Ignore if a link or button was clicked
-      var tag = Event.findElement(event).tagName.toLowerCase();
-      if($A(['input', 'button', 'a']).member(tag))
-        return;
+    element.edit_inline = function() {
       
       // close any existing editors
       InlineEditor.close();
@@ -69,6 +62,12 @@ var InlineEditor = (function(){
           Event.stop(event);
           save();
         }
+        if(event.keyCode == Event.KEY_UP) {
+          observer.fire('up', [element, editor]);
+        }
+        if(event.keyCode == Event.KEY_DOWN) {
+          observer.fire('down', [element, editor]);
+        }
       });
       
       // Finally, select the first Form element in the editor
@@ -83,29 +82,37 @@ var InlineEditor = (function(){
       // after_init callback
       observer.fire('after_init', [element, editor]);
       
-      // Set the current row being edited
+      // Remember the row being edited
       CURRENT_ELEMENT = element;
       CURRENT_EDITOR = editor;
+      
+    }
+    
+    // Edit the row when it is clicked
+    element.observe('click', function(event) {
+      // Ignore if a link or button was clicked
+      var tag = Event.findElement(event).tagName.toLowerCase();
+      if(!$A(['input', 'button', 'a']).member(tag)) {
+        element.edit_inline();
+      }
     });
   };
   
-  // Class methods
   constructor.close = function() {
     if(CURRENT_ELEMENT || CURRENT_EDITOR) {
       observer.fire('close', [CURRENT_ELEMENT, CURRENT_EDITOR]);
       if(CURRENT_ELEMENT) CURRENT_ELEMENT.show();
       if(CURRENT_EDITOR)  CURRENT_EDITOR.remove();
-      CURRENT_ELEMENT =   null;
-      CURRENT_EDITOR =    null;
+      CURRENT_ELEMENT     = null;
+      CURRENT_EDITOR      = null;
     }
   };
-  constructor.observe = function(name,func){observer.observe(name,func);};
-  constructor.unobserve = function(name,func){observer.unobserve(name,func);};
+  constructor.observe = function(name,func){ observer.observe(name, func); };
+  constructor.unobserve = function(name,func){ observer.unobserve(name, func); };
   
-  // Listen for the escape key
+  // Close InlineEditors when the ESC key is pressed
   document.observe('dom:loaded', function() {
     $(document.body).observe('keyup', function(event) {
-      App.debug('esc');
       if(event.keyCode==Event.KEY_ESC)
         InlineEditor.close();
     });

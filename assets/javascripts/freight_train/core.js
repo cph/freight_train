@@ -171,45 +171,32 @@ var FT = (function(){
         }
         alt = !alt;
       }
-    },    
+    },
     hover_row: function(row) {
       if(!row) throw new Error('row must not be null');
-      // 2009.03.27 - Both of the following methods fail to add the
-      // 'hovered' class to a row that has just been edited or created.
-      //$$('.row.interactive').each( function(e) {
       row.observe('mouseover', function() {
-        //var e2 = $(e.readAttribute('id') + '_commands'); if(e2) e2.setStyle({visibility:'visible'});
         row.addClassName('hovered');
       });
       row.observe('mouseout', function() {
-        //var e2 = $(e.readAttribute('id') + '_commands'); if(e2) e2.setStyle({visibility:'hidden'});
         row.removeClassName('hovered');
       });
-      //});
-      /*	
-      e.hover(function()
-      {
-        // Show commands (if FTlicable)		
-        var e2 = $(e.readAttribute('id') + '_commands'); if(e2) e2.show();
- 
-        // Add hovered style
-        e.addClassName('hovered');
-      }, function()
-      {
-        // Hide commands (if FTlicable)
-        var e2 = $(e.readAttribute('id') + '_commands'); if(e2) e2.hide();
- 
-        // Remove hovered style
-        e.removeClassName('hovered');
-      }) });
-      */
     },
     edit_row_inline: function(row, url_root, editor_writer, before_edit, after_edit) {
       var id = row.readAttribute("id");
       var idn = id.match(/\d+/);
       var url = url_root + '/' + idn;
       new InlineEditor(url, row, editor_writer, before_edit, after_edit);
-    }, 
+    },
+    enable_keyboard_navigation: function() {
+      InlineEditor.observe('up', function(row, editor) {
+        var previous_row = row.previous('.editable');
+        if(previous_row) { previous_row.edit_inline(); }
+      });
+      InlineEditor.observe('down', function(row, editor) {
+        var next_row = editor.next('.editable');
+        if(next_row) { next_row.edit_inline(); }
+      });
+    },
     edit_row: function(row, url_root) {
       row.observe(
         "click",

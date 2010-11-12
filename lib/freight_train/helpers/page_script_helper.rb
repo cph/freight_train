@@ -3,20 +3,20 @@ module FreightTrain::Helpers::PageScriptHelper
 
   def make_interactive(path, table_name, options)
     options[:destroy] = true unless options.key?(:destroy)
-
+    
     html = "<script type=\"text/javascript\">\n" << 
        "//<![CDATA[\n" <<
-
+       
        # create a namespace for record-specific functions
        "FT.#{table_name.classify}=(function(){\n" <<
        "  var path='#{path}';\n" <<
        "  var obsv=new Observer();\n" 
-
+       
     if @inline_editor
       html << "  var editor_writer=#{editor_writer_method(table_name, options)};\n"
-      html << "  InlineEditor.observe('after_init',#{after_edit_method(options)});\n"
+      html << "  InlineEditor.observe('after_init', #{after_edit_method(options)});\n"
     end
-
+      
       html << "  return {\n" <<
            "    path: function(){return path;},\n" <<
            "    observe: function(n,f){obsv.observe(n,f);},\n" <<
@@ -54,6 +54,7 @@ module FreightTrain::Helpers::PageScriptHelper
       FT.init({
         token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}')
       });
+      #{"FT.enable_keyboard_navigation();" if options[:enable_keyboard_navigation]}
       //]]>
     </script>
     HTML
@@ -76,13 +77,15 @@ private
   def hookup_row_method( options )
     content = "hookup_row: function(row){"
     if @inline_editor
-      content << "if(row.hasClassName('editable')) FT.edit_row_inline(row,path,editor_writer);"
+      content << "if(row.hasClassName('editable')) {" <<
+                   "FT.edit_row_inline(row,path,editor_writer);" << 
+                 "}"
     elsif (options[:editable] != false)
       if (fn=options[:editor])
         content << "if(row.hasClassName('editable')) FT.edit_row_fn(row,#{fn});"
       else
         content << "if(row.hasClassName('editable')) FT.edit_row(row,path);"
-      end 
+      end
     end
     content << "obsv.fire('hookup_row',row);"
     content << "}"
