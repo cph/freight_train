@@ -52,7 +52,7 @@ var InlineEditor = (function(){
         var params = Form.serialize(editor);
         FT.xhr(url, 'put', params);
       }
-
+      
       // ...on clicking a submit button
       var submit = editor.down('*[type="submit"]');
       if(submit) {
@@ -79,16 +79,16 @@ var InlineEditor = (function(){
         } catch(e) {
         }
       }
-
+      
       // after_init callback
       observer.fire('after_init', [element, editor]);
-
+      
       // Set the current row being edited
       CURRENT_ELEMENT = element;
       CURRENT_EDITOR = editor;
     });
   };
-
+  
   // Class methods
   constructor.close = function() {
     if(CURRENT_ELEMENT || CURRENT_EDITOR) {
@@ -101,15 +101,15 @@ var InlineEditor = (function(){
   };
   constructor.observe = function(name,func){observer.observe(name,func);};
   constructor.unobserve = function(name,func){observer.unobserve(name,func);};
-
+  
   // Listen for the escape key
   document.observe('dom:loaded', function() {
-    document.observe('keyup', function(event) {
-      //if(CURRENT_ROW_ID && (event.keyCode==Event.KEY_ESC))
+    $(document.body).observe('keyup', function(event) {
+      App.debug('esc');
       if(event.keyCode==Event.KEY_ESC)
         InlineEditor.close();
     });
   });
-
+  
   return constructor;  
 })();
