@@ -160,10 +160,8 @@ var FT = (function(){
       var rows = $$('.row');
       //alert(rows[0].readAttribute('style'));
       var alt = false;
-      for(var i=0; i<rows.length; i++)
-      {
-        if(alt != rows[i].hasClassName('alt'))
-        {
+      for(var i=0; i<rows.length; i++) {
+        if(alt != rows[i].hasClassName('alt')) {
           if(alt)
             rows[i].addClassName('alt');
           else    
@@ -175,6 +173,7 @@ var FT = (function(){
     hover_row: function(row) {
       if(!row) throw new Error('row must not be null');
       row.observe('mouseover', function() {
+        observer.fire('hover', [row]);
         row.addClassName('hovered');
       });
       row.observe('mouseout', function() {
@@ -198,14 +197,12 @@ var FT = (function(){
       });
     },
     edit_row: function(row, url_root) {
-      row.observe(
-        "click",
-        function(event) {
-          var id = row.readAttribute("id");
-          var idn = id.match(/\d+/);
-          var url = url_root + '/' + idn; // + "/edit"
-          window.location = url;
-        });
+      row.observe("click", function(event) {
+        var id = row.readAttribute("id");
+        var idn = id.match(/\d+/);
+        var url = url_root + '/' + idn; // + "/edit"
+        window.location = url;
+      });
     }, 
     edit_row_fn: function(row, fn) {
       row.observe("click", function() { fn(row); });
