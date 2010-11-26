@@ -32,10 +32,11 @@ var InlineEditor = (function(){
       observer.fire('before_init', element);
       
       // Create editor
-      var editor = editor_writer(element); if(!editor) return;	
+      var editor = editor_writer(element); if(!editor) {return}
       
       // Hide the view-only element
-      element.hide();
+      // element.hide();
+      element.addClassName('in-edit');
       
       // Insert the editor
       element.insert({'after':editor});
@@ -101,7 +102,7 @@ var InlineEditor = (function(){
   constructor.close = function() {
     if(CURRENT_ELEMENT || CURRENT_EDITOR) {
       observer.fire('close', [CURRENT_ELEMENT, CURRENT_EDITOR]);
-      if(CURRENT_ELEMENT) CURRENT_ELEMENT.show();
+      if(CURRENT_ELEMENT) CURRENT_ELEMENT.removeClassName('in-edit');
       if(CURRENT_EDITOR)  CURRENT_EDITOR.remove();
       CURRENT_ELEMENT     = null;
       CURRENT_EDITOR      = null;
