@@ -18,7 +18,7 @@ module FreightTrain::Helpers::CoreHelper
     def header(*args, &block)
       headings = block_given? ? capture(&block) : args.collect{|heading| alt_content_tag(:th, heading)}.join
       # headings << alt_content_tag(:th)  <-- doing this automatically is too unexpected and too difficult to hack if unneeded
-      output = alt_content_tag(:tr, headings, :class => "header")
+      output = alt_content_tag(:tr, headings, :class => "row header")
       raw_or_concat(output) if block_given?
       output
     end
@@ -28,7 +28,7 @@ module FreightTrain::Helpers::CoreHelper
     
     def footer(*args, &block)
       @footer_html = block_given? ? capture(&block) : args.collect{|footer| alt_content_tag(:td, footer)}.join
-      @footer_html = "#{alt_content_tag(:tr, @footer_html, :class => "footer")}"
+      @footer_html = "#{alt_content_tag(:tr, @footer_html, :class => "row footer")}"
       nil
     end
     
