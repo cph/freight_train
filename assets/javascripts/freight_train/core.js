@@ -253,15 +253,15 @@ var FT = (function(){
       }
     },
     
-    create_options: function(options) {
+    create_options: function(options, selectedItem) {
       var html = '';
-      for(var i=0; i<options.length; i++) {
-        var option = options[i];
-        if(option instanceof Array) {
-          html += '<option value=\"' + option[1] + '\">' + option[0] + '</option>';
-        } else {
-          html += '<option value=\"' + option + '\">' + option + '</option>';
-        }
+      for(var i=0, ii=options.length; i<ii; i++) {
+        var option = options[i],
+            isArray = (option instanceof Array),
+            name = isArray ? option[0] : option,
+            value = isArray ? option[1] : option,
+            selected = (value == selectedItem);
+        html += '<option value="' + value + '"' + (selected ? 'selected="selected"' : '') + '>' + name + '</option>';
       }
       return html;
     },
