@@ -1,6 +1,7 @@
 class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
-
-
+  
+  
+  
   def refresh( mode, record, *args )
     case mode
     when :single
@@ -11,9 +12,11 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
   end
   
   
+  
   def fire(event, id)
     @lines << "$('#{id}').fire('ft:#{event}');";
   end
+  
   
   
   def safe_hide(*ids)
@@ -23,7 +26,8 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     end
   end
   
-
+  
+  
   def add_record( record, *args )
     options = args.extract_options!.with_indifferent_access
     
@@ -37,8 +41,9 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     @lines << "FT.hookup_row('#{model_name}',$('#{idof record}'));"
     call "FT.restripe_rows"
   end
-
-
+  
+  
+  
   def refresh_record( record, *args )
     options = args.extract_options!.with_indifferent_access
     
@@ -52,8 +57,9 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
                  #:locals => {:single => true}
     @lines << "FT.hookup_row('#{model_name}',$('#{id}'));"
   end
-
-
+  
+  
+  
   def refresh_records(model, *args)
     options = args.extract_options!.with_indifferent_access
     
@@ -64,8 +70,9 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     replace_html(table_name, :partial => partial_name, :collection => collection)
     @lines << "$('#{table_name}').select('.row').each(function(row){FT.hookup_row('#{model_name}',row);});"
   end
-
-
+  
+  
+  
   def show_error( message, *args )
     options = args.extract_options!.with_indifferent_access
     
@@ -73,6 +80,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     replace_html id, message
     show id
   end
-
-
+  
+  
+  
 end

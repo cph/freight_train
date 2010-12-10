@@ -9,7 +9,7 @@ class FreightTrain::Responder < ActionController::Responder
   
   
   def to_html
-    if request.xhr?
+    if request.xhr? # && request.freight_train?
       create  if post?
       update  if put?
       destroy if delete?

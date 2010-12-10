@@ -71,3 +71,4 @@ Dir["#{dir}/**/*.rb"].each do |file|
 end
 
 require 'freight_train/extensions/java_script_generator'
+require 'freight_train/extensions/request'
