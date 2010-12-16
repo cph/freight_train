@@ -38,7 +38,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
 #                :partial => (options[:partial] || ((ocn=options[:originating_controller]) ? "/#{ocn}/#{partial_name}" : partial_name)),
                  :partial => partial_name,
                  :object => record
-    @lines << "FT.hookup_row('#{model_name}',$('#{idof record}'));"
+    @lines << "FT.#{model_name}.hookup_row($('#{idof record}'));"
     call "FT.restripe_rows"
   end
   
@@ -55,7 +55,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
                  :partial => partial_name,
                  :object => record
                  #:locals => {:single => true}
-    @lines << "FT.hookup_row('#{model_name}',$('#{id}'));"
+    @lines << "FT.#{model_name}.hookup_row($('#{id}'));"
   end
   
   
@@ -68,7 +68,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     table_name = model_name.tableize
     partial_name = options[:partial] || model_name.underscore
     replace_html(table_name, :partial => partial_name, :collection => collection)
-    @lines << "$('#{table_name}').select('.row').each(function(row){FT.hookup_row('#{model_name}',row);});"
+    @lines << "FT.hookup_rows();"
   end
   
   

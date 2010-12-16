@@ -65,7 +65,7 @@ private
   
   
   
-  def destroy_method( table_name, options )
+  def destroy_method(table_name, options)
     msg = options.key?(:confirm) ? options[:confirm] : "Delete #{table_name.to_s.singularize.titleize}?"
     "destroy: function(idn){" <<
       "return FT.destroy(#{msg ? "'#{msg}'" : "false"},('#{table_name.to_s.singularize}_'+idn),(path+'/'+idn));" <<
@@ -74,12 +74,11 @@ private
   
   
   
-  def hookup_row_method( options )
+  def hookup_row_method(options)
     content = "hookup_row: function(row){"
+    content << "if(row.hasClassName('interactive')) {FT.hover_row(row);}"
     if @inline_editor
-      content << "if(row.hasClassName('editable')) {" <<
-                   "FT.edit_row_inline(row,path,editor_writer);" << 
-                 "}"
+      content << "if(row.hasClassName('editable')) {FT.edit_row_inline(row,path,editor_writer);}"
     elsif (options[:editable] != false)
       if (fn=options[:editor])
         content << "if(row.hasClassName('editable')) FT.edit_row_fn(row,#{fn});"

@@ -4,9 +4,7 @@
 // Events raised from FT:
 //   after_add_nested   raised after a nested item is created
 //   after_reset_nested raised after a nested item is either created or destroyed
-//   hookup             raised after FreightTrain forms are initialized (or reinitialized)
-//   hookup_form        passed a form being initialized as a FreightTrain form
-//   load               raised right after FreightTrain is initialized on dom:loaded
+//   load               raised right after FreightTrain is initialized
 //
 //
 // Events raised from elements
@@ -26,120 +24,181 @@
 //
 var FT = (function(){
 
-  /* PRIVATE VARIABLES */
-  var token = '';
-  var enable_nested_records = true;
-  var observer = new Observer();
+  var token = '',
+      enable_nested_records = true,
+      observer = new Observer(),
+      forms = [];
   
-  /* PRIVATE METHODS */
+  
+  
+  function init(args) {
+    readOptions(args);
+    activateFreightTrainForms();
+    if(enable_nested_records) {
+      FT.reset_add_remove_for_all();
+    }
+    removeDestroyedRows();
+    observer.fire('load');
+  }
+  
+  function readOptions(args) {
+    args = args || {};
+    token = args.token;
+  }
+  
+  
+  
+  function activateFreightTrainForms() {
+    var _forms = findFreightTrainForms();
+    for(var i=0, ii=_forms.length; i<ii; i++) {
+      activateFreightTrainForm(_forms[i]);
+    }
+  }
+  
+  function findFreightTrainForms() {
+    return $$('form.freight_train');
+  }
+  
+  
+  
+  function activateFreightTrainForm(form) {
+    hasFormBeenInitialized(form) ? reinitializeForm(form) : initializeForm(form);
+  }
+  
+  function hasFormBeenInitialized(form) {
+    for(var i=0, ii=forms.length; i<ii; i++) {
+      if(forms[i] == form) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  function reinitializeForm() {
+    // Do nothing
+  }
+  
+  function initializeForm(form) {
+    configureFormSubmission(form);
+    extendFormModel(form);
+    initializeRowsInForm(form);
+  }
+  
+  
+  
+  function configureFormSubmission(form) {
+    form.observe('submit', function(e) {
+      Event.stop(e);
+      InlineEditor.close(); // Don't let values in inline editor override values in creator
+      submitFormRemotely(form);
+    })
+  }
+  
+  function submitFormRemotely(form) {
+    FT.xhr(form.action, 'post', form.serialize());
+  }
+  
+  
+  
+  function extendFormModel(form) {
+    var model = getModelFromForm(form)
+    if(model && model.hookup_row) {
+      model.hookup_rows = function(rows) {
+        if(!rows) {
+          rows = findRowsWithin(form);
+        }
+        for(var i=0, ii=rows.length; i<ii; i++) {
+          model.hookup_row(rows[i]);
+        }
+      }
+    }
+  }
+  
+  function getModelFromForm(form) {
+    var model_name = form.readAttribute('data-model'), 
+        model = FT[model_name];
+    if(!model) {
+      FT.debug('[ft] FT.' + model_name + ' was not found.');
+    }
+    return model;
+  }
+  
+  function findRowsWithin(form) {
+    return form.select('.row');
+  }
+  
+  
+  
+  function initializeRowsInForm(form) {
+    var model = getModelFromForm(form)
+    if(model && model.hookup_rows) {
+      model.hookup_rows();
+    }
+  }
+  
+  
+  
+  function removeDestroyedRows() {
+    // need to wrap document.body in $() so that it works on IE
+    $(document.body).observe('ft:destroy', function(event) {
+      InlineEditor.close();
+      var e = event.element();
+      if(e && e.parentNode) {
+        e.parentNode.removeChild(e);
+      }
+      FT.restripe_rows();
+    });
+  }
+  
+  
+  
+  
+  
+  
   var render_deleted = function(id) {
-    // make the item non-responsive to clicks and remove its background color
     var e=$(id);
     if(e) {
       e.addClassName('deleted');
       e.removeClassName('editable');
-      e.stopObserving('mouseover');
-      
-      // TODO: These next two lines exhibit too much knowledge of an implementation of 360's color selector
-      e.select('.tag-color').each(function(tag) { tag.setStyle({'backgroundColor': ''}); });
-      e.select('.tag-bubble').each(function(tag) { tag.setStyle({'backgroundColor': ''}); });
       e.select('input').each(function(i) {
         i.disabled = true;
       });
     }
   };
-  var _hookup_row = function(model, row) {
-    if(row.hasClassName('interactive')) FT.hover_row(row);
-    model.hookup_row(row);
-  };
-  var set_add_command_on_click = function(form, add_row) {
-    if(!form) throw new Error('form must not be null');
-    add_row = add_row || form.down('#add_row');           if(!add_row) return;
-    add_row.observe('click', function(click_event) {
-      var element = click_event.element();
-      if(element && (element.match('input[type="submit"]') || element.match('input[type="image"]'))) {
-        //alert('submitting remotely; check');
-        InlineEditor.close(); // Don't let values in inline editor override values in creator
-        form.onsubmit = function(submit_event) {
-          FT.xhr(form.action,'post',form.serialize());
-          return false;
-        };
-      }
-    });
-  };
   
-  /* */
-  InlineEditor.observe('before_init',function(tr) {
-    var e=$('error');
-    if(e) e.hide();
-  });
   
-  document.observe('dom:loaded', function() {
-    // need to wrap document.body in $() so that it works on IE
-    $(document.body).observe('ft:destroy', function(event) {
-      InlineEditor.close();
-      var e = event.element();
-      if(e) e.remove();
-      FT.restripe_rows();
-    });
-  });
-
+  // !nb: not FreightTrain's concern?
+  // InlineEditor.observe('before_init', function(tr) {
+  //   var e=$('error');
+  //   if(e) e.hide();
+  // });
   
-  /* PUBLIC METHODS */
+  
+  
   return {
-    init: function(args) {
-      document.observe('dom:loaded', function() {
-        FT.init_now(args);
-      });
+    
+    debug: function(o) {
+      if(window.console && window.console.log) {
+        window.console.log(o);
+      }
     },
-    init_now: function(args) {
-      args = args || {};
-      if(args.token) token = args.token;
-      //if(args.enable_nested_records) enable_nested_records = true;
-      FT.hookup();
-      observer.fire('load');
-    },
+    
+    init: init,
     
     observe: function(name, func) { observer.observe(name, func); },
+    
     unobserve: function(name, func) { observer.unobserve(name, func); },
     
-    hookup_form: function(form) {
-      if(!form) throw new Error('form must not be null');
-      var add_row=form.down('#add_row');
-      if(add_row) {
-        set_add_command_on_click(form,add_row);
-        FT.hookup_editor(add_row);
-      //}else{
-        //alert('\"add_row\" not found');
-      }
-    },
-    hookup_editor: function(editor) {
-      if(!editor) throw new Error('editor must not be null');
-      // FT.submit_forms_on_enter(editor);
-      //if(enable_nested_records)
-      //  FT.reset_add_remove_for_all(editor);
-      observer.fire('hookup_form',editor);
-    },
-    hookup: function() {
-      $$('.freight_train').each(function(train) {
-        FT.hookup_form(train);
-        var model_name = train.readAttribute('data-model')
-        var model = FT[model_name];
-        if(model && model.hookup_row)
-          train.select('.row').each(function(row){_hookup_row(model,row);});
-      });
-      if(enable_nested_records)
-        FT.reset_add_remove_for_all();
-      observer.fire('hookup');
-    },
-    hookup_row: function(model_name, row) {
-      if(!model_name) throw new Error('model_name must not be null');
-      if(!row) throw new Error('row must not be null');
-      var model = FT[model_name];
-      if(model && model.hookup_row)
-        _hookup_row(model, row);
-    },
-    destroy: function(msg,id,path) {
+    // !nb: moved to FT[model_name].hookup_row
+    // hookup_row: function(model_name, row) {
+    //   if(!model_name) throw new Error('model_name must not be null');
+    //   if(!row) throw new Error('row must not be null');
+    //   var model = FT[model_name];
+    //   if(model && model.hookup_row)
+    //     _hookup_row(model, row);
+    // },
+    
+    destroy: function(msg, id, path) {
       if(!msg || confirm(msg)) {
         render_deleted(id);
         FT.xhr(path,'delete');
@@ -147,6 +206,7 @@ var FT = (function(){
       }
       return false;
     },
+    
     xhr: function(url,method,params,args) {
       args = args || {};
       args.asynchronous = true;
@@ -156,20 +216,23 @@ var FT = (function(){
       if(params) args.parameters += '&' + params + '&freight_train=true';
       new Ajax.Request(url, args);
     },
+    
     restripe_rows: function() {
-      var rows = $$('.row');
-      //alert(rows[0].readAttribute('style'));
-      var alt = false;
-      for(var i=0; i<rows.length; i++) {
+      var rows = $$('.row'),
+          alt = false;
+      for(var i=0, ii=rows.length; i<ii; i++) {
         if(alt != rows[i].hasClassName('alt')) {
-          if(alt)
+          if(alt) {
             rows[i].addClassName('alt');
-          else    
+          } else {
             rows[i].removeClassName('alt');
+          }
         }
         alt = !alt;
       }
     },
+    
+    // !nb: not a FreightTrain concern?
     hover_row: function(row) {
       if(!row) throw new Error('row must not be null');
       row.observe('mouseover', function() {
@@ -180,22 +243,31 @@ var FT = (function(){
         row.removeClassName('hovered');
       });
     },
+    
     edit_row_inline: function(row, url_root, editor_writer, before_edit, after_edit) {
       var id = row.readAttribute("id");
       var idn = id.match(/\d+/);
       var url = url_root + '/' + idn;
       new InlineEditor(url, row, editor_writer, before_edit, after_edit);
     },
+    
     enable_keyboard_navigation: function() {
       InlineEditor.observe('up', function(row, editor) {
         var previous_row = row.previous('.editable');
-        if(previous_row) { previous_row.edit_inline(); }
+        if(previous_row) {
+          // editor.save();
+          previous_row.edit_inline();
+        }
       });
       InlineEditor.observe('down', function(row, editor) {
         var next_row = editor.next('.editable');
-        if(next_row) { next_row.edit_inline(); }
+        if(next_row) {
+          // editor.save();
+          next_row.edit_inline();
+        }
       });
     },
+    
     edit_row: function(row, url_root) {
       row.observe("click", function(event) {
         var id = row.readAttribute("id");
@@ -204,42 +276,19 @@ var FT = (function(){
         window.location = url;
       });
     }, 
+    
     edit_row_fn: function(row, fn) {
       row.observe("click", function() { fn(row); });
-    }, 
-    // submit_forms_on_enter: function(parent) {
-    //   // Create the handler only once, no matter how often this method is called
-    //   if(!FT.submit_forms_on_enter.keypress)
-    //     FT.submit_forms_on_enter.keypress = function(event) {
-    //       if(event.keyCode == Event.KEY_RETURN) {
-    //         //debugger;
-    //         Event.stop(event);
-    //         var e = Event.element(event);
-    //         if(!e) return;
-    //         var tr = e.up(".row.editor");
-    //         if(!tr) return;
-    //         var submit = tr.down("*[type='submit']");
-    //         if(!submit) return;
-    //         submit.click(); // Works in Chrome 2, IE 7, Firefox 3
-    //       }
-    //     };
-    //  
-    //   var selector = function(x){ return parent ? parent.select(x) : $$(x); };
-    //   selector('input, select').each(function(e) {
-    //     // Register the event handler only once per input element, no matter how often this method is called
-    //     e.stopObserving("keypress", FT.submit_forms_on_enter.keypress);
-    //     e.observe("keypress", FT.submit_forms_on_enter.keypress);
-    //   });
-    // },
+    },
     
-    // todo: move to Select or HTMLSelectElement?
+    // !todo: move to Select or HTMLSelectElement?
     select_value: function(selector,value) {
       if(!selector) {
-        alert("selector not found");
+        FT.debug("selector not found");
         return;
       }
       if(!value) {
-        //alert("value not found");
+        //FT.debug("value not found");
         return;
       }
       var options = selector.options;
@@ -274,10 +323,11 @@ var FT = (function(){
       if(e && sel)
         FT.select_value(sel, e.readAttribute('value')||e.innerHTML);
       else {
-        if(!e) alert(attr_name+' not found');
-        if(!sel) alert('selector "'+method+'" ('+attr_name+') not found');
+        if(!e) FT.debug(attr_name+' not found');
+        if(!sel) FT.debug('selector "'+method+'" ('+attr_name+') not found');
       }
     },
+    
     check_selected_values: function(tr,tr_edit,attr_name) {
       var e=tr.down('*[attr="'+attr_name+'"]');
       if(e) {
@@ -285,13 +335,14 @@ var FT = (function(){
         for(var i=0; i<values.length; i++)
         {
           e=tr_edit.down('*[value="'+values[i]+'"]');
-          if(!e) alert('"'+values[i]+'" not found');
+          if(!e) FT.debug('"'+values[i]+'" not found');
           else e.writeAttribute('checked','checked');
         }
       }
       else
-        alert(attr_name+' not found');
+        FT.debug(attr_name+' not found');
     },
+    
     reset_form_fields_in: function(parent, options) {
       options = options || {};
       if(options.only) {options.only = $A(options.only);}
@@ -312,6 +363,7 @@ var FT = (function(){
         FT.reset_nested(table);
       });
     },
+    
     select_first_field_in: function(parent) {
       var first_input = parent.select('input, select, textarea').find(function(input) {
         return input.visible() && (input.type != 'hidden');
@@ -320,9 +372,10 @@ var FT = (function(){
         first_input.select();
       }
     },
+    
     add_nested_object: function(sender) {
-      var tr = $(sender).up('.nested-row'); if(!tr) { alert('FT.add_nested_object: .nested-row not found'); return; }
-      var table = tr.parentNode; if(!table) { alert('FT.add_nested_object .nested not found'); return; }
+      var tr = $(sender).up('.nested-row'); if(!tr) { FT.debug('FT.add_nested_object: .nested-row not found'); return; }
+      var table = tr.parentNode; if(!table) { FT.debug('FT.add_nested_object .nested not found'); return; }
       var n = table.childNodes.length;
       
       var new_tr = tr.cloneNode(true);
@@ -342,6 +395,7 @@ var FT = (function(){
       observer.fire('after_add_nested', [table,new_tr]);
       FT.reset_add_remove_for(table);
     },
+    
     delete_nested_object: function(sender) {
       var tr = $(sender).up('.nested-row'); if(!tr) return;
       var table = tr.up('.nested'); if(!table) return;      
@@ -358,6 +412,7 @@ var FT = (function(){
       }
       FT.reset_add_remove_for(table);
     },
+    
     reset_nested: function(table) {
       table = $(table);
       if(table) {
@@ -369,10 +424,12 @@ var FT = (function(){
         }
       }
     },
+    
     reset_add_remove_for_all: function(parent) {
       var selector = function(x){ return parent ? $(parent).select(x) : $$(x); };
       selector('.nested.editor').each(FT.reset_add_remove_for);
     },
+    
     reset_add_remove_for: function(table) {
       function renumber_row(row, i) {
         row.select('input, textarea, select').each(function(e) {
@@ -406,7 +463,7 @@ var FT = (function(){
       else if(n==0) {
         reset_add_remove_for_row(rows[0],'hidden','visible');
       }
- 
+      
       observer.fire('after_reset_nested',table);
       //if(window.after_reset_nested) window.after_reset_nested(table);
     },
@@ -415,7 +472,7 @@ var FT = (function(){
     for_each_row: function(root_tr, root_tr_edit, selector, fn) {
       var nested_rows=root_tr.select(selector);
       var nested_editor_rows=root_tr_edit.select(selector);
-      //debugger;
+      //FT.debugger;
       //if(nested_rows.length == 0) {
       
         // We need to have at least one row with default values

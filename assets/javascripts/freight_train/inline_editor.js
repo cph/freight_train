@@ -42,7 +42,7 @@ var InlineEditor = (function(){
       element.insert({'after':editor});
       
       // Save the contents of the editor...
-      function save() {
+      editor.save = function() {
         var params = Form.serialize(editor);
         FT.xhr(url, 'put', params);
       }
@@ -52,7 +52,7 @@ var InlineEditor = (function(){
       if(submit) {
         submit.observe('click', function(event) {
           Event.stop(event);
-          save();
+          editor.save();
         });
       }
       
@@ -61,7 +61,7 @@ var InlineEditor = (function(){
         // window.console.log('kd: ' + event.which);
         if(event.keyCode == Event.KEY_RETURN) {
           Event.stop(event);
-          save();
+          editor.save();
         }
         if(event.keyCode == Event.KEY_UP) {
           observer.fire('up', [element, editor]);

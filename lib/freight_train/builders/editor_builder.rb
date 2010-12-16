@@ -61,7 +61,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   def check_box(method, options={})
     attr_name = "#{@object_name}[#{method}]"
     raw code(
-      "e = tr.down('*[attr=\"#{attr_name}\"]');if(!e){alert('#{attr_name} not found');return null;}" <<
+      "e = tr.down('*[attr=\"#{attr_name}\"]');if(!e){FT.debug('#{attr_name} not found');return null;}" <<
       "var checked = (e.readAttribute('value')=='true');"
     ) <<
       "<input name=\"#{attr_name}\" type=\"hidden\" value=\"0\"/>" <<
@@ -220,7 +220,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     #   "var e = tr.down('*[attr=\"#{attr_name}\"]');" <<
     #   "var sel = tr_edit.down('select[name=\"#{attr_name}\"]');" <<
     #   "if(sel && e) FT.select_value(sel,e.readAttribute('value'));" <<
-    #   "else{if(!e) alert('#{attr_name} not found');if(!sel) alert('#{method} not found');}"
+    #   "else{if(!e) FT.debug('#{attr_name} not found');if(!sel) FT.debug('#{method} not found');}"
     # super
     
     @after_init << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
@@ -234,8 +234,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     attr_name = "#{@object_name}[#{method}]"
     raw code(
       "e=tr.down('*[attr=\"#{attr_name}\"]');" <<
-      "if(!e){alert('#{attr_name} not found'); return null;}" <<
-    # "alert(e.innerHTML);" <<
+      "if(!e){FT.debug('#{attr_name} not found'); return null;}" <<
+    # "FT.debug(e.innerHTML);" <<
       "html += e.innerHTML;"
     )
   end
@@ -249,8 +249,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     options[:id] = method unless options[:id]
     raw code(
       "e=tr.down('*[attr=\"#{attr_name}\"]');" <<
-      "if(!e){alert('#{attr_name} not found'); return null;}" <<
-    # "alert(e.innerHTML);" <<
+      "if(!e){FT.debug('#{attr_name} not found'); return null;}" <<
+    # "FT.debug(e.innerHTML);" <<
       "var #{method}=e.readAttribute('value')||e.innerHTML;"
     ) << 
     @template.tag( "input", options.merge(
@@ -266,7 +266,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
       "var e = tr.down('*[attr=\"#{attr_name}\"]');" <<
       "var i = tr_edit.down('input[name=\"#{attr_name}\"]');" <<
       "if(i && e) { i.value = e.readAttribute('value')||e.innerHTML; }" <<
-      "else{if(!e) alert('#{attr_name} not found');if(!i) alert('#{method} not found');}"
+      "else{if(!e) FT.debug('#{attr_name} not found');if(!i) FT.debug('#{method} not found');}"
     super method, options
   end
 =end
