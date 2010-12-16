@@ -102,13 +102,13 @@ var FT = (function(){
   
   function extendFormModel(form) {
     var model = getModelFromForm(form)
-    if(model && model.hookup_row) {
-      model.hookup_rows = function(rows) {
-        if(!rows) {
-          rows = findRowsWithin(form);
-        }
-        for(var i=0, ii=rows.length; i<ii; i++) {
-          model.hookup_row(rows[i]);
+    if(model) {
+      if(model.hookup_row) {
+        model.hookup_rows = function(rows) {
+          if(!rows) {rows = findRowsWithin(form);}
+          for(var i=0, ii=rows.length; i<ii; i++) {
+            model.hookup_row(rows[i]);
+          }
         }
       }
     }

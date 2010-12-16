@@ -14,7 +14,7 @@ module FreightTrain::Helpers::PageScriptHelper
        
     if @inline_editor
       html << "  var editor_writer=#{editor_writer_method(table_name, options)};\n"
-      html << "  InlineEditor.observe('after_init', #{after_edit_method(options)});\n"
+      html << "  InlineEditor.observe('after_init', #{after_edit_method(table_name, options)});\n"
     end
       
       html << "  return {\n" <<
@@ -118,10 +118,12 @@ private
   
   
   
-  def after_edit_method( options )
-    content = "function(tr,tr_edit){"
-    content << "tr_edit.select('.nested').each(FT.reset_add_remove_for);" if @enable_nested_records
-    content << @after_init_edit if @after_init_edit
+  def after_edit_method(table_name, options)
+    content =  "function(tr,tr_edit){"
+    content <<   "if(tr.up('form[data-model=\"#{table_name.classify}\"]')){"
+    content <<     "tr_edit.select('.nested').each(FT.reset_add_remove_for);" if @enable_nested_records
+    content <<     @after_init_edit if @after_init_edit
+    content <<   "}"
     content << "}"
   end
   
