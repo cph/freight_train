@@ -68,7 +68,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     table_name = model_name.tableize
     partial_name = options[:partial] || model_name.underscore
     replace_html(table_name, :partial => partial_name, :collection => collection)
-    @lines << "FT.hookup_rows();"
+    @lines << "FT.#{model_name}.hookup_rows();"
   end
   
   
