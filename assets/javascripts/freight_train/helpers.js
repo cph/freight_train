@@ -1,8 +1,0 @@
-FT.Helpers = (function() {
-  
-  
-  
-  return {
-    
-  }
-});
