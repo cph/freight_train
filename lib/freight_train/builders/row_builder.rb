@@ -159,7 +159,7 @@ class FreightTrain::Builders::RowBuilder
   
   def delete_command
     @commands_called = true
-    "<a class=\"delete-command\" href=\"#\" onclick=\"Event.stop(event); FT.#{@record.class.name}.destroy(#{record.id});\">delete</a>"
+    "<a class=\"delete-command\" href=\"#\" onclick=\"Event.stop(event); FT.#{@record.class.name}.destroy(#{record.to_param.to_json});\">delete</a>"
   end
   
   

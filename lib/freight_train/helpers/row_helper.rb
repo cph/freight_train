@@ -40,7 +40,7 @@ module FreightTrain::Helpers::RowHelper
   
   def idof(record)
     raise(ArgumentError, "'record' cannot be nil") if record.nil?
-    "#{record.class.name.underscore}_#{record.id}"
+    "#{record.class.name.underscore}_#{record.to_param}"
   end
   
   
