@@ -80,6 +80,9 @@ var InlineEditor = (function() {
         }
       });
       
+      // after_init callback
+      observer.fire('after_init', [element, editor]);
+      
       // Finally, select the first Form element in the editor
       var first_input = editor.down('input, select, textarea');
       if(first_input) {
@@ -88,9 +91,6 @@ var InlineEditor = (function() {
         } catch(e) {
         }
       }
-      
-      // after_init callback
-      observer.fire('after_init', [element, editor]);
       
       // Remember the row being edited
       CURRENT_ELEMENT = element;
