@@ -37,7 +37,7 @@ module FreightTrain::Core
     
     render :update do |page|
       page.safe_hide "flash_error"
-      page.call "InlineEditor.close"
+      # page.call "InlineEditor.close"
       
       case refresh
       when :single
@@ -69,7 +69,7 @@ module FreightTrain::Core
   def show_error(*args)
     options = args.extract_options!
     message = args.first    
-    render :update do |page|
+    render(:update, :status => 400) do |page|
       page.show_error(message, options) if message
       page.alert options[:alert] if options.key?(:alert)
       yield(page) if block_given?

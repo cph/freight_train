@@ -14,7 +14,7 @@
 //   close            passes the element and the editor to observers just before the editor is hidden and the element restored
 //
 //
-var InlineEditor = (function(){
+var InlineEditor = (function() {
   var CURRENT_ELEMENT = null;
   var CURRENT_EDITOR = null;
   var observer = new Observer();
@@ -42,9 +42,18 @@ var InlineEditor = (function(){
       element.insert({'after':editor});
       
       // Save the contents of the editor...
-      editor.save = function() {
+      editor.save = function(callback) {
         var params = Form.serialize(editor);
-        FT.xhr(url, 'put', params);
+        FT.xhr(url, 'put', params, {
+          onSuccess: function() {
+            if(CURRENT_EDITOR == editor) { InlineEditor.close(); }
+          },
+          onComplete: function(response) {
+            if((response.status != 400) && callback) {
+              callback();
+            }
+          }
+        });
       }
       
       // ...on clicking a submit button
@@ -75,7 +84,7 @@ var InlineEditor = (function(){
       var first_input = editor.down('input, select, textarea');
       if(first_input) {
         try {
-          first_input.focus();
+          first_input.activate();
         } catch(e) {
         }
       }

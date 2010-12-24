@@ -26,6 +26,7 @@ var FT = (function(){
 
   var token = '',
       enable_nested_records = true,
+      save_when_navigating = false,
       observer = new Observer(),
       forms = [];
   
@@ -44,6 +45,7 @@ var FT = (function(){
   function readOptions(args) {
     args = args || {};
     token = args.token;
+    save_when_navigating = args.save_when_navigating;
   }
   
   
@@ -207,7 +209,7 @@ var FT = (function(){
       return false;
     },
     
-    xhr: function(url,method,params,args) {
+    xhr: function(url, method, params, args) {
       args = args || {};
       args.asynchronous = true;
       args.evalScripts = true;
@@ -255,14 +257,14 @@ var FT = (function(){
       InlineEditor.observe('up', function(row, editor) {
         var previous_row = row.previous('.editable');
         if(previous_row) {
-          // editor.save();
+          if(save_when_navigating) { editor.save(); }
           previous_row.edit_inline();
         }
       });
       InlineEditor.observe('down', function(row, editor) {
         var next_row = editor.next('.editable');
         if(next_row) {
-          // editor.save();
+          if(save_when_navigating) { editor.save(); }
           next_row.edit_inline();
         }
       });
