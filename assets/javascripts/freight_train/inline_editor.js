@@ -66,17 +66,17 @@ var InlineEditor = (function() {
       }
       
       // ...or on hitting the Return key
-      editor.observe('keydown', function(event) {
-        // window.console.log('kd: ' + event.which);
-        if(event.keyCode == Event.KEY_RETURN) {
-          Event.stop(event);
+      editor.observe('keydown', function(e) {
+        // window.console.log('kd: ' + e.which);
+        if(e.keyCode == Event.KEY_RETURN) {
+          Event.stop(e);
           editor.save();
         }
-        if(event.keyCode == Event.KEY_UP) {
-          observer.fire('up', [element, editor]);
+        if(e.keyCode == Event.KEY_UP) {
+          observer.fire('up', [e, element, editor]);
         }
-        if(event.keyCode == Event.KEY_DOWN) {
-          observer.fire('down', [element, editor]);
+        if(e.keyCode == Event.KEY_DOWN) {
+          observer.fire('down', [e, element, editor]);
         }
       });
       
@@ -85,21 +85,16 @@ var InlineEditor = (function() {
       
       // Finally, select the first Form element in the editor
       var first_input = editor.down('input, select, textarea');
-      if(first_input) {
-        try {
-          first_input.activate();
-        } catch(e) {
-        }
-      }
+      try { if(first_input) { first_input.activate(); } } catch(e) {}
       
       // Remember the row being edited
       CURRENT_ELEMENT = element;
       CURRENT_EDITOR = editor;
-      
     }
     
     // Edit the row when it is clicked
     element.observe('click', function(event) {
+      
       // Ignore if a link or button was clicked
       var tag = Event.findElement(event).tagName.toLowerCase();
       if(!$A(['input', 'button', 'a']).member(tag)) {

@@ -254,16 +254,18 @@ var FT = (function(){
     },
     
     enable_keyboard_navigation: function() {
-      InlineEditor.observe('up', function(row, editor) {
+      InlineEditor.observe('up', function(e, row, editor) {
         var previous_row = row.previous('.editable');
         if(previous_row) {
+          Event.stop(e);
           if(save_when_navigating) { editor.save(); }
           previous_row.edit_inline();
         }
       });
-      InlineEditor.observe('down', function(row, editor) {
+      InlineEditor.observe('down', function(e, row, editor) {
         var next_row = editor.next('.editable');
         if(next_row) {
+          Event.stop(e);
           if(save_when_navigating) { editor.save(); }
           next_row.edit_inline();
         }
