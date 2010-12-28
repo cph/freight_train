@@ -1,0 +1,7 @@
+= FreightTrain
+
+  - FT new rows don't get hover effect
+  - FT needs to scope events e.g. FT.Tag.after_init rather than InlineEditor.after_init
+  - FT could use custom DOM events rather than its observer?
+  - FT should use event delegation
+  - FT should scrape all of its DOM traversal to an adapter
