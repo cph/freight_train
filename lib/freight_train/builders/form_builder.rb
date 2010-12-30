@@ -27,7 +27,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
           return ((0...object.length).collect do |i|
             name = options[:name] || "#{@object_name}[#{method_or_object}_attributes][#{i}]"
             @template.fields_for(name, object[i], *args, &block)
-          end).join
+          end).join.html_safe
         else
           name = options[:name] || method_or_object
           #@template.concat "<!-- else -->"
@@ -93,7 +93,7 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
     name = "#{@object_name}[#{method}_attributes]"
     singular = method.to_s.singularize
     @template.instance_variable_set "@enable_nested_records", true
-  
+    
     i = 0
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
     raw_or_concat(alt_content_tag(:table, :class => "nested editor") {
@@ -110,10 +110,10 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
             }) <<
             capture(f, &block) <<
             (alt_content_tag(:td, :class => "delete-nested") {
-              "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
+              "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>".html_safe
             }) << 
             (alt_content_tag(:td, :class => "add-nested") {
-              "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
+              "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>".html_safe
             })
           }
           i += 1

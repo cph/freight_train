@@ -114,7 +114,7 @@ Now, let's build an editor for our to-do list items. In `index.html.erb`, we'll 
       <% ft.headings do %>
         <th>Description</th>
       <% end %>
-      <% ft.editor do |editor| %>
+      <%= ft.editor do |editor| %>
         <td><%= editor.text_field :description %></td>
       <% end %>
     <% end %>

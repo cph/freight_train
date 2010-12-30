@@ -1,6 +1,6 @@
 class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilder
   include ActionView::Helpers::TagHelper
-
+  
   @@default_editor_builder = FreightTrain::Builders::EditorBuilder
   def self.default_editor_builder; @@default_editor_builder; end
   def self.default_editor_builder=(val); @@default_editor_builder=val; end
@@ -43,32 +43,32 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   #       corollary, methods can always assume that they are concatenating to an open string.
   #
   # ===================================================================================================
-    
-
+  
+  
+  
   def initialize(object_name, object, template, options, proc)
     super
     @after_init = ""
   end
   
-  
-  # delegate :concat, :raw, :safe_concat, :alt_content_tag, :alt_tag, :to => :@template
   delegate :capture, :to => :@template
   
-  
   attr_reader :after_init
-
-
+  
+  
+  
   def check_box(method, options={})
     attr_name = "#{@object_name}[#{method}]"
-    raw code(
+    raw (code(
       "e = tr.down('*[attr=\"#{attr_name}\"]');if(!e){FT.debug('#{attr_name} not found');return null;}" <<
       "var checked = (e.readAttribute('value')=='true');"
     ) <<
       "<input name=\"#{attr_name}\" type=\"hidden\" value=\"0\"/>" <<
-      "<input name=\"#{attr_name}\" type=\"checkbox\"'+(checked ? 'checked=\"checked\"' : '')+' value=\"1\" />"
+      "<input name=\"#{attr_name}\" type=\"checkbox\"'+(checked ? 'checked=\"checked\"' : '')+' value=\"1\" />")
   end
-
-
+  
+  
+  
   def check_list_for(method, values, &block)
     attr_name = "#{@object_name}[#{method}]"
     @after_init << "FT.check_selected_values(tr,tr_edit,'#{attr_name}');"
@@ -76,8 +76,9 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
       yield FreightTrain::Builders::CheckListBuilder.new(attr_name, [], value, @template)
     end
   end
-
-
+  
+  
+  
   def collection_select(method, collection, value_method = :id, text_method = :to_s, options = {}, html_options = {})
     choices = collection.collect {|i| [i.send(text_method), i.send(value_method)]}
     select(method, choices, options, html_options)
@@ -97,23 +98,26 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     # 
     # raw "#{tag("select", html_options, true)}'+FT.create_options(#{o})+'</select>"
   end
-
-
+  
+  
+  
   def fields_for(method, *args, &block)
     options = args.extract_options!
     name = options[:name] || "#{@object_name}[#{method}]"
     editor = @@default_editor_builder.new(name, nil, @template, options, block)
     html = capture(editor, &block)
     @after_init << editor.after_init
-    html
+    html.html_safe
   end
-
-
+  
+  
+  
   def id
     "'+tr.readAttribute('id').match(/\\d+/)+'"
   end
-
-
+  
+  
+  
   def static_field( method, value )
     @template.tag( "input", {
 #     :id => method,
@@ -123,12 +127,13 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
       :value=>value,
       :name=>"#{@object_name}[#{method}]"} )
   end
-
-
+  
+  
+  
   def hidden_field( method )
     options = { :type => "hidden" }
         
-    raw code(
+    raw (code(
       "e=tr.select('*[attr=\"#{@object_name}[#{method}]\"]');" <<
       "if(e.length==1){"
     ) <<
@@ -157,10 +162,11 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     code(
         "}" <<
       "}"
-    )
+    ))
   end
-
-
+  
+  
+  
   def nested_editor_for( method, *args, &block )
     raise ArgumentError, "Missing block" unless block_given?
     options = args.extract_options!
@@ -171,18 +177,18 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     @template.instance_variable_set "@enable_nested_records", true
     
     @after_init << "FT.for_each_row(tr,tr_edit,'.#{singular}',function(tr,tr_edit,name){"
-
+    
     # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
     html = alt_content_tag(:table, :class => "nested editor") {
       alt_content_tag(:tbody, :name => name) do
         # name = "#{@object_name}[#{method}_attributes]['+i+']"
         name = "'+tr.readAttribute('name')+'";
-    
+        
         # This FormBuilder expects 'tr' to refer to a TR that represents and object and contains
         # TDs representing the object's attributes. For nested objects, the TR is a child of the
         # root TR. Create a closure in which the variable 'tr' refers to the nested object while
         # preserving the reference to the root TR.
-        code(
+        raw (code(
           "(function(root_tr){" <<
           "var nested_rows=root_tr.select('.#{singular}');" <<
           "for(var i=0; i<nested_rows.length; i++){" << 
@@ -196,14 +202,14 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
             end) <<
             capture(f, &block) <<
             (alt_content_tag :td, :class => "delete-nested" do
-              "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
+              "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>".html_safe
             end) <<
             (alt_content_tag :td, :class => "add-nested" do
-              "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
+              "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>".html_safe
             end)
           end
         end) <<
-        code( "}})(tr);" )
+        code( "}})(tr);" ))
       end
     }
     
@@ -211,9 +217,9 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     
     raw_or_concat(html)
   end
-
-
-
+  
+  
+  
   def select(method, choices, options = {}, html_options = {})
     attr_name = "#{@object_name}[#{method}]"
     # @after_init <<
@@ -228,8 +234,9 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     html_options[:attr] = attr_name
     raw "#{tag("select", html_options, true)}'+FT.create_options(#{choices.to_json})+'</select>"    
   end
-
-
+  
+  
+  
   def text(method, options={})
     attr_name = "#{@object_name}[#{method}]"
     raw code(
@@ -240,10 +247,10 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     )
   end
   alias :text_of :text
-
-
+  
+  
   # assign value after creation of control
-
+  
   def text_field(method, options={})
     attr_name = "#{@object_name}[#{method}]"
     options[:id] = method unless options[:id]
@@ -258,7 +265,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
       :name => "#{attr_name}",
       :value => "'+#{method}.toString()+'"))
   end
-
+  
 =begin
   def text_field(method, options={})
     attr_name = "#{@object_name}[#{method}]"
@@ -275,6 +282,8 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     @last_child_called
   end
   
+  
+  
   def last_child(&block)
     if block_given?
       @last_child = @template.capture(&block)
@@ -283,28 +292,25 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
       @last_child_called = true
       alt_content_tag(:td, (@last_child || default_last_child), :class => "last-child")
     end
-=begin
-    name = FreightTrain.tag(:td)
-    html = tag(name, {:class => "last-child"}, true)
-    html << (@last_child || default_last_child )
-    html << raw("</#{name}>")
-    raw html
-=end
   end
-
+  
+  
   
 private
-
-
+  
+  
+  
   def default_last_child
-    '<button class="save" title="Save" id="tag_submit" name="commit" type="submit">Save</button>' +
-    '<button class="cancel" title="Cancel" onclick="InlineEditor.close();return false;">Cancel</button>'    
+    ('<button class="save" title="Save" id="tag_submit" name="commit" type="submit">Save</button>' <<
+    '<button class="cancel" title="Cancel" onclick="InlineEditor.close();return false;">Cancel</button>').html_safe
   end
-
-
+  
+  
+  
   def code(string)
     "';" << string << "html+='"
   end
-
-
+  
+  
+  
 end

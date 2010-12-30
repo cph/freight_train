@@ -28,7 +28,7 @@ module FreightTrain::Helpers::CoreHelper
     
     def footer(*args, &block)
       @footer_html = block_given? ? capture(&block) : args.collect{|footer| alt_content_tag(:td, footer)}.join
-      @footer_html = "#{alt_content_tag(:tr, @footer_html, :class => "row footer")}"
+      @footer_html = "#{alt_content_tag(:tr, @footer_html.html_safe, :class => "row footer")}"
       nil
     end
     
@@ -160,24 +160,24 @@ private
         header = capture(lb, &block) if block_given?
         footer = lb.footer_html
         html = alt_content_tag(:thead) {
-          header
+          header.html_safe
         } <<
         alt_content_tag(:tbody, :id => collection_name) {
           render(:partial => partial, :collection => records) unless !records or records.empty?
         }
         html << alt_content_tag(:tfoot) {
-          footer
+          footer.html_safe
         } unless footer.blank?
         html
       } <<
       "</form>\n" <<
-    
+      
       "#{will_paginate(records) if options[:paginate]}" <<
-
-      # generate javascript
+      
       make_interactive(path, collection_name, options)
     )
   end
-
-
+  
+  
+  
 end

@@ -98,7 +98,7 @@ class FreightTrain::Builders::RowBuilder
             alt_content_tag(:td, (f.hidden_field :id), :class => "hidden", :style => "display:none;") <<
             capture(f, &block)
           end
-        }.join
+        }.join.html_safe
       end
     end)
   end
