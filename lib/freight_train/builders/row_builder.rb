@@ -41,9 +41,9 @@ class FreightTrain::Builders::RowBuilder
   def currency_of(method, options={})
     number = @record.send(method) || 0
     if number < 0
-      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\" class=\"#{options[:class]} negative\">($#{number_to_currency -number, :unit=>""})</span>"
+      "<span attr=\"#{@object_name}[#{method}]\" value=\"#{h(number)}\" class=\"#{options[:class]} negative\">($#{h(number_to_currency -number, :unit=>"")})</span>".html_safe
     else
-      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{number}\" class=\"#{options[:class]}\">$#{number_to_currency number, :unit=>""}</span>"
+      "<span attr=\"#{@object_name}[#{method}]\" value=\"#{h(number)}\" class=\"#{options[:class]}\">$#{h(number_to_currency number, :unit=>"")}</span>".html_safe
     end
   end
   
@@ -52,11 +52,11 @@ class FreightTrain::Builders::RowBuilder
   def fields_for(method, &block)
     value = @record.send method
     if value.is_a? Array
-      raw ((0...value.length).collect {|i|
+      ((0...value.length).collect {|i|
         capture(@@default_row_builder.new(@template, "#{@object_name}[#{method}]", value[i]), &block)
-      }).join
+      }).join.html_safe
     else
-      raw capture(@@default_row_builder.new(@template, "#{@object_name}[#{method}]", value), &block)
+      capture(@@default_row_builder.new(@template, "#{@object_name}[#{method}]", value), &block)
     end
   end
   
@@ -64,11 +64,8 @@ class FreightTrain::Builders::RowBuilder
   
   def hidden_field(method)
     value = @record.send method
-    if value.is_a? Array
-      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value.join("|")}\"></span>"
-    else
-      raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value}\"></span>"
-    end
+    value = value.join("|") if value.is_a? Array
+    "<span attr=\"#{@object_name}[#{method}]\" value=\"#{h(value)}\"></span>".html_safe
   end
   
   
@@ -106,7 +103,7 @@ class FreightTrain::Builders::RowBuilder
   
   
   def text_of(method, options={})
-    raw "<span attr=\"#{@object_name}[#{method}]\" class=\"#{options[:class]}\">#{h @record.send(method)}</span>"
+    "<span attr=\"#{@object_name}[#{method}]\" class=\"#{options[:class]}\">#{h(@record.send(method))}</span>".html_safe
   end
   
   
@@ -117,10 +114,10 @@ class FreightTrain::Builders::RowBuilder
     #content = "<input type=\"checkbox\" attr=\"#{method}\" disabled=\"disabled\""
     #content << " checked=\"checked\"" if @record.send method
     #content << " />"
-    content = "<div class=\"toggle #{value ? "yes" : "no"}\" attr=\"#{@object_name}[#{method}]\" value=\"#{value}\""
+    content = "<div class=\"toggle #{value ? "yes" : "no"}\" attr=\"#{@object_name}[#{method}]\" value=\"#{h(value)}\""
     content << " title=\"#{options[:title]}\"" if options[:title]
     content << "></div>"
-    raw content
+    content.html_safe
   end
   
   
@@ -131,7 +128,7 @@ class FreightTrain::Builders::RowBuilder
     value_value = value ? (value_method ? value.send(value_method) : value) : ""
     value_display = value ? (display_method ? value.send(display_method) : value) : ""
     method = options[:attr] if options[:attr]
-    raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value_value}\">#{value_display}</span>"    
+    "<span attr=\"#{@object_name}[#{method}]\" value=\"#{h(value_value)}\">#{h(value_display)}</span>".html_safe
   end
   
   
@@ -152,14 +149,14 @@ class FreightTrain::Builders::RowBuilder
       end
       html << "</span>"
     end
-    raw (html)
+    html.html_safe
   end
   
   
   
   def delete_command
     @commands_called = true
-    "<a class=\"delete-command\" href=\"#\" onclick=\"Event.stop(event); FT.#{@record.class.name}.destroy(#{record.to_param.to_json});\">delete</a>"
+    "<a class=\"delete-command\" href=\"#\" onclick=\"Event.stop(event); FT.#{@record.class.name}.destroy(#{record.to_param.to_json});\">delete</a>".html_safe
   end
   
   

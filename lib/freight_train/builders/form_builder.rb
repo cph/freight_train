@@ -1,10 +1,11 @@
 class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
+  
   attr_reader :object
   
-  
   delegate :capture, :raw, :raw_or_concat, :alt_content_tag, :alt_tag, :to => :@template
-
-
+  
+  
+  
   def check_list_for( method, values, &block )
     #options = args.extract_options!
     array = @object.send method
@@ -12,8 +13,9 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
       yield FreightTrain::Builders::CheckListBuilder.new("#{@object_name}[#{method}]", array, value, @template)
     end
   end
-
-
+  
+  
+  
   # override: do arrays like attributes  
   def fields_for(method_or_object, *args, &block)
     options = args.extract_options!
@@ -35,14 +37,15 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
         end
       end
     end
- 
+    
     super(method_or_object, *args, &block)
   end
-
-
+  
+  
+  
   def hidden_field(method_or_object, *args)
     options = args.extract_options!
- 
+    
     case method_or_object
     when String, Symbol
       method = method_or_object
@@ -56,9 +59,9 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
       # method = ActionController::RecordIdentifier.singular_class_name(obj)
       method = obj.class.name.tableize.singularize
     end
- 
+    
     options[:type] = "hidden"
- 
+    
     content = ""
     content = "<!--#{@object.class}-->"
     if obj.is_a? Array
@@ -78,15 +81,17 @@ class FreightTrain::Builders::FormBuilder < ActionView::Helpers::FormBuilder
       # options[:value] = obj ? "#{obj}" : ""
       content << @template.tag( "input", options )
     end
-    raw content
+    content.html_safe
   end
+  
   
   
   def static_field(method_or_object, *args)
     hidden_field(method_or_object, *args)
   end
-
-
+  
+  
+  
   # !todo: there's _a lot_ of duplication between this method and the one in editor_builder; is there a good way to merge them?
   def nested_editor_for(method, *args, &block)
     attr_name = "#{@object_name}[#{method}]"
