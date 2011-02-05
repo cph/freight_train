@@ -59,12 +59,12 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   
   def check_box(method, options={})
     attr_name = "#{@object_name}[#{method}]"
-    raw (code(
+    (code(
       "e = tr.down('*[attr=\"#{attr_name}\"]');if(!e){FT.debug('#{attr_name} not found');return null;}" <<
       "var checked = (e.readAttribute('value')=='true');"
     ) <<
       "<input name=\"#{attr_name}\" type=\"hidden\" value=\"0\"/>" <<
-      "<input name=\"#{attr_name}\" type=\"checkbox\"'+(checked ? 'checked=\"checked\"' : '')+' value=\"1\" />")
+      "<input name=\"#{attr_name}\" type=\"checkbox\"'+(checked ? 'checked=\"checked\"' : '')+' value=\"1\" />").html_safe
   end
   
   
@@ -82,21 +82,6 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   def collection_select(method, collection, value_method = :id, text_method = :to_s, options = {}, html_options = {})
     choices = collection.collect {|i| [i.send(text_method), i.send(value_method)]}
     select(method, choices, options, html_options)
-    # attr_name = "#{@object_name}[#{method}]"
-    # @after_init << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
-    # 
-    # html_options[:id] = method unless html_options[:id]
-    # html_options[:name] = attr_name
-    # 
-    # o = "["
-    # collection.each do |i|
-    #   o << "," if (o.length > 1)
-    #   # prevent options that contain apostrophes from screwing things up
-    #   o << "['#{i.send(value_method).to_s.gsub( Regexp.new("'"), "\\\\'")}','#{i.send(text_method).to_s.gsub( Regexp.new("'"), "\\\\'")}']"
-    # end
-    # o << "]"
-    # 
-    # raw "#{tag("select", html_options, true)}'+FT.create_options(#{o})+'</select>"
   end
   
   
@@ -133,7 +118,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   def hidden_field( method )
     options = { :type => "hidden" }
         
-    raw (code(
+    (code(
       "e=tr.select('*[attr=\"#{@object_name}[#{method}]\"]');" <<
       "if(e.length==1){"
     ) <<
@@ -152,7 +137,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     ) <<
     
       @template.tag( "input", {
-        :type=>"hidden",        
+        :type=>"hidden",
 #       :class => "field",
 #       :id => method,
         'data-attr' => method,
@@ -162,7 +147,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     code(
         "}" <<
       "}"
-    ))
+    )).html_safe
   end
   
   
@@ -188,7 +173,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
         # TDs representing the object's attributes. For nested objects, the TR is a child of the
         # root TR. Create a closure in which the variable 'tr' refers to the nested object while
         # preserving the reference to the root TR.
-        raw (code(
+        (code(
           "(function(root_tr){" <<
           "var nested_rows=root_tr.select('.#{singular}');" <<
           "for(var i=0; i<nested_rows.length; i++){" << 
@@ -209,7 +194,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
             end)
           end
         end) <<
-        code( "}})(tr);" ))
+        code( "}})(tr);" )).html_safe
       end
     }
     
@@ -239,12 +224,12 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   
   def text(method, options={})
     attr_name = "#{@object_name}[#{method}]"
-    raw code(
+    code(
       "e=tr.down('*[attr=\"#{attr_name}\"]');" <<
       "if(!e){FT.debug('#{attr_name} not found'); return null;}" <<
     # "FT.debug(e.innerHTML);" <<
       "html += e.innerHTML;"
-    )
+    ).html_safe
   end
   alias :text_of :text
   
@@ -254,7 +239,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
   def text_field(method, options={})
     attr_name = "#{@object_name}[#{method}]"
     options[:id] = method unless options[:id]
-    raw code(
+    (code(
       "e=tr.down('*[attr=\"#{attr_name}\"]');" <<
       "if(!e){FT.debug('#{attr_name} not found'); return null;}" <<
     # "FT.debug(e.innerHTML);" <<
@@ -263,7 +248,7 @@ class FreightTrain::Builders::EditorBuilder < FreightTrain::Builders::FormBuilde
     @template.tag( "input", options.merge(
       :type => "text",
       :name => "#{attr_name}",
-      :value => "'+#{method}.toString()+'"))
+      :value => "'+#{method}.toString()+'"))).html_safe
   end
   
 =begin
