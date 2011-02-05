@@ -62,8 +62,8 @@ class FreightTrain::Builders::RowBuilder
   
   
   
-  def hidden_field(method)
-    value = @record.send method
+  def hidden_field(method, value=nil)
+    value ||= @record.send(method)
     if value.is_a? Array
       raw "<span attr=\"#{@object_name}[#{method}]\" value=\"#{value.join("|")}\"></span>"
     else
