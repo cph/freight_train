@@ -43,7 +43,8 @@ var InlineEditor = (function() {
       
       // Save the contents of the editor...
       editor.save = function(callback) {
-        var params = Form.serialize(editor);
+        // var params = Form.serialize(editor);
+        var params = editor.up('form').serialize();
         FT.xhr(url, 'put', params, {
           onSuccess: function() {
             if(CURRENT_EDITOR == editor) { InlineEditor.close(); }
