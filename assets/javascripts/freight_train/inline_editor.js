@@ -97,8 +97,7 @@ var InlineEditor = (function() {
     element.observe('click', function(event) {
       
       // Ignore if a link or button was clicked
-      var tag = Event.findElement(event).tagName.toLowerCase();
-      if(!$A(['input', 'button', 'a']).member(tag)) {
+      if(!Event.findElement(event, 'input, button, a')) {
         element.edit_inline();
       }
     });
