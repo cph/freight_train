@@ -117,7 +117,7 @@ var InlineEditor = (function() {
   
   // Close InlineEditors when the ESC key is pressed
   document.observe('dom:loaded', function() {
-    $(document.body).observe('keyup', function(event) {
+    $(document.body).observe('keydown', function(event) {
       if(event.keyCode==Event.KEY_ESC) {
         InlineEditor.close();
       }
