@@ -29,7 +29,7 @@ module FreightTrain::Helpers::FormattingHelper
 
 
   def format_exception_for(record, options={})
-    "<p>An error occurred while trying to #{options[:action]} #{record.class.name.titleize}:</p><ul><li>#{h $!}</li></ul>"
+    "<p>An error occurred while trying to #{options[:action] || "access"} #{record.class.name.titleize}:</p><ul><li>#{h $!}</li></ul>"
   end
 
 
