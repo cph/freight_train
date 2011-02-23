@@ -85,7 +85,7 @@ module FreightTrain::Core
   
   
   def show_exception_for(record, options={}, &block)
-    message = format_exception_for(record, options.merge(:action => @current_action))
+    message = format_exception_for(record, options.merge(:action => action_name))
     show_error(message, options, &block)
   end
   

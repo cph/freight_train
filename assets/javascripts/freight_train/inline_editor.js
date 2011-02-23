@@ -43,7 +43,8 @@ var InlineEditor = (function() {
       
       // Save the contents of the editor...
       editor.save = function(callback) {
-        var params = Form.serialize(editor);
+        // var params = Form.serialize(editor);
+        var params = editor.up('form').serialize();
         FT.xhr(url, 'put', params, {
           onSuccess: function() {
             if(CURRENT_EDITOR == editor) { InlineEditor.close(); }
@@ -96,8 +97,7 @@ var InlineEditor = (function() {
     element.observe('click', function(event) {
       
       // Ignore if a link or button was clicked
-      var tag = Event.findElement(event).tagName.toLowerCase();
-      if(!$A(['input', 'button', 'a']).member(tag)) {
+      if(!Event.findElement(event, 'input, button, a')) {
         element.edit_inline();
       }
     });
@@ -117,7 +117,7 @@ var InlineEditor = (function() {
   
   // Close InlineEditors when the ESC key is pressed
   document.observe('dom:loaded', function() {
-    $(document.body).observe('keyup', function(event) {
+    $(document.body).observe('keydown', function(event) {
       if(event.keyCode==Event.KEY_ESC) {
         InlineEditor.close();
       }
