@@ -382,11 +382,11 @@ var FT = (function(){
       var table = tr.parentNode; if(!table) { FT.debug('FT.add_nested_object .nested not found'); return; }
       var n = table.childNodes.length;
       
-      var new_tr = tr.cloneNode(true);
+      var new_tr = FT.clone_node(tr);
       new_tr.id = tr.id.replace(/(\d+)$/, function(fullMatch, n) { return (Number(n)+1); });
       new_tr.writeAttribute('name', new_tr.readAttribute('name').gsub(/[(\d+)]/, n));
       table.appendChild(new_tr);
-         
+      
       var _destroy = new_tr.down('[data-attr="_destroy"]');
       if(_destroy) _destroy.value = 0;
       
@@ -398,6 +398,46 @@ var FT = (function(){
             
       observer.fire('after_add_nested', [table,new_tr]);
       FT.reset_add_remove_for(table);
+    },
+    
+    clone_node: function(element) {
+      // IE copies events bound via attachEvent when
+      // using cloneNode. Calling detachEvent on the
+      // clone will also remove the events from the orignal
+      // In order to get around this, we use innerHTML.
+      var clone;
+      if(Prototype.Browser.IE) {
+        clone = element.clone(false);
+        clone.innerHTML = element.innerHTML;
+        
+        // innerHTML still copies all kinds of custom attributes over in IE.
+        FT.reset_after_clone(clone);
+      } else {
+        clone = element.cloneNode(true);
+      }
+      return clone;
+    },
+    
+    reset_after_clone: function(element) {
+      var attributes = element.attributes,
+          children = element.childNodes;
+      if(attributes) {
+        for(var i=0, ii=attributes.length; i<ii; i++) {
+          if(attributes[i]) {
+            var attr = attributes[i].nodeName;
+            if(('_prototypeUID' == attr) ||
+               (/^jQuery/.test(attr))) {
+              App.debug('removing "' + attr + '"');
+              element.removeAttribute(attr);
+            }
+          }
+        }
+      }
+      if(children) {
+        for(var i=0, ii=children.length; i<ii; i++) {
+          FT.reset_after_clone(children[i]);
+        }
+      }
     },
     
     delete_nested_object: function(sender) {
