@@ -442,8 +442,17 @@ var FT = (function(){
     
     delete_nested_object: function(sender) {
       var tr = $(sender).up('.nested-row'); if(!tr) return;
-      var table = tr.up('.nested'); if(!table) return;      
+      var table = tr.up('.nested'); if(!table) return;
       var name = tr.readAttribute('name');
+      
+      // How many undeleted records are left? Only 1? Create a new empty record.
+      var rows=table.select('.nested-row').reject(function(row) {
+        var _destroy = row.down('[data-attr="_destroy"]');
+        return (_destroy.value=='1');
+      });
+      if(rows.length == 1) {
+        FT.add_nested_object(sender);
+      }
       
       var id = tr.down('[data-attr="id"]');
       if(id && (id.value == '')) {
@@ -479,13 +488,12 @@ var FT = (function(){
         row.select('input, textarea, select').each(function(e) {
           e.writeAttribute('name', e.readAttribute('name').gsub(/[(\d+)]/, i));
         });
-      };
-      function reset_add_remove_for_row(row, delete_visibility, add_visibility) {
-        var delete_link = row.down('.delete-link');
-        if(delete_link) delete_link.setStyle({visibility:delete_visibility});
+      }
+      
+      function set_add_visibility(row, add_visibility) {
         var add_link = row.down('.add-link');
-        if(add_link) add_link.setStyle({visibility:add_visibility});
-      };
+        add_link && add_link.setStyle({visibility:add_visibility});
+      }
       
       var object_name=table.readAttribute('name');
       var rows=table.select('.nested-row');
@@ -497,16 +505,10 @@ var FT = (function(){
         var _destroy = row.down('[data-attr="_destroy"]');
         return (_destroy.value=='1');
       });
-      var n=rows.length-1;
-      if(n>0) {
-        for(var i=0; i<n; i++) {
-          reset_add_remove_for_row(rows[i],'visible','hidden');
-        }
-        reset_add_remove_for_row(rows[n],'visible','visible');
-      }
-      else if(n==0) {
-        reset_add_remove_for_row(rows[0],'hidden','visible');
-      }
+      
+      var ii = rows.length - 1;
+      for(var i=0; i<ii; i++) { set_add_visibility(rows[i],  'hidden'); }
+      if(ii >= 0)             { set_add_visibility(rows[ii], 'visible'); }
       
       observer.fire('after_reset_nested',table);
       //if(window.after_reset_nested) window.after_reset_nested(table);
