@@ -351,7 +351,7 @@ var FT = (function(){
       options = options || {};
       if(options.only) {options.only = $A(options.only);}
       if(options.except) {options.except = $A(options.except);}
-      parent.select('input[type="text"], textarea').each(function(input) {
+      parent.select('input[type!="submit"], input[type!="radio"], input[type!="checkbox"], textarea').each(function(input) {
         if(!(options.only && !options.only.include(input.id)) &&
            !(options.except && options.except.include(input.id))) {
            input.value = '';
