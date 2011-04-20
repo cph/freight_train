@@ -52,9 +52,9 @@ module FreightTrain::Helpers::PageScriptHelper
     <script type="text/javascript">
       //<![CDATA[
       FT.init({
-        token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}')
+        token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}'),
+        enable_keyboard_navigation: #{options[:enable_keyboard_navigation] || false}
       });
-      #{"FT.enable_keyboard_navigation();" if options[:enable_keyboard_navigation]}
       //]]>
     </script>
     HTML
@@ -76,14 +76,14 @@ private
   
   def hookup_row_method(options)
     content = "hookup_row: function(row){"
-    content << "if(row.hasClassName('interactive')) {FT.hover_row(row);}"
+    content << "if(row.hasClassName('interactive')) {FT.Helpers.hoverRow(row);}"
     if @inline_editor
-      content << "if(row.hasClassName('editable')) {FT.edit_row_inline(row,path,editor_writer);}"
+      content << "if(row.hasClassName('editable')) {FT.Helpers.editRowInline(row,path,editor_writer);}"
     elsif (options[:editable] != false)
       if (fn=options[:editor])
-        content << "if(row.hasClassName('editable')) FT.edit_row_fn(row,#{fn});"
+        content << "if(row.hasClassName('editable')) FT.Helpers.editRow(row,#{fn});"
       else
-        content << "if(row.hasClassName('editable')) FT.edit_row(row,path);"
+        content << "if(row.hasClassName('editable')) FT.Helpers.editRow(row,path);"
       end
     end
     content << "obsv.fire('hookup_row',row);"

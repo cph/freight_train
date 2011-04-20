@@ -22,30 +22,33 @@
 //   hookup_row         passes each row to observers: both when the page is loaded and when new rows are added dynamically
 //
 //
-var FT = (function(){
+var FT = (function() {
 
   var token = '',
       enable_nested_records = true,
       save_when_navigating = false,
+      enable_keyboard_navigation = false,
       observer = new Observer(),
-      forms = [];
+      forms = [],
+      _$ = null;
   
   
   
   function init(args) {
     readOptions(args);
     activateFreightTrainForms();
-    if(enable_nested_records) {
-      FT.reset_add_remove_for_all();
-    }
+    enable_nested_records       && FT.reset_add_remove_for_all();
+    enable_keyboard_navigation  && enableKeyboardNavigation();
     removeDestroyedRows();
     observer.fire('load');
   }
   
   function readOptions(args) {
     args = args || {};
+    _$ = FT.Adapters.Prototype;
     token = args.token;
     save_when_navigating = args.save_when_navigating;
+    enable_keyboard_navigation = args.enable_keyboard_navigation;
   }
   
   
@@ -58,7 +61,7 @@ var FT = (function(){
   }
   
   function findFreightTrainForms() {
-    return $$('form.freight_train');
+    return _$.find('form.freight_train');
   }
   
   
@@ -89,15 +92,15 @@ var FT = (function(){
   
   
   function configureFormSubmission(form) {
-    form.observe('submit', function(e) {
-      Event.stop(e);
+    _$.on(form, 'submit', function(e) {
+      _$.stop(e);
       InlineEditor.close(); // Don't let values in inline editor override values in creator
       submitFormRemotely(form);
     })
   }
   
   function submitFormRemotely(form) {
-    FT.xhr(form.action, 'post', form.serialize());
+    FT.xhr(form.action, 'post', _$.serialize(form));
   }
   
   
@@ -107,7 +110,7 @@ var FT = (function(){
     if(model) {
       if(model.hookup_row) {
         model.hookup_rows = function(rows) {
-          if(!rows) {rows = findRowsWithin(form);}
+          rows = rows || findRowsWithin(form);
           for(var i=0, ii=rows.length; i<ii; i++) {
             model.hookup_row(rows[i]);
           }
@@ -117,173 +120,144 @@ var FT = (function(){
   }
   
   function getModelFromForm(form) {
-    var model_name = form.readAttribute('data-model'), 
+    var model_name = _$.attr(form, 'data-model'),
         model = FT[model_name];
-    if(!model) {
-      FT.debug('[ft] FT.' + model_name + ' was not found.');
-    }
+    model || FT.debug('[ft] FT.' + model_name + ' was not found.');
     return model;
   }
   
   function findRowsWithin(form) {
-    return form.select('.row');
+    return _$.find(form, '.row');
   }
   
   
   
   function initializeRowsInForm(form) {
     var model = getModelFromForm(form)
-    if(model && model.hookup_rows) {
-      model.hookup_rows();
-    }
+    model && model.hookup_rows && model.hookup_rows();
+  }
+  
+  
+  
+  function enableKeyboardNavigation() {
+    InlineEditor.observe('up', function(e, row, editor) {
+      var previous_row = _$.previous(row, '.editable');
+      if(previous_row) {
+        _$.stop(e);
+        if(save_when_navigating) { editor.save(); }
+        previous_row.edit_inline();
+      }
+    });
+    InlineEditor.observe('down', function(e, row, editor) {
+      var next_row = _$.next(editor, '.editable');
+      if(next_row) {
+        _$.stop(e);
+        if(save_when_navigating) { editor.save(); }
+        next_row.edit_inline();
+      }
+    });
   }
   
   
   
   function removeDestroyedRows() {
     // need to wrap document.body in $() so that it works on IE
-    $(document.body).observe('ft:destroy', function(event) {
+    _$.on(document.body, 'ft:destroy', function(event) {
       InlineEditor.close();
       var e = event.element();
-      if(e && e.parentNode) {
-        e.parentNode.removeChild(e);
-      }
-      FT.restripe_rows();
+      e && e.parentNode && e.parentNode.removeChild(e);
+      FT.Helpers.restripeRows();
     });
   }
   
   
   
   
+  function destroyRow(msg, id, path) {
+    if(!msg || confirm(msg)) {
+      renderDeleted(id);
+      FT.xhr(path, 'delete');
+      return true;
+    }
+    return false;
+  }
   
-  
-  var render_deleted = function(id) {
-    var e=$(id);
+  function renderDeleted(id) {
+    var e = _$.find(id)[0];
     if(e) {
-      e.addClassName('deleted');
-      e.removeClassName('editable');
-      e.select('input').each(function(i) {
+      _$.addClass(e, 'deleted');
+      _$.removeClass(e, 'editable');
+      _$.find(e, 'input').each(function(i) {
         i.disabled = true;
       });
     }
-  };
-  
-  
-  // !nb: not FreightTrain's concern?
-  // InlineEditor.observe('before_init', function(tr) {
-  //   var e=$('error');
-  //   if(e) e.hide();
-  // });
+  }
   
   
   
-  return {
-    
-    debug: function(o) {
-      if(window.console && window.console.log) {
-        window.console.log(o);
+  
+  var Helpers = {
+    restripeRows: function() {
+      var rows = _$.find('.row');
+      for(var i=0, ii=rows.length, alt=false; i<ii; i++, alt=!alt) {
+        (alt ? _$.addClass : _$.removeClass)(rows[i], 'alt');
       }
     },
     
-    init: init,
-    
-    observe: function(name, func) { observer.observe(name, func); },
-    
-    unobserve: function(name, func) { observer.unobserve(name, func); },
-    
-    // !nb: moved to FT[model_name].hookup_row
-    // hookup_row: function(model_name, row) {
-    //   if(!model_name) throw new Error('model_name must not be null');
-    //   if(!row) throw new Error('row must not be null');
-    //   var model = FT[model_name];
-    //   if(model && model.hookup_row)
-    //     _hookup_row(model, row);
-    // },
-    
-    destroy: function(msg, id, path) {
-      if(!msg || confirm(msg)) {
-        render_deleted(id);
-        FT.xhr(path,'delete');
-        return true;
-      }
-      return false;
-    },
-    
-    xhr: function(url, method, params, args) {
-      args = args || {};
-      args.asynchronous = true;
-      args.evalScripts = true;
-      args.method = method;
-      args.parameters = token || "";
-      if(params) args.parameters += '&' + params + '&freight_train=true';
-      new Ajax.Request(url, args);
-    },
-    
-    restripe_rows: function() {
-      var rows = $$('.row'),
-          alt = false;
-      for(var i=0, ii=rows.length; i<ii; i++) {
-        if(alt != rows[i].hasClassName('alt')) {
-          if(alt) {
-            rows[i].addClassName('alt');
-          } else {
-            rows[i].removeClassName('alt');
-          }
-        }
-        alt = !alt;
-      }
-    },
-    
-    // !nb: not a FreightTrain concern?
-    hover_row: function(row) {
+    // !nb: should this be a FreightTrain concern?
+    hoverRow: function(row) {
       if(!row) throw new Error('row must not be null');
-      row.observe('mouseover', function() {
+      _$.on(row, 'mouseover', function() {
         observer.fire('hover', [row]);
-        row.addClassName('hovered');
+        _$.addClass(row, 'hovered');
       });
-      row.observe('mouseout', function() {
-        row.removeClassName('hovered');
+      _$.on(row, 'mouseout', function() {
+        _$.removeClass(row, 'hovered');
       });
     },
     
-    edit_row_inline: function(row, url_root, editor_writer, before_edit, after_edit) {
-      var id = row.readAttribute("id");
+    editRowInline: function(row, url_root, editor_writer, before_edit, after_edit) {
+      var id = _$.attr(row, 'id');
       var idn = id.match(/\d+/);
       var url = url_root + '/' + idn;
       new InlineEditor(url, row, editor_writer, before_edit, after_edit);
     },
-    
-    enable_keyboard_navigation: function() {
-      InlineEditor.observe('up', function(e, row, editor) {
-        var previous_row = row.previous('.editable');
-        if(previous_row) {
-          Event.stop(e);
-          if(save_when_navigating) { editor.save(); }
-          previous_row.edit_inline();
+    editRow: function(row, url_root_or_fn) {
+      var handler;
+      if(typeof url_root_or_fn == 'function') {
+        handler = url_root_or_fn;
+      } else {
+        handler = function(row) {
+          var id = _$.attr(row, 'id');
+          var idn = id.match(/\d+/);
+          var url = url_root_or_fn + '/' + idn; // + "/edit"
+          window.location = url;
         }
-      });
-      InlineEditor.observe('down', function(e, row, editor) {
-        var next_row = editor.next('.editable');
-        if(next_row) {
-          Event.stop(e);
-          if(save_when_navigating) { editor.save(); }
-          next_row.edit_inline();
-        }
-      });
-    },
+      }
+      _$.on(row, 'click', function() { handler(row); });
+    }
     
-    edit_row: function(row, url_root) {
-      row.observe("click", function(event) {
-        var id = row.readAttribute("id");
-        var idn = id.match(/\d+/);
-        var url = url_root + '/' + idn; // + "/edit"
-        window.location = url;
-      });
-    }, 
+  }
+  
+  
+  
+  function xhr(url, method, params, args) {
+    params = (params ? (params + '&') : '') + (token ? (token + '&') : '') + 'freight_train=true';
+    return _$.xhr(url, method, params, args);
+  }
+  
+  
+  
+  
+  return {
+    Adapters:   {},
+    Helpers:    Helpers,
     
-    edit_row_fn: function(row, fn) {
-      row.observe("click", function() { fn(row); });
-    },
+    init:       init,
+    observe:    function(name, func) { observer.observe(name, func); },
+    unobserve:  function(name, func) { observer.unobserve(name, func); },
+    destroy:    destroyRow,
+    xhr:        xhr,
     
     // !todo: move to Select or HTMLSelectElement?
     select_value: function(selector,value) {
@@ -535,6 +509,15 @@ var FT = (function(){
           fn(tr,tr_edit,tr_edit.readAttribute('name'));
         }
       //}
+    },
+    
+    
+    
+    
+    debug: function(o) {
+      if(window.console && window.console.log) {
+        window.console.log(o);
+      }
     }
   };
 })();

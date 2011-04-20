@@ -39,7 +39,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
                  :partial => partial_name,
                  :object => record
     @lines << "FT.#{model_name}.hookup_row($('#{idof record}'));"
-    call "FT.restripe_rows"
+    call "FT.Helpers.restripeRows"
   end
   
   
