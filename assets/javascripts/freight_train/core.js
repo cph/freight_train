@@ -254,13 +254,15 @@ var FT = (function() {
     Helpers:    Helpers,
     
     init:       init,
+    
+    adapter:    function() { return _$; },
     observe:    function(name, func) { observer.observe(name, func); },
     unobserve:  function(name, func) { observer.unobserve(name, func); },
     destroy:    destroyRow,
     xhr:        xhr,
     
     // !todo: move to Select or HTMLSelectElement?
-    select_value: function(selector,value) {
+    select_value: function(selector, value) {
       if(!selector) {
         FT.debug("selector not found");
         return;
@@ -298,9 +300,9 @@ var FT = (function() {
       var attr_name = tr.readAttribute('name')+'['+method+']';
       var e=tr.down('*[attr="'+attr_name+'"]');
       var sel=tr_edit.down('select[name="'+attr_name+'"]');
-      if(e && sel)
+      if(e && sel) {
         FT.select_value(sel, e.readAttribute('value')||e.innerHTML);
-      else {
+      } else {
         if(!e) FT.debug(attr_name+' not found');
         if(!sel) FT.debug('selector "'+method+'" ('+attr_name+') not found');
       }
@@ -310,15 +312,15 @@ var FT = (function() {
       var e=tr.down('*[attr="'+attr_name+'"]');
       if(e) {
         var values=e.readAttribute('value').split('|');
-        for(var i=0; i<values.length; i++)
-        {
+        for(var i=0; i<values.length; i++) {
           e=tr_edit.down('*[value="'+values[i]+'"]');
           if(!e) FT.debug('"'+values[i]+'" not found');
           else e.writeAttribute('checked','checked');
         }
       }
-      else
+      else {
         FT.debug(attr_name+' not found');
+      }
     },
     
     reset_form_fields_in: function(parent, options) {
@@ -502,8 +504,7 @@ var FT = (function() {
       //  fn(tr,tr_edit);
       //}
       //else {
-        for(var i=0; i<nested_rows.length; i++)
-        {
+        for(var i=0; i<nested_rows.length; i++) {
           var tr=nested_rows[i];
           var tr_edit=nested_editor_rows[i];
           fn(tr,tr_edit,tr_edit.readAttribute('name'));
