@@ -1,13 +1,15 @@
-module FreightTrain::Helpers::FormattingHelper
+module FreightTrain
+  module Helpers
+    module FormattingHelper
 
 
-  # !todo: this is simply copied for lail_extensions' FormattingHelper!
-  def format_errors( object )
-    if object and object.respond_to?("errors") and !(messages = object.errors.all_messages).empty?
-      "<ul>" + messages.collect{|msg| "<li>#{msg}</li>"}.join + "</ul>"
-    else
-      ""
-    end    
+      # !todo: this is simply copied for lail_extensions' FormattingHelper!
+      def format_errors( object )
+        if object and object.respond_to?("errors") and !(messages = object.errors.all_messages).empty?
+          "<ul>" + messages.collect{|msg| "<li>#{msg}</li>"}.join + "</ul>"
+        else
+          ""
+        end    
 =begin
     if object and object.respond_to? "errors"
       temp = "<ul>"
@@ -25,12 +27,13 @@ module FreightTrain::Helpers::FormattingHelper
       ""
     end
 =end    
+      end
+
+
+      def format_exception_for(record, options={})
+        "<p>An error occurred while trying to #{options[:action] || "access"} #{record.class.name.titleize}:</p><ul><li>#{h $!}</li></ul>"
+      end
+      
+    end
   end
-
-
-  def format_exception_for(record, options={})
-    "<p>An error occurred while trying to #{options[:action] || "access"} #{record.class.name.titleize}:</p><ul><li>#{h $!}</li></ul>"
-  end
-
-
 end

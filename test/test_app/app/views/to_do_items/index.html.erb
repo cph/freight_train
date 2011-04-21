@@ -1,0 +1,14 @@
+<h1>Listing to_do_items</h1>
+
+<%= list :to_do_items do |ft| %>
+  <%= ft.headings do %>
+    <th>Description</th>
+  <% end %>
+  <%= ft.editor do |editor| %>
+    <td><%= editor.text_field :description %></td>
+  <% end %>
+<% end %>
+
+<br />
+
+<%= link_to 'New To do item', new_to_do_item_path %>

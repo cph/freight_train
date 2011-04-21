@@ -1,6 +1,5 @@
 # to be mixed into an ActionController
 module FreightTrain
-  include FreightTrain::Core
   
   
   def FreightTrain.tag(tag)
@@ -24,7 +23,9 @@ module FreightTrain
   def self.included(other_module)
     
     # include all FreightTrain helpers
-    dir = "vendor/plugins/freight_train/lib/freight_train/helpers"
+    dir = File.expand_path(File.join(File.dirname(__FILE__), 'freight_train', 'helpers'))
+    p dir
+    # dir = "vendor/plugins/freight_train/lib/freight_train/helpers"
     extract = /^#{Regexp.quote(dir)}\/?(.*).rb$/
     Dir["#{dir}/**/*_helper.rb"].each do |file|
       h = "freight_train/helpers/#{file.sub(extract,'\1')}"
@@ -33,6 +34,8 @@ module FreightTrain
       # ActionController::Base.add_template_helper(h.camelize.constantize)
       other_module.send :helper, h.camelize.constantize
     end
+    
+    ActionView::Base.default_form_builder = FreightTrain::Builders::FormBuilder
     
     other_module.extend ClassMethods
   end
@@ -53,13 +56,18 @@ module FreightTrain
     def uses_freight_train
       self.responder = FreightTrain::Responder
     end
-
-
+    
+    
   end
-
-  ActionView::Base.default_form_builder = FreightTrain::Builders::FormBuilder
-
+  
 end
+
+require 'freight_train/helpers'
+require 'freight_train/builders'
+require 'freight_train/core'
+require 'freight_train/responder'
+FreightTrain.send(:include, FreightTrain::Core)
+
 
 
 # TODO: require everything in the freight_train directory?
