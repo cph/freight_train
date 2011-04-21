@@ -54,3 +54,27 @@ div.field, div.actions {
   font-size: 12px;
   list-style: square;
 }
+
+.list > ol {
+  margin:0;
+  padding:0;
+}
+
+li.row.header {
+  font-weight:bold;
+}
+
+li.row {
+  display:block;
+  list-style:none;
+  padding:0;
+  margin:2px 0;
+}
+
+li.row > div {
+  display:inline-block;
+}
+
+li.row.in-edit {
+  display:none;
+}

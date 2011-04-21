@@ -1,4 +1,18 @@
-<h1>Listing to_do_items</h1>
+<h1>To-Do List</h1>
+
+<h3>New To-Do Item</h3>
+
+<%= form_for(ToDoItem.new, :remote => true) do |f| %>
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<h3>To-Do List</h3>
 
 <%= list :to_do_items do |ft| %>
   <%= ft.headings do %>
@@ -9,6 +23,3 @@
   <% end %>
 <% end %>
 
-<br />
-
-<%= link_to 'New To do item', new_to_do_item_path %>
