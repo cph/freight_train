@@ -28,21 +28,21 @@ module FreightTrain
           html << "    #{hookup_row_method options}\n" <<
                "  };\n" <<
                "})();\n"
-           
+         
         # methods in global namespace
         if options[:reset_on_create] != :none
           options[:reset_on_create] = :all unless options[:reset_on_create].is_a?(Array)
           html << reset_on_create_method(table_name, options) << "\n"
         end
-      
+        
           html << "//]]>\n" <<
                "</script>\n"
         @already_defined = true
         html
       end
-  
-  
-  
+      
+      
+      
       # !todo: move as much of this as possible to core.js
       def ft_init(options={})
         if @already_initialized
@@ -61,21 +61,22 @@ module FreightTrain
         </script>
         HTML
       end
-
-
+      
+      
+      
     private
-  
-  
-  
+      
+      
+      
       def destroy_method(table_name, options)
         msg = options.key?(:confirm) ? options[:confirm] : "Delete #{table_name.to_s.singularize.titleize}?"
         "destroy: function(idn){" <<
           "return FT.destroy(#{msg ? "'#{msg}'" : "false"},('#{table_name.to_s.singularize}_'+idn),(path+'/'+idn));" <<
         "}"
       end
-  
-  
-  
+      
+      
+      
       def hookup_row_method(options)
         content = "hookup_row: function(row){"
         content << "if(row.hasClassName('interactive')) {FT.Helpers.hoverRow(row);}"
@@ -91,9 +92,9 @@ module FreightTrain
         content << "obsv.fire('hookup_row',row);"
         content << "}"
       end
-  
-  
-  
+      
+      
+      
       def reset_on_create_method(table_name, options)
         arg = options[:reset_on_create]
         "$(document.body).observe('ft:create', function(event) {" <<
@@ -103,9 +104,9 @@ module FreightTrain
           "});" <<
         "});"
       end
-  
-  
-  
+      
+      
+      
       def editor_writer_method(table_name, options)
         "function(tr){" <<  
           "var e;" <<
@@ -117,9 +118,9 @@ module FreightTrain
           "return tr_edit;" <<
         "}"
       end
-  
-  
-  
+      
+      
+      
       def after_edit_method(table_name, options)
         content =  "function(tr,tr_edit){"
         content <<   "if(tr.up('form[data-model=\"#{table_name.classify}\"]')){"
@@ -128,9 +129,9 @@ module FreightTrain
         content <<   "}"
         content << "}"
       end
-  
-  
-  
+      
+      
+      
     end
   end
 end

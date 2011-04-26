@@ -112,7 +112,7 @@ module FreightTrain
   
       def toggle_of(method, *args)
         options = args.extract_options!
-        value = @record.send method    
+        value = @record.send method
         #content = "<input type=\"checkbox\" attr=\"#{method}\" disabled=\"disabled\""
         #content << " checked=\"checked\"" if @record.send method
         #content << " />"
@@ -121,9 +121,9 @@ module FreightTrain
         content << "></div>"
         content.html_safe
       end
-  
-  
-  
+      
+      
+      
       def value_of(method, value_method, display_method, *args)
         options = args.extract_options!
         value = @record.send method
@@ -132,15 +132,15 @@ module FreightTrain
         method = options[:attr] if options[:attr]
         "<span attr=\"#{@object_name}[#{method}]\" value=\"#{h(value_value)}\">#{h(value_display)}</span>".html_safe
       end
-  
-  
-  
+      
+      
+      
       def commands_called?
         @commands_called
       end
-  
-  
-  
+      
+      
+      
       def commands_for(commands)
         @commands_called = true
         html = ""
@@ -153,16 +153,16 @@ module FreightTrain
         end
         html.html_safe
       end
-  
-  
-  
+      
+      
+      
       def delete_command
         @commands_called = true
         "<a class=\"delete-command\" href=\"#\" onclick=\"Event.stop(event); FT.#{@record.class.name}.destroy(#{record.to_param.to_json});\">delete</a>".html_safe
       end
-  
-  
-  
+      
+      
+      
     end
   end
 end
