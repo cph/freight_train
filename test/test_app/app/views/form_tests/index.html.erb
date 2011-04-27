@@ -1,0 +1,40 @@
+<h1>Form Test</h1>
+
+<h3>New Form Test</h3>
+
+<%= form_for(FormTest.new, :remote => true) do |f| %>
+  <table>
+    <tr>
+      <th><%= f.label :checkbox %></th>
+      <td><%= f.check_box :checkbox %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :hidden %></th>
+      <td><%= f.hidden_field :hidden %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :money %></th>
+      <td>
+        <%= f.fields_for :money do |m| %>
+          <%= m.text_field :amount %>
+          <%= m.select :currency, %w{USD DKK} %>
+        <% end %>
+      </td>
+    </tr>
+  </table>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<h3>Form Tests</h3>
+
+<%= table_for :form_tests do |ft| %>
+  <%= ft.headings do %>
+    <th>Description</th>
+  <% end %>
+  <%= ft.editor do |editor| %>
+    <td><%= editor.text_field :description %></td>
+  <% end %>
+<% end %>
+

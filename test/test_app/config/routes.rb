@@ -1,5 +1,7 @@
 TestApp::Application.routes.draw do
   
+  resources :form_tests
+
   resources :questions do
     resources :answers
   end
