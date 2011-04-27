@@ -75,6 +75,10 @@ li.row > div {
   display:inline-block;
 }
 
+li.nested-row > div {
+  display:inline-block;
+}
+
 li.row.in-edit {
   display:none;
 }

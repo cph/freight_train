@@ -117,10 +117,10 @@ module FreightTrain
                 }) <<
                 capture(f, &block) <<
                 (alt_content_tag(:td, :class => "delete-nested") {
-                  "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>".html_safe
+                  "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\">Delete</a>".html_safe
                 }) << 
                 (alt_content_tag(:td, :class => "add-nested") {
-                  "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>".html_safe
+                  "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\">Add</a>".html_safe
                 })
               }
               i += 1

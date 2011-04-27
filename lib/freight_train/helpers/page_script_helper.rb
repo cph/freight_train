@@ -112,7 +112,7 @@ module FreightTrain
           "var e;" <<
           "var html='" << @inline_editor.gsub(/\r|\n/, " ").gsub(/\s+</, " <").gsub(/>\s+/, "> ") << "';" <<
           "var tr_edit = $(document.createElement('#{FreightTrain.tag(:tr)}'));" << 
-          "tr_edit.className = 'row editor #{table_name}';" << 
+          "tr_edit.className = 'row editor #{table_name.singularize}';" << 
           "tr_edit.id = 'edit_row';" << 
           "tr_edit.update(html);" << 
           "return tr_edit;" <<

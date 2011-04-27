@@ -2,12 +2,12 @@ module FreightTrain
   module Builders
     class EditorBuilder < FormBuilder
       include ActionView::Helpers::TagHelper
-  
+      
       @@default_editor_builder = FreightTrain::Builders::EditorBuilder
       def self.default_editor_builder; @@default_editor_builder; end
       def self.default_editor_builder=(val); @@default_editor_builder=val; end
-  
-  
+      
+      
       # TODO: Push this into a JavaScript library
       #   1. allow base class to generate controls
       #      a. use @after_init method to assign values to controls
@@ -15,8 +15,8 @@ module FreightTrain
       #   2. refactor to put @after_init method into before- or after- filter
       #      a. abstract value assignment for (e.g.) INPUT[TYPE="TEXT"] and SELECT and INPUT[TYPE="CHECKBOX"]
       #      b. call generic value assignment in before/after filters and push logic to core.js
-  
-  
+      
+      
       # ===================================================================================================
       # ABOUT EDITOR_BUILDER
       # ===================================================================================================
@@ -45,20 +45,20 @@ module FreightTrain
       #       corollary, methods can always assume that they are concatenating to an open string.
       #
       # ===================================================================================================
-  
-  
-  
+      
+      
+      
       def initialize(object_name, object, template, options, proc)
         super
         @after_init = ""
       end
-  
+      
       delegate :capture, :to => :@template
-  
+      
       attr_reader :after_init
-  
-  
-  
+      
+      
+      
       def check_box(method, options={})
         attr_name = "#{@object_name}[#{method}]"
         (code(
@@ -68,9 +68,9 @@ module FreightTrain
           "<input name=\"#{attr_name}\" type=\"hidden\" value=\"0\"/>" <<
           "<input name=\"#{attr_name}\" type=\"checkbox\"'+(checked ? 'checked=\"checked\"' : '')+' value=\"1\" />").html_safe
       end
-  
-  
-  
+      
+      
+      
       def check_list_for(method, values, &block)
         attr_name = "#{@object_name}[#{method}]"
         @after_init << "FT.check_selected_values(tr,tr_edit,'#{attr_name}');"
@@ -78,16 +78,16 @@ module FreightTrain
           yield FreightTrain::Builders::CheckListBuilder.new(attr_name, [], value, @template)
         end
       end
-  
-  
-  
+      
+      
+      
       def collection_select(method, collection, value_method = :id, text_method = :to_s, options = {}, html_options = {})
         choices = collection.collect {|i| [i.send(text_method), i.send(value_method)]}
         select(method, choices, options, html_options)
       end
-  
-  
-  
+      
+      
+      
       def fields_for(method, *args, &block)
         options = args.extract_options!
         name = options[:name] || "#{@object_name}[#{method}]"
@@ -96,15 +96,15 @@ module FreightTrain
         @after_init << editor.after_init
         html.html_safe
       end
-  
-  
-  
+      
+      
+      
       def id
         "'+tr.readAttribute('id').match(/\\d+/)+'"
       end
-  
-  
-  
+      
+      
+      
       def static_field( method, value )
         @template.tag( "input", {
     #     :id => method,
@@ -114,9 +114,9 @@ module FreightTrain
           :value=>value,
           :name=>"#{@object_name}[#{method}]"} )
       end
-  
-  
-  
+      
+      
+      
       def hidden_field( method )
         options = { :type => "hidden" }
         
@@ -132,12 +132,12 @@ module FreightTrain
             'data-attr' => method,
             :value=>"'+e[0].readAttribute('value')+'",
             :name=>"#{@object_name}[#{method}]"} ) <<
-      
+        
         code(
           "}else{" <<
             "for(var i=0; i<e.length; i++){"
         ) <<
-    
+        
           @template.tag( "input", {
             :type=>"hidden",
     #       :class => "field",
@@ -145,32 +145,32 @@ module FreightTrain
             'data-attr' => method,
             :value=>"'+e[i].readAttribute('value')+'",
             :name=>"#{@object_name}[#{method}][]"} ) <<
-    
+        
         code(
             "}" <<
           "}"
         )).html_safe
       end
-  
-  
-  
+      
+      
+      
       def nested_editor_for( method, *args, &block )
         raise ArgumentError, "Missing block" unless block_given?
         options = args.extract_options!
-    
+        
         attr_name = "#{@object_name}[#{method}]"
         name = "#{@object_name}[#{method}_attributes]"
         singular = method.to_s.singularize
         @template.instance_variable_set "@enable_nested_records", true
-    
+        
         @after_init << "FT.for_each_row(tr,tr_edit,'.#{singular}',function(tr,tr_edit,name){"
-    
+        
         # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
         html = alt_content_tag(:table, :class => "nested editor") {
           alt_content_tag(:tbody, :name => name) do
             # name = "#{@object_name}[#{method}_attributes]['+i+']"
             name = "'+tr.readAttribute('name')+'";
-        
+            
             # This FormBuilder expects 'tr' to refer to a TR that represents and object and contains
             # TDs representing the object's attributes. For nested objects, the TR is a child of the
             # root TR. Create a closure in which the variable 'tr' refers to the nested object while
@@ -189,24 +189,24 @@ module FreightTrain
                 end) <<
                 capture(f, &block) <<
                 (alt_content_tag :td, :class => "delete-nested" do
-                  "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>".html_safe
+                  "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\">Delete</a>".html_safe
                 end) <<
                 (alt_content_tag :td, :class => "add-nested" do
-                  "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>".html_safe
+                  "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\">Add</a>".html_safe
                 end)
               end
             end) <<
             code( "}})(tr);" )).html_safe
           end
         }
-    
+        
         @after_init << "});"
-    
+        
         raw_or_concat(html)
       end
-  
-  
-  
+      
+      
+      
       def grouped_collection_select(method, collection, group_method, group_label_method, option_key_method, option_value_method, options = {}, html_options = {})
         attr_name = "#{@object_name}[#{method}]"
         @after_init << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
@@ -215,9 +215,9 @@ module FreightTrain
         html_options[:id] = nil
         super(method, collection, group_method, group_label_method, option_key_method, option_value_method, options, html_options)
       end
-  
-  
-  
+      
+      
+      
       def select(method, choices, options = {}, html_options = {})
         attr_name = "#{@object_name}[#{method}]"
         # @after_init <<
@@ -226,15 +226,15 @@ module FreightTrain
         #   "if(sel && e) FT.select_value(sel,e.readAttribute('value'));" <<
         #   "else{if(!e) FT.debug('#{attr_name} not found');if(!sel) FT.debug('#{method} not found');}"
         # super
-    
+        
         @after_init << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
         html_options[:name] = attr_name
         html_options[:attr] = attr_name
         raw "#{tag("select", html_options, true)}'+FT.create_options(#{choices.to_json})+'</select>"    
       end
-  
-  
-  
+      
+      
+      
       def text(method, options={})
         attr_name = "#{@object_name}[#{method}]"
         code(
@@ -245,10 +245,10 @@ module FreightTrain
         ).html_safe
       end
       alias :text_of :text
-  
-  
+      
+      
       # assign value after creation of control
-  
+      
       def text_field(method, options={})
         attr_name = "#{@object_name}[#{method}]"
         options[:id] = method unless options[:id]
@@ -263,7 +263,7 @@ module FreightTrain
           :name => "#{attr_name}",
           :value => "'+#{method}.toString()+'"))).html_safe
       end
-  
+      
 =begin
   def text_field(method, options={})
     attr_name = "#{@object_name}[#{method}]"
@@ -275,13 +275,13 @@ module FreightTrain
     super method, options
   end
 =end
-  
+      
       def last_child_called?
         @last_child_called
       end
-  
-  
-  
+      
+      
+      
       def last_child(&block)
         if block_given?
           @last_child = @template.capture(&block)
@@ -291,26 +291,26 @@ module FreightTrain
           alt_content_tag(:td, (@last_child || default_last_child), :class => "last-child")
         end
       end
-  
-  
-  
+      
+      
+      
     private
-  
-  
-  
+      
+      
+      
       def default_last_child
         ('<button class="save" title="Save" id="tag_submit" name="commit" type="submit">Save</button>' <<
         '<button class="cancel" title="Cancel" onclick="InlineEditor.close();return false;">Cancel</button>').html_safe
       end
-  
-  
-  
+      
+      
+      
       def code(string)
         "';" << string << "html+='"
       end
-  
-  
-  
+      
+      
+      
     end
   end
 end
