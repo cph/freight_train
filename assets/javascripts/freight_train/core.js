@@ -39,6 +39,7 @@ var FT = (function() {
     activateFreightTrainForms();
     enable_nested_records       && FT.reset_add_remove_for_all();
     enable_keyboard_navigation  && enableKeyboardNavigation();
+    activateRowCommands();
     removeDestroyedRows();
     observer.fire('load');
   }
@@ -160,11 +161,30 @@ var FT = (function() {
   
   
   
+  function activateRowCommands() {
+    activateDeleteCommand();
+  }
+  
+  function activateDeleteCommand() {
+    _$.live('click', '.delete-command', function(e) {
+      var a     = _$.target(e),
+          id    = a && _$.attr(a, 'data-id'),
+          form  = a && _$.up(a, 'form.freight_train'),
+          model = form && getModelFromForm(form);
+      if(model && id) {
+        _$.stop(e);
+        model && model.destroy(id);
+      }
+    });
+  }
+  
+  
+  
   function removeDestroyedRows() {
     // need to wrap document.body in $() so that it works on IE
     _$.on(document.body, 'ft:destroy', function(event) {
       InlineEditor.close();
-      var e = event.element();
+      var e = _$.target(event);
       e && e.parentNode && e.parentNode.removeChild(e);
       FT.Helpers.restripeRows();
     });

@@ -10,6 +10,9 @@ FT.Adapters.Prototype = {
   previous: function(element, selector) {
     return $(element).previous(selector);
   },
+  up: function(element, selector) {
+    return $(element).up(selector);
+  },
   
   // Attributes
   attr: function(element, name, value) {
@@ -24,11 +27,19 @@ FT.Adapters.Prototype = {
   },
   
   // Events
+  live: function(event_name, selector, callback) {
+    $(document.body).observe(event_name, function(e) {
+      e.element().match(selector) && callback(e);
+    });
+  },
   on: function(element, event_name, callback) {
     $(element).observe(event_name, callback);
   },
   stop: function(event) {
     Event.stop(event);
+  },
+  target: function(event) {
+    return event.element();
   },
   
   // CSS
