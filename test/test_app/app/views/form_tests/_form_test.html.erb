@@ -1,0 +1,10 @@
+<%= row_for form_test do |row| %>
+  <td><%= row.toggle_of :checkbox %></td>
+  <td><%= row.hidden_field :hidden %></td>
+  <td>
+    <%= row.fields_for :money do |m| %>
+      <%= m.currency_of :amount %>
+      <%= m.text_of :currency %>
+    <% end %>
+  </td>
+<% end %>

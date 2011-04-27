@@ -1,0 +1,6 @@
+<%= row_for question do |row| %>
+  <%= row.text_of :text %><br />
+  <%= row.nested_fields_for :answers do |obf| %>
+    <%= obf.text_of :text %>
+  <% end %>
+<% end %>

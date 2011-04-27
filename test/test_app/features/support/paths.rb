@@ -14,6 +14,9 @@ module NavigationHelpers
     when /the To[ \-]Do Items page/
       '/to_do_items'
 
+    when /the Questions page/
+      '/questions'
+
     # Add more mappings here.
     # Here is an example that pulls values out of the Regexp:
     #

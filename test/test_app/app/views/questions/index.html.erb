@@ -1,0 +1,37 @@
+<h1>Questions</h1>
+
+<h3>Add a Multiple-Choice Question</h3>
+
+<%= form_for(@new_question, :remote => true) do |f| %>
+  <div class="field">
+    <%= f.label :text, "Question:" %><br />
+    <%= f.text_field :text %>
+  </div>
+  <div class="field">
+    Answers:
+    <%= f.nested_editor_for :answers do |ans| %>
+      <%= ans.text_field :text %>
+    <% end %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<p>&nbsp;</p>
+
+<h3>Multiple-Choice Questions</h3>
+
+<%= list :questions do |ft| %>
+  <%= ft.editor do |e| %>
+    <div class="field">
+      <%= e.text_field :text %>
+    </div><br />
+    <div class="field">
+      <%= e.nested_editor_for :answers do |ans| %>
+        <%= ans.text_field :text %>
+      <% end %>      
+    </div>
+  <% end %>
+<% end %>
+

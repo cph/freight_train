@@ -10,7 +10,32 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110421133921) do
+ActiveRecord::Schema.define(:version => 20110427211124) do
+
+  create_table "answers", :force => true do |t|
+    t.integer  "question_id"
+    t.string   "text"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "form_tests", :force => true do |t|
+    t.boolean  "checkbox"
+    t.string   "hidden"
+    t.string   "collection_select"
+    t.string   "select"
+    t.string   "grouped_collection_select"
+    t.decimal  "amount"
+    t.string   "currency"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "questions", :force => true do |t|
+    t.string   "text"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "to_do_items", :force => true do |t|
     t.string   "description"
