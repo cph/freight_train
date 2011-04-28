@@ -79,6 +79,13 @@ li.nested-row > div {
   display:inline-block;
 }
 
+tr.row.in-edit,
 li.row.in-edit {
   display:none;
+}
+
+.toggle.yes {
+  height:12px;
+  width:12px;
+  background:green;
 }

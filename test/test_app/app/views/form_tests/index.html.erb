@@ -31,10 +31,19 @@
 
 <%= table_for :form_tests do |ft| %>
   <%= ft.headings do %>
-    <th>Description</th>
+    <th>Checkbox</th>
+    <th>Hidden</th>
+    <th>Money</th>
   <% end %>
-  <%= ft.editor do |editor| %>
-    <td><%= editor.text_field :description %></td>
+  <%= ft.editor do |f| %>
+    <td><%= f.check_box :checkbox %></td>
+    <td><%= f.hidden_field :hidden %></td>
+    <td>
+      <%= f.fields_for :money do |m| %>
+        <%= m.text_field :amount %>
+        <%= m.select :currency, %w{USD DKK} %>
+      <% end %>
+    </td>
   <% end %>
 <% end %>
 

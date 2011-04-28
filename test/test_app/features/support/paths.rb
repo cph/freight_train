@@ -17,6 +17,9 @@ module NavigationHelpers
     when /the Questions page/
       '/questions'
 
+    when /the Form Test page/
+      '/form_tests'
+
     # Add more mappings here.
     # Here is an example that pulls values out of the Regexp:
     #
