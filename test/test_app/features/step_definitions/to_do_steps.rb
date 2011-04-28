@@ -7,6 +7,12 @@ end
 
 # Extended Web Steps
 
+When /^I fill in the "([^"]*)" of the edited item with "([^"]*)"$/ do |field, new_description|
+  with_scope("#edit_row.to_do_item") do
+    fill_in(field, :with => new_description)
+  end
+end
+
 When /^I click on the to\-do item "([^"]*)"$/ do |description|
   to_do_item = ToDoItem.find_by_description(description)
   selector = "#to_do_item_#{to_do_item.id}"

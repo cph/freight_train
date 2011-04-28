@@ -7,10 +7,11 @@ group :test do
   gem 'cucumber', '0.10.0'
   gem 'cucumber-rails'
   gem 'capybara'
+  gem 'launchy'
 #  gem 'capybara-webkit'
   # gem 'capybara-zombie', :git => "https://github.com/plataformatec/capybara-zombie.git"
   gem 'database_cleaner'
-end  
+end
 
 group :development, :test do
   gem "ruby-debug", :platforms => :mri_18
