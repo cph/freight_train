@@ -207,12 +207,8 @@ module FreightTrain
       
       
       
-      def grouped_collection_select(method, collection, group_method, group_label_method, option_key_method, option_value_method, options = {}, html_options = {})
-        attr_name = "#{@object_name}[#{method}]"
-        @after_init << "FT.copyValue(tr,tr_edit,'#{method}');"
-        html_options[:name] = attr_name
-        html_options[:attr] = attr_name
-        html_options[:id] = nil
+      def grouped_collection_select(method, collection, group_method, group_label_method, option_key_method, option_value_method, options={}, html_options={})
+        autofill!(method, html_options)
         super(method, collection, group_method, group_label_method, option_key_method, option_value_method, options, html_options)
       end
       
@@ -247,43 +243,13 @@ module FreightTrain
       alias :text_of :text
       
       
-      # assign value after creation of control
       
       def text_field(method, html_options={})
-        attr_name = "#{@object_name}[#{method}]"
-        @after_init << "FT.copyValue(tr,tr_edit,'#{method}');"
-        html_options[:name] = attr_name
-        html_options[:attr] = attr_name
-        html_options[:id] = nil
+        autofill!(method, html_options)
         super(method, html_options)
       end
       
-      # def text_field(method, options={})
-      #   attr_name = "#{@object_name}[#{method}]"
-      #   options[:id] = method unless options[:id]
-      #   (code(
-      #     "e=tr.down('*[attr=\"#{attr_name}\"]');" <<
-      #     "if(!e){FT.debug('#{attr_name} not found'); return null;}" <<
-      #   # "FT.debug(e.innerHTML);" <<
-      #     "var #{method}=e.readAttribute('value')||e.innerHTML;"
-      #   ) << 
-      #   @template.tag( "input", options.merge(
-      #     :type => "text",
-      #     :name => "#{attr_name}",
-      #     :value => "'+#{method}.toString()+'"))).html_safe
-      # end
       
-=begin
-  def text_field(method, options={})
-    attr_name = "#{@object_name}[#{method}]"
-    @after_init <<
-      "var e = tr.down('*[attr=\"#{attr_name}\"]');" <<
-      "var i = tr_edit.down('input[name=\"#{attr_name}\"]');" <<
-      "if(i && e) { i.value = e.readAttribute('value')||e.innerHTML; }" <<
-      "else{if(!e) FT.debug('#{attr_name} not found');if(!i) FT.debug('#{method} not found');}"
-    super method, options
-  end
-=end
       
       def last_child_called?
         @last_child_called
@@ -304,6 +270,16 @@ module FreightTrain
       
       
     private
+      
+      
+      
+      def autofill!(method, html_options)
+        attr_name = "#{@object_name}[#{method}]"
+        @after_init << "FT.copyValue(tr,tr_edit,'#{method}');"
+        html_options[:name] = attr_name
+        html_options[:attr] = attr_name
+        html_options[:id] = nil
+      end
       
       
       

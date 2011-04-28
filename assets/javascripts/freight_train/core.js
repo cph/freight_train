@@ -268,34 +268,47 @@ var FT = (function() {
   
   
   
-  function copyValue(row, edtr, method) {
-    var attr_name = _$.attr(row, 'name') + '[' + method + ']',
-        element   = _$.find(row, '*[attr="' + attr_name + '"]')[0],
-        control   = _$.find(edtr, '*[name="' + attr_name + '"]')[0],
-        value     = element && (_$.attr(element, 'value') || element.innerHTML);
-    if(control && value) {
-      _$.assign(control, value);
-    } else {
-      !element && FT.debug('*[attr="' + attr_name + '"] not found');
-      !control && FT.debug('*[name="' + attr_name + '"] not found');
-    }
+  function copyValue(row, editor, method) {
+    var attr_name = getAttrName(row, method),
+        value     = getAttrValue(row, attr_name),
+        control   = getField(editor, attr_name);
+    control && value && _$.assign(control, value);
+  }
+  
+  function getAttrName(row, method) {
+    return _$.attr(row, 'name') + '[' + method + ']';
+  }
+  
+  function getAttrValue(row, attr_name) {
+    var element = getField(row, attr_name);
+    return element && (_$.attr(element, 'value') || element.innerHTML);
+  }
+  
+  function getField(row, attr_name) {
+    var selector = '*[attr="' + attr_name + '"]',
+        element  = _$.find(row, selector)[0];
+    return element ? element : (FT.debug(selector + ' not found') && null);
   }
   
   
   
   
   return {
-    Adapters:   {},
-    Helpers:    Helpers,
+    Adapters:     {},
+    Helpers:      Helpers,
     
-    init:       init,
+    init:         init,
     
-    adapter:    function() { return _$; },
-    observe:    function(name, func) { observer.observe(name, func); },
-    unobserve:  function(name, func) { observer.unobserve(name, func); },
-    destroy:    destroyRow,
-    xhr:        xhr,
-    copyValue:  copyValue,
+    adapter:      function() { return _$; },
+    observe:      function(name, func) { observer.observe(name, func); },
+    unobserve:    function(name, func) { observer.unobserve(name, func); },
+    destroy:      destroyRow,
+    xhr:          xhr,
+    
+    copyValue:    copyValue,
+    getAttrName:  getAttrName,
+    getAttrValue: getAttrValue,
+    getField:     getField,
     
     create_options: function(options, selectedItem) {
       var html = '';
