@@ -1,65 +1,66 @@
 module FreightTrain
   module Helpers
     module PageScriptHelper
-
-
+      
+      
+      
       def make_interactive(path, table_name, options)
         options[:destroy] = true unless options.key?(:destroy)
-    
-        html = "<script type=\"text/javascript\">\n" << 
-           "//<![CDATA[\n" <<
-       
-           # create a namespace for record-specific functions
-           "FT.#{table_name.classify}=(function(){\n" <<
-           "  var path='#{path}';\n" <<
-           "  var obsv=new Observer();\n" 
-       
-        if @inline_editor
-          html << "  var editor_writer=#{editor_writer_method(table_name, options)};\n"
-          html << "  InlineEditor.observe('after_init', #{after_edit_method(table_name, options)});\n"
-        end
-      
-          html << "  return {\n" <<
-               "    path: function(){return path;},\n" <<
-               "    observe: function(n,f){obsv.observe(n,f);},\n" <<
-               "    unobserve: function(n,f){obsv.unobserve(n,f);},\n" <<
-               "    update_in_place: function(property,id,value){FT.xhr((path+'/'+id+'/update_'+property),'put',('#{table_name.singularize}['+property+'='+value));},\n"
-          html << "    #{destroy_method(table_name, options)},\n" if options[:destroy]
-          html << "    #{hookup_row_method options}\n" <<
-               "  };\n" <<
-               "})();\n"
-         
-        # methods in global namespace
-        if options[:reset_on_create] != :none
-          options[:reset_on_create] = :all unless options[:reset_on_create].is_a?(Array)
-          html << reset_on_create_method(table_name, options) << "\n"
-        end
+        model_name = table_name.classify
         
-          html << "//]]>\n" <<
-               "</script>\n"
+        javascript_tag do
+raw <<-JS
+  var FT=FT||{};
+  FT.#{model_name}=(function(){
+    var name='#{model_name}', path='#{path}', o, editor_writer=#{editor_writer_method(table_name.singularize)};
+    return {
+       init: function(){o=new Observer();#{reset_on_create_method(table_name, options)}}
+     , path: function(){return path;}
+     , observe: function(n,f){o.observe(n,f);}
+     , unobserve: function(n,f){o.unobserve(n,f);}
+     #{initialize_editor_method(table_name, options)}
+     #{activate_editing_method(table_name, options)}
+     #{update_in_place_method(table_name)}
+     #{destroy_method(table_name, options)}
+     #{hookup_row_method options}
+    };
+  })();
+JS
+        end
+      ensure
         @already_defined = true
-        html
       end
       
       
       
-      # !todo: move as much of this as possible to core.js
+      def include_freight_train(options={})
+        adapter = options[:adapter].to_s
+        adapter = "prototype" unless %w{prototype jquery}.member?(adapter)
+        adapter_js = "freight_train/#{adapter}_adapter.js"
+        
+raw <<-HTML
+  #{javascript_include_tag('freight_train/observer.js')}
+  #{javascript_include_tag('freight_train/inline_editor.js')}
+  #{javascript_include_tag('freight_train/core.js')}
+  #{javascript_include_tag(adapter_js)}
+  #{ft_init(options)}
+HTML
+      end
+      
+      
+      
       def ft_init(options={})
-        if @already_initialized
-          return ""
-        else
+        unless @already_initialized
           @already_initialized = true
+          javascript_tag do
+raw <<-JS
+  FT.init({
+    token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}'),
+    enable_keyboard_navigation: #{options[:enable_keyboard_navigation] || false}
+  });
+JS
+          end
         end
-        <<-HTML
-        <script type="text/javascript">
-          //<![CDATA[
-          FT.init({
-            token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}'),
-            enable_keyboard_navigation: #{options[:enable_keyboard_navigation] || false}
-          });
-          //]]>
-        </script>
-        HTML
       end
       
       
@@ -68,9 +69,52 @@ module FreightTrain
       
       
       
+      def editor_writer_method(singular)
+        editor_fn = @inline_editor.to_s.gsub(/\r|\n/, " ").gsub(/\s+</, "<").gsub(/>\s+/, ">")
+        if editor_fn.blank?
+          editor_fn = "return null;"
+        else
+          editor_fn = "var html='#{editor_fn}';" <<
+                      "return FT.Helpers.createEditor('#{FreightTrain.tag(:tr)}',html,'#{singular}');"
+        end
+        "function(tr){#{editor_fn}}"
+      end
+      
+      
+      
+      def reset_on_create_method(table_name, options)
+        "FT.Helpers.resetOnCreate(name, #{options[:reset_on_create].to_json});"
+      end
+      
+      
+      
+      def initialize_editor_method(table_name, options)
+        ", initializeEditor: function(tr,tr_edit){#{@after_init_edit}}"
+      end
+      
+      
+      
+      def activate_editing_method(table_name, options)
+        if @inline_editor
+          ", activateEditing: function(row){FT.Helpers.editRowInline(row,path,editor_writer);}"
+        elsif (options[:editable] != false)
+          ", activateEditing: function(row){FT.Helpers.editRow(row,path);}"
+        end
+      end
+      
+      
+      
+      def update_in_place_method(table_name)
+        ", updateInPlace: function(property,id,value){" <<
+          "FT.xhr((path+'/'+id+'/update_'+property),'put',('#{table_name.singularize}['+property+']='+value));" <<
+        "}"
+      end
+      
+      
+      
       def destroy_method(table_name, options)
         msg = options.key?(:confirm) ? options[:confirm] : "Delete #{table_name.to_s.singularize.titleize}?"
-        "destroy: function(idn){" <<
+        ", destroy: function(idn){" <<
           "return FT.destroy(#{msg ? "'#{msg}'" : "false"},('#{table_name.to_s.singularize}_'+idn),(path+'/'+idn));" <<
         "}"
       end
@@ -78,56 +122,9 @@ module FreightTrain
       
       
       def hookup_row_method(options)
-        content = "hookup_row: function(row){"
-        content << "if(row.hasClassName('interactive')) {FT.Helpers.hoverRow(row);}"
-        if @inline_editor
-          content << "if(row.hasClassName('editable')) {FT.Helpers.editRowInline(row,path,editor_writer);}"
-        elsif (options[:editable] != false)
-          if (fn=options[:editor])
-            content << "if(row.hasClassName('editable')) FT.Helpers.editRow(row,#{fn});"
-          else
-            content << "if(row.hasClassName('editable')) FT.Helpers.editRow(row,path);"
-          end
-        end
-        content << "obsv.fire('hookup_row',row);"
-        content << "}"
-      end
-      
-      
-      
-      def reset_on_create_method(table_name, options)
-        arg = options[:reset_on_create]
-        "$(document.body).observe('ft:create', function(event) {" <<
-          "$$('form[data-model=\"#{table_name.classify}\"] #add_row').each(function(row){" <<
-            "FT.reset_form_fields_in(row" << ((arg == :all) ? "" : ", {only: #{arg.to_json}}") << ");" <<
-            "FT.select_first_field_in(row);" <<
-          "});" <<
-        "});"
-      end
-      
-      
-      
-      def editor_writer_method(table_name, options)
-        "function(tr){" <<  
-          "var e;" <<
-          "var html='" << @inline_editor.gsub(/\r|\n/, " ").gsub(/\s+</, " <").gsub(/>\s+/, "> ") << "';" <<
-          "var tr_edit = $(document.createElement('#{FreightTrain.tag(:tr)}'));" << 
-          "tr_edit.className = 'row editor #{table_name.singularize}';" << 
-          "tr_edit.id = 'edit_row';" << 
-          "tr_edit.update(html);" << 
-          "return tr_edit;" <<
+        ", hookupRow: function(row){" <<
+          "o.fire('hookup_row',row);" <<
         "}"
-      end
-      
-      
-      
-      def after_edit_method(table_name, options)
-        content =  "function(tr,tr_edit){"
-        content <<   "if(tr.up('form[data-model=\"#{table_name.classify}\"]')){"
-        content <<     "tr_edit.select('.nested').each(FT.reset_add_remove_for);" if @enable_nested_records
-        content <<     @after_init_edit if @after_init_edit
-        content <<   "}"
-        content << "}"
       end
       
       

@@ -22,7 +22,7 @@
 //   hookup_row         passes each row to observers: both when the page is loaded and when new rows are added dynamically
 //
 //
-var FT = (function() {
+(function() {
 
   var token = '',
       enable_nested_records = true,
@@ -39,6 +39,7 @@ var FT = (function() {
     activateFreightTrainForms();
     enable_nested_records       && FT.reset_add_remove_for_all();
     enable_keyboard_navigation  && enableKeyboardNavigation();
+    respondToInlineEditorEvents();
     activateRowCommands();
     removeDestroyedRows();
     observer.fire('load');
@@ -107,14 +108,20 @@ var FT = (function() {
   
   
   function extendFormModel(form) {
-    var model = getModelFromForm(form)
-    if(model) {
-      if(model.hookup_row) {
-        model.hookup_rows = function(rows) {
-          rows = rows || findRowsWithin(form);
-          for(var i=0, ii=rows.length; i<ii; i++) {
-            model.hookup_row(rows[i]);
-          }
+    var model = getModelFromForm(form);
+    if(model && !model.extended) {
+      model.init();
+      model.extended = true;
+      var _originalHookupRow = model.hookupRow;
+      model.hookupRow = function(row) {
+        _$.hasClass(row, 'interactive') && FT.Helpers.hoverRow(row);
+        _$.hasClass(row, 'editable') && model.activateEditing && model.activateEditing(row);
+        _originalHookupRow && _originalHookupRow(row);
+      }
+      model.hookupRows = function(rows) {
+        rows = rows || findRowsWithin(form);
+        for(var i=0, ii=rows.length; i<ii; i++) {
+          model.hookupRow(rows[i]);
         }
       }
     }
@@ -135,7 +142,7 @@ var FT = (function() {
   
   function initializeRowsInForm(form) {
     var model = getModelFromForm(form)
-    model && model.hookup_rows && model.hookup_rows();
+    model && model.hookupRows && model.hookupRows();
   }
   
   
@@ -157,6 +164,19 @@ var FT = (function() {
         next_row.edit_inline();
       }
     });
+  }
+  
+  
+  
+  function respondToInlineEditorEvents() {
+    InlineEditor.observe('after_init', initializeInlineEditorForModel);
+  }
+  
+  function initializeInlineEditorForModel(tr, tr_edit) {
+    var form = _$.up(tr, 'form.freight_train'),
+        model = form && getModelFromForm(form);
+        // "tr_edit.select('.nested').each(FT.reset_add_remove_for);"
+    model && model.initializeEditor(tr, tr_edit);
   }
   
   
@@ -288,8 +308,30 @@ var FT = (function() {
       for(var i=0, ii=nested_rows.length; i<ii; i++) {
         fn(nested_rows[i], i);
       }
+    },
+    
+    
+    
+    createEditor: function(node_type, html, klass) {
+      var editor = document.createElement(node_type);
+      editor.className = 'row editor ' + klass;
+      editor.innerHTML = html;
+      return editor;
+    },
+    
+    resetOnCreate: function(model_name, options) {
+      options = options || 'all';
+      if(options != 'none') {
+        _$.on(document.body, 'ft:create', function(e) {
+          $$('form[data-model="' + model_name + '"] #add_row').each(function(row) {
+            resetFormFieldsIn(row, options);
+            selectFirstFieldIn(row);
+          });
+        });
+      }
     }
   }
+  
   
   
   
@@ -323,8 +365,45 @@ var FT = (function() {
   
   
   
+  function resetFormFieldsIn(parent, options) {
+    options = options || {};
+    if(options.only) {options.only = $A(options.only);}
+    if(options.except) {options.except = $A(options.except);}
+    parent.select('input[type="text"], input[type="tel"], input[type="email"], textarea').each(function(input) {
+      if(!(options.only && !options.only.include(input.id)) &&
+         !(options.except && options.except.include(input.id))) {
+         input.value = '';
+       }
+    });
+    parent.select('select').each(function(input) {
+      if(!(options.only && !options.only.include(input.id)) &&
+         !(options.except && options.except.include(input.id))) {
+         input.selectedIndex = 0;
+       }
+    });
+    parent.select('.nested.editor').each(function(table) {
+      FT.reset_nested(table);
+    });
+  }
   
-  return {
+  function selectFirstFieldIn(parent) {
+    var first_input = parent.select('input, select, textarea').find(function(input) {
+      return input.visible() && (input.type != 'hidden');
+    });
+    if(first_input) {
+      first_input.select();
+    }
+  }
+  
+  
+  
+  function extend(a, b) {
+    for(method in b) { a[method] = b[method]; }
+  }
+  
+  
+  
+  extend(FT, {
     Adapters:     {},
     Helpers:      Helpers,
     
@@ -341,37 +420,10 @@ var FT = (function() {
     getAttrValue: getAttrValue,
     getField:     getField,
     
-
+    resetFormFieldsIn: resetFormFieldsIn,
+    selectFirstFieldIn: selectFirstFieldIn,
     
-    reset_form_fields_in: function(parent, options) {
-      options = options || {};
-      if(options.only) {options.only = $A(options.only);}
-      if(options.except) {options.except = $A(options.except);}
-      parent.select('input[type="text"], input[type="tel"], input[type="email"], textarea').each(function(input) {
-        if(!(options.only && !options.only.include(input.id)) &&
-           !(options.except && options.except.include(input.id))) {
-           input.value = '';
-         }
-      });
-      parent.select('select').each(function(input) {
-        if(!(options.only && !options.only.include(input.id)) &&
-           !(options.except && options.except.include(input.id))) {
-           input.selectedIndex = 0;
-         }
-      });
-      parent.select('.nested.editor').each(function(table) {
-        FT.reset_nested(table);
-      });
-    },
     
-    select_first_field_in: function(parent) {
-      var first_input = parent.select('input, select, textarea').find(function(input) {
-        return input.visible() && (input.type != 'hidden');
-      });
-      if(first_input) {
-        first_input.select();
-      }
-    },
     
     add_nested_object: function(sender) {
       var tr = $(sender).up('.nested-row'); if(!tr) { FT.debug('FT.add_nested_object: .nested-row not found'); return; }
@@ -534,5 +586,5 @@ var FT = (function() {
         window.console.log(o);
       }
     }
-  };
+  });
 })();

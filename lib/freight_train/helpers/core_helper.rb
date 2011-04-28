@@ -1,22 +1,22 @@
 module FreightTrain
   module Helpers
     module CoreHelper
-  
-  
-  
+      
+      
+      
       class ListBuilder
-    
+        
         def initialize(sym, template, options)
           @sym, @template, @options = sym, template, options
           @html = ""
           @footer_html = nil
         end
-    
+        
         attr_reader :footer_html
-    
+        
         delegate :capture, :raw, :raw_or_concat, :alt_content_tag, :fields_for, :to => :@template
-    
-    
+        
+        
         def header(*args, &block)
           headings = block_given? ? capture(&block) : args.collect{|heading| alt_content_tag(:th, heading)}.join
           # headings << alt_content_tag(:th)  <-- doing this automatically is too unexpected and too difficult to hack if unneeded
@@ -25,47 +25,47 @@ module FreightTrain
           output
         end
         alias :headings :header
-    
-    
-    
+        
+        
+        
         def footer(*args, &block)
           @footer_html = block_given? ? capture(&block) : args.collect{|footer| alt_content_tag(:td, footer)}.join
           @footer_html = "#{alt_content_tag(:tr, @footer_html.html_safe, :class => "row footer")}"
           nil
         end
-    
-    
+        
+        
         def creator(*args, &block)
           raise ArgumentError, "Missing block" unless block_given?
           if args.empty?
             args = [@template.instance_variable_get("@#{@sym}") || @sym]
           end
-      
+          
           raw_or_concat(alt_content_tag(:tr, :id => "add_row", :class => "row editor new") {
             fields_for *args, &block
           })
         end
-    
-    
+        
+        
         def editor(*args, &block)
           raise ArgumentError, "Missing block" unless block_given?
           options = args.extract_options!.reverse_merge!(
             :last_child => true)
           builder = FreightTrain::Builders::EditorBuilder.default_editor_builder
           editor_builder = builder.new(@sym, nil, @template, options, block)
-      
+          
           editor_html = capture(editor_builder, &block)
           editor_html << editor_builder.last_child unless !options[:last_child] or editor_builder.last_child_called?
           @template.instance_variable_set("@inline_editor", editor_html)
           @template.instance_variable_set("@after_init_edit", editor_builder.after_init)
           "" # @inline_editor and @after_init_edit are saved for later; don't print either out here
         end
-    
-    
+        
+        
         def to_s
         end
-    
-    
+        
+        
       end
 
 
@@ -140,6 +140,8 @@ module FreightTrain
         model_name = collection_name.classify
         instance_name = collection_name.singularize
         partial = options[:partial] || instance_name
+        
+        @inline_editor = "function(tr){}"
     
         records = instance_variable_get "@#{collection_name}"
         path = options[:path] || polymorphic_path(args)

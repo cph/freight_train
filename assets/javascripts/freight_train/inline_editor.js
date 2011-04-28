@@ -14,6 +14,7 @@
 //   close            passes the element and the editor to observers just before the editor is hidden and the element restored
 //
 //
+var FT=FT||{};
 var InlineEditor = (function() {
   var CURRENT_ELEMENT = null;
   var CURRENT_EDITOR = null;
@@ -32,10 +33,10 @@ var InlineEditor = (function() {
       observer.fire('before_init', element);
       
       // Create editor
-      var editor = editor_writer(element); if(!editor) {return}
+      var editor = editor_writer(element); if(!editor) {return;}
+      editor.id = 'edit_row';
       
       // Hide the view-only element
-      // element.hide();
       element.addClassName('in-edit');
       
       // Insert the editor

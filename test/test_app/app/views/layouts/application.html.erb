@@ -4,16 +4,12 @@
   <title>TestApp</title>
   <%= stylesheet_link_tag :all %>
   <%= javascript_include_tag :defaults %>
-  <%= javascript_include_tag 'freight_train/observer.js' %>
-  <%= javascript_include_tag 'freight_train/inline_editor.js' %>
-  <%= javascript_include_tag 'freight_train/core.js' %>
-  <%= javascript_include_tag 'freight_train/prototype_adapter.js' %>
   <%= csrf_meta_tag %>
 </head>
 <body>
 
 <%= yield %>
 
-<%= raw ft_init %>
+<%= include_freight_train :adapter => :prototype %>
 </body>
 </html>

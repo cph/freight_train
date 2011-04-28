@@ -2,7 +2,7 @@ FT.Adapters.Prototype = {
   
   // Traversal
   find: function(parent_or_selector, selector) {
-    return selector ? $(parent_or_selector).select(selector) : $$(parent_or_selector);
+    return (selector ? $(parent_or_selector).select(selector) : $$(parent_or_selector))||[];
   },
   next: function(element, selector) {
     return $(element).next(selector);
