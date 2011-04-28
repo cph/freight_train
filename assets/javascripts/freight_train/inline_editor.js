@@ -1,9 +1,9 @@
-// InlineEditor
+// FT.InlineEditor
 // =========================================================================================================
 // Replaces an element with an editable version of itself
 //
 // Usage:
-//   new InlineEditor(url, element, editor_writer)
+//   new FT.InlineEditor(url, element, editor_writer)
 //     url            the URL where edited materials will be posted to using the HTTP verb PUT
 //     element        the HTML element which contains the information to be replaced with an inline editor
 //     editor_writer  a function that creates an inline editor from the element
@@ -14,19 +14,33 @@
 //   close            passes the element and the editor to observers just before the editor is hidden and the element restored
 //
 //
+
 var FT=FT||{};
-var InlineEditor = (function() {
+FT.InlineEditor = (function() {
   var CURRENT_ELEMENT = null;
   var CURRENT_EDITOR = null;
   var observer = new Observer();
+  var _$;
   
   var constructor = function(url, element, editor_writer) {
-    element = $(element); if(!element) return;
+    if(!element) { return; }
+    
+    _$ = _$ || (function() {
+      var a = FT.adapter();
+      a.loaded(function() { // Close InlineEditors when the ESC key is pressed
+        a.on(document.body, 'keydown', function(e) {
+          (e.keyCode == Event.KEY_ESC) && FT.InlineEditor.close();
+        });
+      });
+      return a;
+    })();
+    
+    if(!_$) { throw new 'FT.adapter() is not defined!' }
     
     element.edit_inline = function() {
       
       // close any existing editors
-      InlineEditor.close();
+      FT.InlineEditor.close();
       
       // before_init callback
       // TODO: can return false to cancel the edit?
@@ -37,41 +51,39 @@ var InlineEditor = (function() {
       editor.id = 'edit_row';
       
       // Hide the view-only element
-      element.addClassName('in-edit');
+      _$.addClass(element, 'in-edit');
       
       // Insert the editor
-      element.insert({'after':editor});
+      _$.insert_after(element, editor);
       
       // Save the contents of the editor...
       editor.save = function(callback) {
-        // var params = Form.serialize(editor);
-        var params = editor.up('form').serialize();
+        var form = _$.up(editor, 'form'),
+            params = _$.serialize(form);
         FT.xhr(url, 'put', params, {
           onSuccess: function() {
-            if(CURRENT_EDITOR == editor) { InlineEditor.close(); }
+            (CURRENT_EDITOR == editor) && FT.InlineEditor.close();
           },
           onComplete: function(response) {
-            if((response.status != 400) && callback) {
-              callback();
-            }
+            (response.status != 400) && callback && callback();
           }
         });
       }
       
       // ...on clicking a submit button
-      var submit = editor.down('*[type="submit"]');
-      if(submit) {
-        submit.observe('click', function(event) {
-          Event.stop(event);
+      var submits = _$.find(editor, '*[type="submit"]');
+      for(var i=0, ii=submits.length; i<ii; i++) {
+        _$.on(submits[i], 'click', function(e) {
+          _$.stop(e);
           editor.save();
         });
       }
       
       // ...or on hitting the Return key
-      editor.observe('keydown', function(e) {
+      _$.on(editor, 'keydown', function(e) {
         // window.console.log('kd: ' + e.which);
         if(e.keyCode == Event.KEY_RETURN) {
-          Event.stop(e);
+          _$.stop(e);
           editor.save();
         }
         if(e.keyCode == Event.KEY_UP) {
@@ -86,44 +98,31 @@ var InlineEditor = (function() {
       observer.fire('after_init', [element, editor]);
       
       // Finally, select the first Form element in the editor
-      var first_input = editor.down('input, select, textarea');
-      try { if(first_input) { first_input.activate(); } } catch(e) {}
+      FT.selectFirstFieldIn(editor);
       
       // Remember the row being edited
       CURRENT_ELEMENT = element;
       CURRENT_EDITOR = editor;
     }
     
-    // Edit the row when it is clicked
-    element.observe('click', function(event) {
-      
-      // Ignore if a link or button was clicked
-      if(!Event.findElement(event, 'input, button, a')) {
-        element.edit_inline();
-      }
+    // Edit the row when it is clicked (but not if a link or button was clicked)
+    _$.on(element, 'click', function(e) {
+      var target = _$.target(e);
+      target && !_$.match(target, 'input, button, a') && element.edit_inline();
     });
   };
   
   constructor.close = function() {
     if(CURRENT_ELEMENT || CURRENT_EDITOR) {
       observer.fire('close', [CURRENT_ELEMENT, CURRENT_EDITOR]);
-      if(CURRENT_ELEMENT) CURRENT_ELEMENT.removeClassName('in-edit');
-      if(CURRENT_EDITOR)  CURRENT_EDITOR.remove();
-      CURRENT_ELEMENT     = null;
-      CURRENT_EDITOR      = null;
+      CURRENT_ELEMENT && _$.removeClass(CURRENT_ELEMENT, 'in-edit');
+      CURRENT_EDITOR  && CURRENT_EDITOR.parentNode && CURRENT_EDITOR.parentNode.removeChild(CURRENT_EDITOR);
+      CURRENT_ELEMENT = null;
+      CURRENT_EDITOR  = null;
     }
   };
   constructor.observe = function(name,func){ observer.observe(name, func); };
   constructor.unobserve = function(name,func){ observer.unobserve(name, func); };
-  
-  // Close InlineEditors when the ESC key is pressed
-  document.observe('dom:loaded', function() {
-    $(document.body).observe('keydown', function(event) {
-      if(event.keyCode==Event.KEY_ESC) {
-        InlineEditor.close();
-      }
-    });
-  });
   
   return constructor;  
 })();

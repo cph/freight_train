@@ -98,7 +98,7 @@
   function configureFormSubmission(form) {
     _$.on(form, 'submit', function(e) {
       _$.stop(e);
-      InlineEditor.close(); // Don't let values in inline editor override values in creator
+      FT.InlineEditor.close(); // Don't let values in inline editor override values in creator
       submitFormRemotely(form);
     })
   }
@@ -153,7 +153,7 @@
   
   function enableNestedEditors() {
     enableNestedEditorsIn();
-    InlineEditor.observe('after_init', function(element, editor) {
+    FT.InlineEditor.observe('after_init', function(element, editor) {
       enableNestedEditorsIn(editor);
     })
   }
@@ -301,7 +301,7 @@
   
   
   function enableKeyboardNavigation() {
-    InlineEditor.observe('up', function(e, row, editor) {
+    FT.InlineEditor.observe('up', function(e, row, editor) {
       var previous_row = _$.previous(row, '.editable');
       if(previous_row) {
         _$.stop(e);
@@ -309,7 +309,7 @@
         previous_row.edit_inline();
       }
     });
-    InlineEditor.observe('down', function(e, row, editor) {
+    FT.InlineEditor.observe('down', function(e, row, editor) {
       var next_row = _$.next(editor, '.editable');
       if(next_row) {
         _$.stop(e);
@@ -324,7 +324,7 @@
   
   
   function respondToInlineEditorEvents() {
-    InlineEditor.observe('after_init', initializeInlineEditorForModel);
+    FT.InlineEditor.observe('after_init', initializeInlineEditorForModel);
   }
   
   function initializeInlineEditorForModel(tr, tr_edit) {
@@ -362,7 +362,7 @@
   function removeDestroyedRows() {
     // need to wrap document.body in $() so that it works on IE
     _$.on(document.body, 'ft:destroy', function(event) {
-      InlineEditor.close();
+      FT.InlineEditor.close();
       var e = _$.target(event);
       e && e.parentNode && e.parentNode.removeChild(e);
       FT.Helpers.restripeRows();
@@ -419,7 +419,7 @@
       var id = _$.attr(row, 'id');
       var idn = id.match(/\d+/);
       var url = url_root + '/' + idn;
-      new InlineEditor(url, row, editor_writer, before_edit, after_edit);
+      new FT.InlineEditor(url, row, editor_writer, before_edit, after_edit);
     },
     editRow: function(row, url_root_or_fn) {
       var handler;

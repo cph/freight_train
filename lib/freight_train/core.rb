@@ -39,7 +39,7 @@ module FreightTrain
       
       render :update do |page|
         page.safe_hide "flash_error"
-        # page.call "InlineEditor.close"
+        # page.call "FT.InlineEditor.close"
         
         case refresh
         when :single

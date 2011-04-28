@@ -2,12 +2,20 @@ var FT=FT||{};
 FT.Adapters=FT.Adapters||{};
 FT.Adapters.Prototype = {
   
+  // Load
+  loaded: function(callback) {
+    document.observe('dom:loaded', callback);
+  },
+  
   // Traversal
   find_by_id: function(id) {
     return $(id);
   },
   find: function(parent_or_selector, selector) {
     return (selector ? $(parent_or_selector).select(selector) : $$(parent_or_selector))||[];
+  },
+  match: function(element, selector) {
+    return $(element).match(selector);
   },
   next: function(element, selector) {
     return $(element).next(selector);
@@ -74,6 +82,9 @@ FT.Adapters.Prototype = {
       clone = element.cloneNode(true);
     }
     return clone;
+  },
+  insert_after: function(reference, element) {
+    reference.insert({'after':element});
   },
   
   // Events

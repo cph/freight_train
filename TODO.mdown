@@ -2,7 +2,6 @@
 
 ### Refactor to be Prototype-independent
 
-  - Refactor `inline_editor_.js`
   - Create an adapter that relies on jQuery; test w/o Prototype
 
 ### Other
