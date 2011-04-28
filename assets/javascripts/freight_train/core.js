@@ -37,7 +37,7 @@
   function init(args) {
     readOptions(args);
     activateFreightTrainForms();
-    enable_nested_records       && FT.reset_add_remove_for_all();
+    enable_nested_records       && enableNestedEditors();
     enable_keyboard_navigation  && enableKeyboardNavigation();
     respondToInlineEditorEvents();
     activateRowCommands();
@@ -52,6 +52,8 @@
     save_when_navigating = args.save_when_navigating;
     enable_keyboard_navigation = args.enable_keyboard_navigation;
   }
+  
+  
   
   
   
@@ -147,6 +149,157 @@
   
   
   
+  
+  
+  function enableNestedEditors() {
+    enableNestedEditorsIn();
+    InlineEditor.observe('after_init', function(element, editor) {
+      enableNestedEditorsIn(editor);
+    })
+  }
+  
+  function enableNestedEditorsIn(parent) {
+    withEach(findNestedEditors(parent), initializeNestedEditor);
+  }
+  
+  function updateNestedEditorsIn(parent) {
+    withEach(findNestedEditors(parent), updateNestedEditor);
+  }
+  
+  function findNestedEditors(parent) {
+    return _$.find((parent || document.body), '.nested.editor');
+  }
+  
+  function initializeNestedEditor(nested_editor) {
+    _$.delegate(nested_editor, 'click',    '.add-nested-link', nestedRowAction(addNestedRow));
+    _$.delegate(nested_editor, 'click', '.delete-nested-link', nestedRowAction(deleteNestedRow));
+    updateNestedEditor(nested_editor);
+  }
+  
+  function nestedRowAction(action) {
+    return function(e) {
+      _$.stop(e);
+      var row = getNestedRowFromEvent(e);
+      row && action(row);
+    }
+  }
+  
+  function getNestedRowFromEvent(e) {
+    var target = _$.target(e),
+        row = target && _$.up(target, '.nested-row');
+    row || FT.debug('[getParentNestedRow] .nested-row not found');
+    return row;
+  }
+  
+  
+  
+  function addNestedRow(row) {
+    if(!row.parentNode) {return;}
+    var nested_editor = _$.up(row, '.nested.editor');
+    
+    // Clone a row
+    var new_row   = _$.clone(row),
+        name      = _$.attr(new_row, 'name').replace(/\[(\d+)\]/, function(m, n){return '['+(Number(n)+1)+']';});
+    new_row.id    = row.id.replace(/(\d+)$/, function(m, n){return Number(n) + 1;});
+    _$.attr(new_row, 'name', name);
+    _$.attr(new_row, 'attr', name);
+    row.parentNode.appendChild(new_row);
+    
+    // Reset the cloned row's values
+    setNestedRowFieldValue(new_row, '_destroy', 0);
+    setNestedRowFieldValue(new_row, 'id', '');
+    resetFormFieldsIn(new_row);
+    selectFirstFieldIn(new_row);
+    
+    observer.fire('after_add_nested', [nested_editor, new_row]);
+    updateNestedEditor(nested_editor);
+  }
+  
+  function deleteNestedRow(row) {
+    if(!row.parentNode) {return;}
+    var nested_editor = _$.up(row, '.nested.editor');
+    
+    // How many undeleted records are left? Only 1? Create a new empty record.
+    var undeleted_rows = 0;
+    withEach(row.parentNode.childNodes, function(row) {
+      (getNestedRowFieldValue(row, '_destroy') != '1') && (undeleted_rows++);
+    });
+    (undeleted_rows <= 1) && addNestedRow(row);
+    
+    // Remove or hide the deleted record
+    if(getNestedRowFieldValue(row, 'id')) {
+      setNestedRowFieldValue(row, '_destroy', 1);
+      _$.hide(row);
+    } else {
+      row.parentNode.removeChild(row);
+    }
+    
+    observer.fire('after_delete_nested', [nested_editor, row]);
+    updateNestedEditor(nested_editor);
+  }
+  
+  function getNestedRowFieldValue(row, attr) {
+    var field = getNestedRowField(row, attr);
+    return field && field.value;
+  }
+  
+  function setNestedRowFieldValue(row, attr, value) {
+    var field = getNestedRowField(row, attr);
+    field && (field.value = value);
+  }
+  
+  function getNestedRowField(row, attr) {
+    return _$.find(row, '[data-attr="' + attr + '"]')[0];
+  }
+  
+  
+  
+  
+  function updateNestedEditor(nested_editor) {
+    var object_name   = _$.attr(nested_editor, 'name'),
+        rows          = _$.find(nested_editor, '.nested-row'),
+        visible_rows  = [],
+        row;
+    
+    for(var i=0, ii=rows.length; i<ii; i++) {
+      row = rows[i];
+      renumberNestedRow(row, i);
+      (getNestedRowFieldValue(row, '_destroy') != '1') && visible_rows.push(row);
+    }
+    
+    var ii = visible_rows.length - 1;
+    for(var i=0; i<ii; i++) { setAddNestedVisibility(visible_rows[i],  'hidden'); }
+    if(ii >= 0)             { setAddNestedVisibility(visible_rows[ii], 'visible'); }
+    
+    observer.fire('after_reset_nested', nested_editor);
+  }
+  
+  function renumberNestedRow(row, i) {
+    row.select('input, textarea, select').each(function(e) {
+      e.writeAttribute('name', e.readAttribute('name').gsub(/[(\d+)]/, i));
+    });
+  }
+  
+  function setAddNestedVisibility(row, add_visibility) {
+    var add_link = _$.find(row, '.add-link')[0];
+    add_link && _$.css(add_link, {visibility: add_visibility});
+  }
+  
+  
+  
+  function resetNestedEditor(nested_editor) {
+    var nested_rows = _$.find(nested_editor, '.nested-row');
+    for(var i=1, ii=nested_rows.length; i<ii; i++) {
+      var row = nested_rows[i];
+      row.parentNode.removeChild(row);
+    }
+    updateNestedEditor(nested_editor);
+  }
+  
+  
+  
+  
+  
   function enableKeyboardNavigation() {
     InlineEditor.observe('up', function(e, row, editor) {
       var previous_row = _$.previous(row, '.editable');
@@ -168,6 +321,8 @@
   
   
   
+  
+  
   function respondToInlineEditorEvents() {
     InlineEditor.observe('after_init', initializeInlineEditorForModel);
   }
@@ -181,12 +336,14 @@
   
   
   
+  
+  
   function activateRowCommands() {
     activateDeleteCommand();
   }
   
   function activateDeleteCommand() {
-    _$.live('click', '.delete-command', function(e) {
+    _$.delegate(document.body, 'click', '.delete-command', function(e) {
       var a     = _$.target(e),
           id    = a && _$.attr(a, 'data-id'),
           form  = a && _$.up(a, 'form.freight_train'),
@@ -197,6 +354,8 @@
       }
     });
   }
+  
+  
   
   
   
@@ -385,7 +544,7 @@
       fieldToBeReset(select.id) && (select.selectedIndex = 0);
     }
     for(var i=0, ii=nested_editors.length; i<ii; i++) {
-      FT.reset_nested(nested_editors[i]);
+      resetNestedEditor(nested_editors[i]);
     }
   }
   
@@ -402,11 +561,13 @@
   
   
   
+  function withEach(array, fn) {
+    for(var i=0, ii=array.length; i<ii; i++) { fn(array[i]); }
+  }
+  
   function member(array, item) {
     for(var i=0, ii=array.length; i<ii; i++) {
-      if(array[i] == item) {
-        return true;
-      }
+      if(array[i] == item) { return true; }
     }
     return false;
   }
@@ -418,162 +579,24 @@
   
   
   extend(FT, {
-    Helpers:      Helpers,
+    Helpers:            Helpers,
     
-    init:         init,
+    init:               init,
     
-    adapter:      function() { return _$; },
-    observe:      function(name, func) { observer.observe(name, func); },
-    unobserve:    function(name, func) { observer.unobserve(name, func); },
-    destroy:      destroyRow,
-    xhr:          xhr,
+    adapter:            function() { return _$; },
+    observe:            function(name, func) { observer.observe(name, func); },
+    unobserve:          function(name, func) { observer.unobserve(name, func); },
+    destroy:            destroyRow,
+    xhr:                xhr,
     
-    copyValue:    copyValue,
-    getAttrName:  getAttrName,
-    getAttrValue: getAttrValue,
-    getField:     getField,
+    copyValue:          copyValue,
+    getAttrName:        getAttrName,
+    getAttrValue:       getAttrValue,
+    getField:           getField,
     
-    resetFormFieldsIn: resetFormFieldsIn,
+    resetFormFieldsIn:  resetFormFieldsIn,
     selectFirstFieldIn: selectFirstFieldIn,
     
-    
-    
-    add_nested_object: function(sender) {
-      var tr = $(sender).up('.nested-row'); if(!tr) { FT.debug('FT.add_nested_object: .nested-row not found'); return; }
-      var table = tr.parentNode; if(!table) { FT.debug('FT.add_nested_object .nested not found'); return; }
-      var n = table.childNodes.length;
-      
-      var new_tr = FT.clone_node(tr);
-      new_tr.id = tr.id.replace(/(\d+)$/, function(fullMatch, n) { return (Number(n)+1); });
-      new_tr.writeAttribute('name', new_tr.readAttribute('name').gsub(/[(\d+)]/, n));
-      table.appendChild(new_tr);
-      
-      var _destroy = new_tr.down('[data-attr="_destroy"]');
-      if(_destroy) _destroy.value = 0;
-      
-      var id = new_tr.down('[data-attr="id"]');
-      if(id) id.value = '';
-      
-      FT.reset_form_fields_in(new_tr);
-      FT.select_first_field_in(new_tr);
-            
-      observer.fire('after_add_nested', [table,new_tr]);
-      FT.reset_add_remove_for(table);
-    },
-    
-    clone_node: function(element) {
-      // IE copies events bound via attachEvent when
-      // using cloneNode. Calling detachEvent on the
-      // clone will also remove the events from the orignal
-      // In order to get around this, we use innerHTML.
-      var clone;
-      if(Prototype.Browser.IE) {
-        clone = element.clone(false);
-        clone.innerHTML = element.innerHTML;
-        
-        // innerHTML still copies all kinds of custom attributes over in IE.
-        FT.reset_after_clone(clone);
-      } else {
-        clone = element.cloneNode(true);
-      }
-      return clone;
-    },
-    
-    reset_after_clone: function(element) {
-      var attributes = element.attributes,
-          children = element.childNodes;
-      if(attributes) {
-        for(var i=0, ii=attributes.length; i<ii; i++) {
-          if(attributes[i]) {
-            var attr = attributes[i].nodeName;
-            if(('_prototypeUID' == attr) ||
-               (/^jQuery/.test(attr))) {
-              App.debug('removing "' + attr + '"');
-              element.removeAttribute(attr);
-            }
-          }
-        }
-      }
-      if(children) {
-        for(var i=0, ii=children.length; i<ii; i++) {
-          FT.reset_after_clone(children[i]);
-        }
-      }
-    },
-    
-    delete_nested_object: function(sender) {
-      var tr = $(sender).up('.nested-row'); if(!tr) return;
-      var table = tr.up('.nested'); if(!table) return;
-      var name = tr.readAttribute('name');
-      
-      // How many undeleted records are left? Only 1? Create a new empty record.
-      var rows=table.select('.nested-row').reject(function(row) {
-        var _destroy = row.down('[data-attr="_destroy"]');
-        return (_destroy.value=='1');
-      });
-      if(rows.length == 1) {
-        FT.add_nested_object(sender);
-      }
-      
-      var id = tr.down('[data-attr="id"]');
-      if(id && (id.value == '')) {
-        tr.remove();
-      }
-      else {
-        var _destroy = tr.down('[data-attr="_destroy"]');
-        _destroy.value = 1;
-        tr.hide();
-      }
-      FT.reset_add_remove_for(table);
-    },
-    
-    reset_nested: function(table) {
-      table = $(table);
-      if(table) {
-        var nested = table.select('.nested-row');
-        for(var i=1;i<nested.length;i++) {
-          nested[i].remove();
-          FT.reset_add_remove_for(table); // !todo: I think this is wrong. Either 'table' should be 'nested[i]'
-                                          //        or this should occur outside the for loop.
-        }
-      }
-    },
-    
-    reset_add_remove_for_all: function(parent) {
-      var selector = function(x){ return parent ? $(parent).select(x) : $$(x); };
-      selector('.nested.editor').each(FT.reset_add_remove_for);
-    },
-    
-    reset_add_remove_for: function(table) {
-      function renumber_row(row, i) {
-        row.select('input, textarea, select').each(function(e) {
-          e.writeAttribute('name', e.readAttribute('name').gsub(/[(\d+)]/, i));
-        });
-      }
-      
-      function set_add_visibility(row, add_visibility) {
-        var add_link = row.down('.add-link');
-        add_link && add_link.setStyle({visibility:add_visibility});
-      }
-      
-      var object_name=table.readAttribute('name');
-      var rows=table.select('.nested-row');
-      for(var i=0; i<rows.length; i++) {
-        renumber_row(rows[i], i);
-      }
-      
-      rows=rows.reject(function(row) {
-        var _destroy = row.down('[data-attr="_destroy"]');
-        return (_destroy.value=='1');
-      });
-      
-      var ii = rows.length - 1;
-      for(var i=0; i<ii; i++) { set_add_visibility(rows[i],  'hidden'); }
-      if(ii >= 0)             { set_add_visibility(rows[ii], 'visible'); }
-      
-      observer.fire('after_reset_nested',table);
-      //if(window.after_reset_nested) window.after_reset_nested(table);
-    },
     
     
     

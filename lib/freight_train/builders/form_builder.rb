@@ -149,51 +149,18 @@ module FreightTrain
       
       def delete_nested_command
         alt_content_tag(:td, :class => "delete-nested") do
-          "<a class=\"delete-link\" href=\"#\" title=\"Delete\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\">Delete</a>".html_safe
+          "<a class=\"delete-link delete-nested-link\" href=\"#\" title=\"Delete\">Delete</a>".html_safe
         end
       end
       
       def add_nested_command
         alt_content_tag(:td, :class => "add-nested") do
-          "<a class=\"add-link\" href=\"#\" title=\"Add\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\">Add</a>".html_safe
+          "<a class=\"add-link add-nested-link\" href=\"#\" title=\"Add\">Add</a>".html_safe
         end
       end
-
-
-
-# !todo: almost -- this one just has the '+i+' in nested-row
-=begin
-  def fields_for_nested_editor(method_or_object, *args, &block)
-    fields_for(method, *args) do |f|
-      alt_content_tag :tr, :class => "nested-row", :id => "#{method.to_s.singularize}_'+i+'" do
-        alt_content_tag :td, :class => "hidden" do
-          safe_concat f.hidden_field :id
-          #safe_concat "<input type=\"hidden\" name=\"#{@object_name}[#{method}][_delete]\" value=\"false\" />"
-          safe_concat f.static_field :_destroy, 0
-        end
-        yield f
-        alt_content_tag :td, :class => "delete-nested" do
-          safe_concat "<a class=\"delete-link\" href=\"#\" onclick=\"Event.stop(event);FT.delete_nested_object(this);return false;\"></a>"
-        end
-        alt_content_tag :td, :class => "add-nested" do
-          safe_concat "<a class=\"add-link\" href=\"#\" onclick=\"Event.stop(event);FT.add_nested_object(this);return false;\"></a>"
-        end
-      end
-    end
-  end
-=end
-
-  
-    private
-
-=begin
-  def nested_fields_for(method_or_object, *args, &block)
-    args << {:builder => FreightTrain::Builders::NestedFormBuilderWrapper}
-    fields_for(method_or_object, *args, &block)    
-  end
-=end
-
-
+      
+      
+      
     end
   end
 end

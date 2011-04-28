@@ -34,10 +34,52 @@ FT.Adapters.Prototype = {
     return $(element).visible();
   },
   
+  // Manipulation
+  clone: function(element) {
+    // IE copies events bound via attachEvent when
+    // using cloneNode. Calling detachEvent on the
+    // clone will also remove the events from the orignal
+    // In order to get around this, we use innerHTML.
+    var clone;
+    if(Prototype.Browser.IE) {
+      clone = element.clone(false);
+      clone.innerHTML = element.innerHTML;
+      
+      // innerHTML still copies all kinds of custom attributes over in IE.
+      (function(element) {
+        var attributes = element.attributes,
+            children = element.childNodes;
+        if(attributes) {
+          for(var i=0, ii=attributes.length; i<ii; i++) {
+            if(attributes[i]) {
+              var attr = attributes[i].nodeName;
+              if(('_prototypeUID' == attr) ||
+                 (/^jQuery/.test(attr))) {
+                App.debug('removing "' + attr + '"');
+                element.removeAttribute(attr);
+              }
+            }
+          }
+        }
+        if(children) {
+          for(var i=0, ii=children.length; i<ii; i++) {
+            arguments.callee(children[i]);
+          }
+        }
+      })(clone);
+    } else {
+      clone = element.cloneNode(true);
+    }
+    return clone;
+  },
+  
   // Events
-  live: function(event_name, selector, callback) {
-    $(document.body).observe(event_name, function(e) {
-      e.element().match(selector) && callback(e);
+  delegate: function(parent, event_name, selector, callback) {
+    $(parent).observe(event_name, function(e) {
+      if(e.element().match(selector)) {
+        window.console.log([event_name, e.element(), selector]);
+        callback(e);
+      }
     });
   },
   on: function(element, event_name, callback) {
@@ -59,6 +101,15 @@ FT.Adapters.Prototype = {
   },
   removeClass: function(element, class_name) {
     $(element).removeClassName(class_name);
+  },
+  hide: function(element) {
+    $(element).hide();
+  },
+  show: function(element) {
+    $(element).show();
+  },
+  css: function(element, css) {
+    $(element).setStyle(css);
   },
   
   // Forms
