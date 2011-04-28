@@ -268,6 +268,21 @@ var FT = (function() {
   
   
   
+  function copyValue(row, edtr, method) {
+    var attr_name = _$.attr(row, 'name') + '[' + method + ']',
+        element   = _$.find(row, '*[attr="' + attr_name + '"]')[0],
+        control   = _$.find(edtr, '*[name="' + attr_name + '"]')[0],
+        value     = element && (_$.attr(element, 'value') || element.innerHTML);
+    if(control && value) {
+      _$.assign(control, value);
+    } else {
+      !element && FT.debug('*[attr="' + attr_name + '"] not found');
+      !control && FT.debug('*[name="' + attr_name + '"] not found');
+    }
+  }
+  
+  
+  
   
   return {
     Adapters:   {},
@@ -280,27 +295,7 @@ var FT = (function() {
     unobserve:  function(name, func) { observer.unobserve(name, func); },
     destroy:    destroyRow,
     xhr:        xhr,
-    
-    // !todo: move to Select or HTMLSelectElement?
-    select_value: function(selector, value) {
-      if(!selector) {
-        FT.debug("selector not found");
-        return;
-      }
-      if(!value) {
-        //FT.debug("value not found");
-        return;
-      }
-      var options = selector.options;
-      var option;
-      for(var i=0;i<options.length;i++) {
-        option = options[i];
-        if(option.value == value) {
-          option.selected = true;
-          return;
-        }
-      }
-    },
+    copyValue:  copyValue,
     
     create_options: function(options, selectedItem) {
       var html = '';
@@ -316,18 +311,6 @@ var FT = (function() {
     },
     
     /* ARE THESE NEXT TWO STRICTLY FREIGHT TRAIN? */
-    copy_selected_value: function(tr,tr_edit,method) {
-      var attr_name = tr.readAttribute('name')+'['+method+']';
-      var e=tr.down('*[attr="'+attr_name+'"]');
-      var sel=tr_edit.down('select[name="'+attr_name+'"]');
-      if(e && sel) {
-        FT.select_value(sel, e.readAttribute('value')||e.innerHTML);
-      } else {
-        if(!e) FT.debug(attr_name+' not found');
-        if(!sel) FT.debug('selector "'+method+'" ('+attr_name+') not found');
-      }
-    },
-    
     check_selected_values: function(tr,tr_edit,attr_name) {
       var e=tr.down('*[attr="'+attr_name+'"]');
       if(e) {

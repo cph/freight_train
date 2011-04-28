@@ -209,7 +209,7 @@ module FreightTrain
       
       def grouped_collection_select(method, collection, group_method, group_label_method, option_key_method, option_value_method, options = {}, html_options = {})
         attr_name = "#{@object_name}[#{method}]"
-        @after_init << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
+        @after_init << "FT.copyValue(tr,tr_edit,'#{method}');"
         html_options[:name] = attr_name
         html_options[:attr] = attr_name
         html_options[:id] = nil
@@ -227,7 +227,7 @@ module FreightTrain
         #   "else{if(!e) FT.debug('#{attr_name} not found');if(!sel) FT.debug('#{method} not found');}"
         # super
         
-        @after_init << "FT.copy_selected_value(tr,tr_edit,'#{method}');"
+        @after_init << "FT.copyValue(tr,tr_edit,'#{method}');"
         html_options[:name] = attr_name
         html_options[:attr] = attr_name
         raw "#{tag("select", html_options, true)}'+FT.create_options(#{choices.to_json})+'</select>"    
@@ -249,20 +249,29 @@ module FreightTrain
       
       # assign value after creation of control
       
-      def text_field(method, options={})
+      def text_field(method, html_options={})
         attr_name = "#{@object_name}[#{method}]"
-        options[:id] = method unless options[:id]
-        (code(
-          "e=tr.down('*[attr=\"#{attr_name}\"]');" <<
-          "if(!e){FT.debug('#{attr_name} not found'); return null;}" <<
-        # "FT.debug(e.innerHTML);" <<
-          "var #{method}=e.readAttribute('value')||e.innerHTML;"
-        ) << 
-        @template.tag( "input", options.merge(
-          :type => "text",
-          :name => "#{attr_name}",
-          :value => "'+#{method}.toString()+'"))).html_safe
+        @after_init << "FT.copyValue(tr,tr_edit,'#{method}');"
+        html_options[:name] = attr_name
+        html_options[:attr] = attr_name
+        html_options[:id] = nil
+        super(method, html_options)
       end
+      
+      # def text_field(method, options={})
+      #   attr_name = "#{@object_name}[#{method}]"
+      #   options[:id] = method unless options[:id]
+      #   (code(
+      #     "e=tr.down('*[attr=\"#{attr_name}\"]');" <<
+      #     "if(!e){FT.debug('#{attr_name} not found'); return null;}" <<
+      #   # "FT.debug(e.innerHTML);" <<
+      #     "var #{method}=e.readAttribute('value')||e.innerHTML;"
+      #   ) << 
+      #   @template.tag( "input", options.merge(
+      #     :type => "text",
+      #     :name => "#{attr_name}",
+      #     :value => "'+#{method}.toString()+'"))).html_safe
+      # end
       
 =begin
   def text_field(method, options={})

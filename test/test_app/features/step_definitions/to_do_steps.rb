@@ -9,7 +9,7 @@ end
 
 When /^I fill in the "([^"]*)" of the edited item with "([^"]*)"$/ do |field, new_description|
   with_scope("#edit_row.to_do_item") do
-    fill_in(field, :with => new_description)
+    fill_in("to_do_item[#{field.downcase}]", :with => new_description)
   end
 end
 

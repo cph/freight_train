@@ -53,6 +53,28 @@ FT.Adapters.Prototype = {
     $(element).removeClassName(class_name);
   },
   
+  // Forms
+  assign: function(control, value) {
+    switch(control.nodeName.toUpperCase()) {
+      case 'INPUT':
+      case 'TEXTAREA':
+        $(control).setValue(value);
+        break;
+        
+      case 'SELECT':
+        var options = selector.options;
+        var option;
+        for(var i=0;i<options.length;i++) {
+          option = options[i];
+          if(option.value == value) {
+            option.selected = true;
+            return;
+          }
+        }
+        break;
+    }
+  },
+  
   // Ajax
   xhr: function(url, method, params, args) {
     args = args || {};
