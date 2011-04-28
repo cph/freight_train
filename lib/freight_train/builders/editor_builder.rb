@@ -183,20 +183,14 @@ module FreightTrain
       def nested_editor_wrapper(method, attr_name, &block)
         singular = method.to_s.singularize
         
-        # This FormBuilder expects 'tr' to refer to a TR that represents and object and contains
-        # TDs representing the object's attributes. For nested objects, the TR is a child of the
-        # root TR. Create a closure in which the variable 'tr' refers to the nested object while
-        # preserving the reference to the root TR.
-        code(
-          "(function(root_tr){" <<
-          "var nested_rows=root_tr.select('.#{singular}');" <<
-          "for(var i=0; i<nested_rows.length; i++){" << 
-            "var tr=nested_rows[i];"
-        ) <<
+        # Use FT.Helpers.forEachNestedRow to create a closure where the variable 'tr'
+        # refers to the nested row so that in the context of the EditorBuilder instantiated
+        # by `fields_for`, 'tr' refers to the nested row rather than its parent.
+        code("FT.Helpers.forEachNestedRow(tr,'#{singular}',function(tr,i){") <<
         (fields_for(method, :name => "'+tr.readAttribute('name')+'") do |f|
           nested_editor_row(f, attr_name, "'+i+'", method, &block)
         end) <<
-        code("}})(tr);")
+        code("});")
       end
       
       
