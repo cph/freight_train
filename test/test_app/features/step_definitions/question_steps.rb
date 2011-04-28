@@ -15,6 +15,7 @@ end
 # Extended Web Steps
 
 Then /^the question "([^"]*)" should have (\d+) answers?$/ do |question, answers_count|
+  sleep(1.0/5.0)
   question = Question.find_by_text(question)
   with_scope("#question_#{question.id}") do
     assert_equal answers_count.to_i, all('.answer').length

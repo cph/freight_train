@@ -270,10 +270,23 @@ var FT = (function() {
       return html;
     },
     
-    forEachNestedRow: function(root_tr, selector, callback) {
+    
+    
+    forEachRow: function(row, editor, selector, fn) {
+      var nested_rows     = _$.find(row, selector),
+          nested_editors  = _$.find(editor, selector);
+      for(var i=0, ii=nested_rows.length; i<ii; i++) {
+        var nested_row    = nested_rows[i],
+            nested_editor = nested_editors[i],
+            name          = _$.attr(nested_editor, 'name');
+        fn(nested_row, nested_editor, name);
+      }
+    },
+    
+    forEachNestedRow: function(root_tr, selector, fn) {
       var nested_rows = _$.find(root_tr, selector);
       for(var i=0, ii=nested_rows.length; i<ii; i++) {
-        callback(nested_rows[i], i);
+        fn(nested_rows[i], i);
       }
     }
   }
@@ -329,22 +342,6 @@ var FT = (function() {
     getField:     getField,
     
 
-    
-    /* ARE THESE NEXT TWO STRICTLY FREIGHT TRAIN? */
-    check_selected_values: function(tr,tr_edit,attr_name) {
-      var e=tr.down('*[attr="'+attr_name+'"]');
-      if(e) {
-        var values=e.readAttribute('value').split('|');
-        for(var i=0; i<values.length; i++) {
-          e=tr_edit.down('*[value="'+values[i]+'"]');
-          if(!e) FT.debug('"'+values[i]+'" not found');
-          else e.writeAttribute('checked','checked');
-        }
-      }
-      else {
-        FT.debug(attr_name+' not found');
-      }
-    },
     
     reset_form_fields_in: function(parent, options) {
       options = options || {};
@@ -513,30 +510,24 @@ var FT = (function() {
       //if(window.after_reset_nested) window.after_reset_nested(table);
     },
     
-    /* SHOULD THIS GET A BETTER NAME OR BE PUT IN A SUB-NAMESPACE? */     
-    for_each_row: function(root_tr, root_tr_edit, selector, fn) {
-      var nested_rows=root_tr.select(selector);
-      var nested_editor_rows=root_tr_edit.select(selector);
-      //FT.debugger;
-      //if(nested_rows.length == 0) {
-      
-        // We need to have at least one row with default values
-        // or we have no way of adding/editing new values
-      //  var tr=nested_rows[i];
-      //  var tr_edit=nested_editor_rows[i];
-      //  fn(tr,tr_edit);
-      //}
-      //else {
-        for(var i=0; i<nested_rows.length; i++) {
-          var tr=nested_rows[i];
-          var tr_edit=nested_editor_rows[i];
-          fn(tr,tr_edit,tr_edit.readAttribute('name'));
+    
+    
+    
+    /* ARE THESE NEXT TWO STRICTLY FREIGHT TRAIN? */
+    check_selected_values: function(tr,tr_edit,attr_name) {
+      var e=tr.down('*[attr="'+attr_name+'"]');
+      if(e) {
+        var values=e.readAttribute('value').split('|');
+        for(var i=0; i<values.length; i++) {
+          e=tr_edit.down('*[value="'+values[i]+'"]');
+          if(!e) FT.debug('"'+values[i]+'" not found');
+          else e.writeAttribute('checked','checked');
         }
-      //}
+      }
+      else {
+        FT.debug(attr_name+' not found');
+      }
     },
-    
-    
-    
     
     debug: function(o) {
       if(window.console && window.console.log) {

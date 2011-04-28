@@ -148,7 +148,7 @@ module FreightTrain
       
       def nested_editor_for(method, *args, &block)
         singular = method.to_s.singularize
-        @after_init << "FT.for_each_row(tr,tr_edit,'.#{singular}',function(tr,tr_edit,name){"
+        @after_init << "FT.Helpers.forEachRow(tr,tr_edit,'.#{singular}',function(tr,tr_edit,name){"
         super(method, *args, &block)
       ensure
         @after_init << "});"
