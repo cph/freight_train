@@ -28,5 +28,8 @@ When /^I follow "([^"]*)" within the to\-do item "([^"]*)"$/ do |link, descripti
 end
 
 Then /^there should be (\d+) To Do Items?$/ do |n|
+  with_scope("#to_do_items") do
+    assert_equal n.to_i, all('.to_do_item').length
+  end
   assert_equal n.to_i, ToDoItem.count
 end

@@ -186,7 +186,7 @@ module FreightTrain
         # Use FT.Helpers.forEachNestedRow to create a closure where the variable 'tr'
         # refers to the nested row so that in the context of the EditorBuilder instantiated
         # by `fields_for`, 'tr' refers to the nested row rather than its parent.
-        code("FT.Helpers.forEachNestedRow(tr,'#{singular}',function(tr,i){") <<
+        code("FT.Helpers.forEachNestedRow(tr,'.#{singular}',function(tr,i){") <<
         (fields_for(method, :name => "'+tr.readAttribute('name')+'") do |f|
           nested_editor_row(f, attr_name, "'+i+'", method, &block)
         end) <<

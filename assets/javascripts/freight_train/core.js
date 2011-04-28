@@ -270,8 +270,8 @@ var FT = (function() {
       return html;
     },
     
-    forEachNestedRow: function(root_tr, singular, callback) {
-      var nested_rows = _$.find(root_tr, ('.' + singular));
+    forEachNestedRow: function(root_tr, selector, callback) {
+      var nested_rows = _$.find(root_tr, selector);
       for(var i=0, ii=nested_rows.length; i<ii; i++) {
         callback(nested_rows[i], i);
       }
