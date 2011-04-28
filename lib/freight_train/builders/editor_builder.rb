@@ -8,15 +8,6 @@ module FreightTrain
       def self.default_editor_builder=(val); @@default_editor_builder=val; end
       
       
-      # TODO: Push this into a JavaScript library
-      #   1. allow base class to generate controls
-      #      a. use @after_init method to assign values to controls
-      #      b. ** come up with mechanism to set field and id for nested values (or use another method to identify them) **
-      #   2. refactor to put @after_init method into before- or after- filter
-      #      a. abstract value assignment for (e.g.) INPUT[TYPE="TEXT"] and SELECT and INPUT[TYPE="CHECKBOX"]
-      #      b. call generic value assignment in before/after filters and push logic to core.js
-      
-      
       # ===================================================================================================
       # ABOUT EDITOR_BUILDER
       # ===================================================================================================
