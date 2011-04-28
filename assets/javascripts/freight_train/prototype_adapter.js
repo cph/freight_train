@@ -3,6 +3,9 @@ FT.Adapters=FT.Adapters||{};
 FT.Adapters.Prototype = {
   
   // Traversal
+  find_by_id: function(id) {
+    return $(id);
+  },
   find: function(parent_or_selector, selector) {
     return (selector ? $(parent_or_selector).select(selector) : $$(parent_or_selector))||[];
   },
@@ -88,6 +91,9 @@ FT.Adapters.Prototype = {
   stop: function(event) {
     Event.stop(event);
   },
+  fire: function(element, event_name, args) {
+    $(element).fire(event_name, args);
+  },
   target: function(event) {
     return event.element();
   },
@@ -103,10 +109,12 @@ FT.Adapters.Prototype = {
     $(element).removeClassName(class_name);
   },
   hide: function(element) {
-    $(element).hide();
+    var element = $(element);
+    element && element.hide();
   },
   show: function(element) {
-    $(element).show();
+    var element = $(element);
+    element && element.show();
   },
   css: function(element, css) {
     $(element).setStyle(css);

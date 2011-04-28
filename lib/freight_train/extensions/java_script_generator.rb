@@ -14,31 +14,29 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
   
   
   def fire(event, id)
-    @lines << "$('#{id}').fire('ft:#{event}');";
+    @lines << "FT.adapter().fire(FT.adapter().find_by_id('#{id}'), 'ft:#{event}');"
   end
   
   
   
   def safe_hide(*ids)
-    for id in ids
-      @lines << "var element = $('#{id}');"
-      @lines << "if(element) { element.hide(); }"
+    ids.each do |id|
+      @lines << "FT.adapter().hide(FT.adapter().find_by_id('#{id}'));"
     end
   end
   
   
   
-  def add_record( record, *args )
+  def add_record(record, *args)
     options = args.extract_options!.with_indifferent_access
     
     model_name = record.class.name
     partial_name = options[:partial] || record.class.name.underscore
     insert_html  :top,
                  record.class.name.tableize,
-#                :partial => (options[:partial] || ((ocn=options[:originating_controller]) ? "/#{ocn}/#{partial_name}" : partial_name)),
                  :partial => partial_name,
                  :object => record
-    @lines << "FT.#{model_name}.hookupRow($('#{idof record}'));"
+    @lines << "FT.#{model_name}.hookupRow(FT.adapter().find_by_id('#{idof record}'));"
     call "FT.Helpers.restripeRows"
   end
   
@@ -51,11 +49,9 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     model_name = record.class.name
     partial_name = options[:partial] || record.class.name.underscore
     replace_html id,
-#                :partial => (options[:partial] || ((ocn=options[:originating_controller]) ? "/#{ocn}/#{partial_name}" : partial_name)),
                  :partial => partial_name,
                  :object => record
-                 #:locals => {:single => true}
-    @lines << "FT.#{model_name}.hookupRow($('#{id}'));"
+    @lines << "FT.#{model_name}.hookupRow(FT.adapter().find_by_id('#{id}'));"
   end
   
   
@@ -68,7 +64,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     table_name = model_name.tableize
     partial_name = options[:partial] || model_name.underscore
     replace_html(table_name, :partial => partial_name, :collection => collection)
-    @lines << "FT.#{model_name}.hookupRows();"
+    call "FT.#{model_name}.hookupRows"
   end
   
   
