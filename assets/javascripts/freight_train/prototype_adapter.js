@@ -1,3 +1,5 @@
+var FT=FT||{};
+FT.Adapters=FT.Adapters||{};
 FT.Adapters.Prototype = {
   
   // Traversal
@@ -15,6 +17,9 @@ FT.Adapters.Prototype = {
   },
   
   // Attributes
+  activate: function(element) {
+    $(element).select();
+  },
   attr: function(element, name, value) {
     if(value) {
       $(element).writeAttribute(name, value);
@@ -24,6 +29,9 @@ FT.Adapters.Prototype = {
   },
   serialize: function(form) {
     return $(form).serialize();
+  },
+  visible: function(element) {
+    return $(element).visible();
   },
   
   // Events

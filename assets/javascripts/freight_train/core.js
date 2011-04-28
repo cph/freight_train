@@ -366,45 +366,58 @@
   
   
   function resetFormFieldsIn(parent, options) {
-    options = options || {};
-    if(options.only) {options.only = $A(options.only);}
-    if(options.except) {options.except = $A(options.except);}
-    parent.select('input[type="text"], input[type="tel"], input[type="email"], textarea').each(function(input) {
-      if(!(options.only && !options.only.include(input.id)) &&
-         !(options.except && options.except.include(input.id))) {
-         input.value = '';
-       }
-    });
-    parent.select('select').each(function(input) {
-      if(!(options.only && !options.only.include(input.id)) &&
-         !(options.except && options.except.include(input.id))) {
-         input.selectedIndex = 0;
-       }
-    });
-    parent.select('.nested.editor').each(function(table) {
-      FT.reset_nested(table);
-    });
+    var inputs          = _$.find(parent, 'input[type="text"], input[type="tel"], input[type="email"], textarea'),
+        selects         = _$.find(parent, 'select'),
+        nested_editors  = _$.find(parent, '.nested.editor');
+        options         = options || {};
+    
+    function fieldToBeReset(id) {
+      return !(options.only && !member(options.only, input.id)) &&
+             !(options.except && member(options.except, input.id));
+    }
+    
+    for(var i=0, ii=inputs.length; i<ii; i++) {
+      var input = inputs[i];
+      fieldToBeReset(input.id) && (input.value = '');
+    }
+    for(var i=0, ii=selects.length; i<ii; i++) {
+      var select = selects[i];
+      fieldToBeReset(select.id) && (select.selectedIndex = 0);
+    }
+    for(var i=0, ii=nested_editors.length; i<ii; i++) {
+      FT.reset_nested(nested_editors[i]);
+    }
   }
   
   function selectFirstFieldIn(parent) {
-    var first_input = parent.select('input, select, textarea').find(function(input) {
-      return input.visible() && (input.type != 'hidden');
-    });
-    if(first_input) {
-      first_input.select();
+    var inputs = _$.find(parent, 'input, select, textarea');
+    for(var i=0, ii=inputs.length; i<ii; i++) {
+      var input = inputs[i];
+      if(_$.visible(input) && (input.type != 'hidden')) {
+        _$.activate(input);
+        return;
+      }
     }
   }
   
   
   
-  function extend(a, b) {
-    for(method in b) { a[method] = b[method]; }
+  function member(array, item) {
+    for(var i=0, ii=array.length; i<ii; i++) {
+      if(array[i] == item) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  function extend(destination, source) {
+    for(method in source) { destination[method] = source[method]; }
   }
   
   
   
   extend(FT, {
-    Adapters:     {},
     Helpers:      Helpers,
     
     init:         init,
