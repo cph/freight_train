@@ -62,7 +62,7 @@ FT.Adapters.Prototype = {
         break;
         
       case 'SELECT':
-        var options = selector.options;
+        var options = control.options;
         var option;
         for(var i=0;i<options.length;i++) {
           option = options[i];

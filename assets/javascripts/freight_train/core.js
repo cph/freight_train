@@ -255,8 +255,20 @@ var FT = (function() {
         }
       }
       _$.on(row, 'click', function() { handler(row); });
-    }
+    },
     
+    createOptions: function(options, selectedItem) {
+      var html = '';
+      for(var i=0, ii=options.length; i<ii; i++) {
+        var option = options[i],
+            isArray = (option instanceof Array),
+            name = isArray ? option[0] : option,
+            value = isArray ? option[1] : option,
+            selected = (value == selectedItem);
+        html += '<option value="' + value + '"' + (selected ? 'selected="selected"' : '') + '>' + name + '</option>';
+      }
+      return html;
+    }
   }
   
   
@@ -268,10 +280,9 @@ var FT = (function() {
   
   
   
-  function copyValue(row, editor, method) {
-    var attr_name = getAttrName(row, method),
-        value     = getAttrValue(row, attr_name),
-        control   = getField(editor, attr_name);
+  function copyValue(row, editor, attr_name) {
+    var value   = getAttrValue(row, attr_name),
+        control = getField(editor, attr_name);
     control && value && _$.assign(control, value);
   }
   
@@ -310,18 +321,7 @@ var FT = (function() {
     getAttrValue: getAttrValue,
     getField:     getField,
     
-    create_options: function(options, selectedItem) {
-      var html = '';
-      for(var i=0, ii=options.length; i<ii; i++) {
-        var option = options[i],
-            isArray = (option instanceof Array),
-            name = isArray ? option[0] : option,
-            value = isArray ? option[1] : option,
-            selected = (value == selectedItem);
-        html += '<option value="' + value + '"' + (selected ? 'selected="selected"' : '') + '>' + name + '</option>';
-      }
-      return html;
-    },
+
     
     /* ARE THESE NEXT TWO STRICTLY FREIGHT TRAIN? */
     check_selected_values: function(tr,tr_edit,attr_name) {
