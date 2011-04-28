@@ -131,12 +131,6 @@ module FreightTrain
         super(method, html_options)
       end
       
-      
-      
-      # ===================================================================================================
-      # Special-case methods
-      # ===================================================================================================
-      
       def fields_for(method, *args, &block)
         options = args.extract_options!
         name = options[:name] || "#{@object_name}[#{method}]"
@@ -180,6 +174,16 @@ module FreightTrain
       
       
       
+      def autofill!(method, html_options)
+        attr_name = "#{@object_name}[#{method}]"
+        @after_init << "FT.copyValue(tr,tr_edit,'#{attr_name}');"
+        html_options[:name] = attr_name
+        html_options[:attr] = attr_name
+        html_options[:id] = nil
+      end
+      
+      
+      
       def nested_editor_wrapper(method, attr_name, &block)
         singular = method.to_s.singularize
         
@@ -191,16 +195,6 @@ module FreightTrain
           nested_editor_row(f, attr_name, "'+i+'", method, &block)
         end) <<
         code("});")
-      end
-      
-      
-      
-      def autofill!(method, html_options)
-        attr_name = "#{@object_name}[#{method}]"
-        @after_init << "FT.copyValue(tr,tr_edit,'#{attr_name}');"
-        html_options[:name] = attr_name
-        html_options[:attr] = attr_name
-        html_options[:id] = nil
       end
       
       
