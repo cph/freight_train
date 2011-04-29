@@ -21,16 +21,14 @@ module FreightTrain
       # override: do arrays like attributes  
       def fields_for(method_or_object, *args, &block)
         options = args.extract_options!
-        #@template.concat "<!-- #{args.extract_options![:builder]} -->"
         if @object
           case method_or_object
           when String, Symbol
             object = @object.send method_or_object
             if object.is_a? Array
-              #@template.concat "<!-- array -->"
+              name = options[:name] || "#{@object_name}[#{method_or_object}_attributes]"
               return ((0...object.length).collect do |i|
-                name = options[:name] || "#{@object_name}[#{method_or_object}_attributes][#{i}]"
-                @template.fields_for(name, object[i], *args, &block)
+                @template.fields_for("#{name}[#{i}]", object[i], *args, &block)
               end).join.html_safe
             else
               name = options[:name] || method_or_object
