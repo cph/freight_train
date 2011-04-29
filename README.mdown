@@ -22,7 +22,7 @@ The path `assets\javascripts\freight_train` contains JavaScripts that should be 
 
 #### For Rails 2:
 
-Rails 2 support has been deprecated from the `master` branch. To use FreightTrain with Rails 2, see the [`rails2` branch](https://github.com/boblail/freight_train/tree/rails2).
+Rails 2 support has been deprecated from the `master` branch. To use FreightTrain with Rails 2, see the [rails2 branch](https://github.com/boblail/freight_train/tree/rails2).
 
 
 
@@ -78,11 +78,8 @@ Now, open app/views/to_do_items/index.html.erb and replace the `<table>` tag and
 #### views/to_do_items/index.html.erb:
 
     <h1>Listing to_do_items</h1>
-
     <% table_for :to_do_items %>
-
     <br />
-
     <%= link_to 'New to_do_item', new_to_do_item_path %>
 
 The `table_for` command sets FreightTrain to work with the collection we've supplied, `:to_do_items`. FreightTrain will generate everything you need to list, edit, and delete the items belonging to that collection. But we need to tell FreightTrain how we'd like each item to be rendered. We do this by creating a partial for named **to_do_item**:
@@ -155,9 +152,9 @@ Finally, FreightTrain supplies a JavaScript helper method to facilitate deleting
 
 #### views/to_do_items/_to_do_item.html.erb:
 
-  <% row_for to_do_item, :commands => [:delete] do |row| %>
-    <%= row.text_of :description %>
-  <% end %>
+    <% row_for to_do_item, :commands => [:delete] do |row| %>
+      <%= row.text_of :description %>
+    <% end %>
 
 
 
