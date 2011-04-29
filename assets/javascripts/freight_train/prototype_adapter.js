@@ -7,7 +7,28 @@ FT.Adapters.Prototype = {
     document.observe('dom:loaded', callback);
   },
   
-  // Traversal
+  // Attributes
+  attr: function(element, name, value) {
+    if(value) {
+      $(element).writeAttribute(name, value);
+    } else {  
+      return $(element).readAttribute(name);
+    }
+  },
+  css: function(element, css) {
+    $(element).setStyle(css);
+  },
+  addClass: function(element, class_name) {
+    $(element).addClassName(class_name);
+  },
+  hasClass: function(element, class_name) {
+    return $(element).hasClassName(class_name);
+  },
+  removeClass: function(element, class_name) {
+    $(element).removeClassName(class_name);
+  },
+  
+  // Selection/Traversal
   find_by_id: function(id) {
     return $(id);
   },
@@ -27,25 +48,18 @@ FT.Adapters.Prototype = {
     return $(element).up(selector);
   },
   
-  // Attributes
-  activate: function(element) {
-    $(element).select();
+  // Manipulation
+  hide: function(element) {
+    var element = $(element);
+    element && element.hide();
   },
-  attr: function(element, name, value) {
-    if(value) {
-      $(element).writeAttribute(name, value);
-    } else {  
-      return $(element).readAttribute(name);
-    }
-  },
-  serialize: function(form) {
-    return $(form).serialize();
+  show: function(element) {
+    var element = $(element);
+    element && element.show();
   },
   visible: function(element) {
     return $(element).visible();
   },
-  
-  // Manipulation
   clone: function(element) {
     // IE copies events bound via attachEvent when
     // using cloneNode. Calling detachEvent on the
@@ -87,6 +101,34 @@ FT.Adapters.Prototype = {
     reference.insert({'after':element});
   },
   
+  // Forms
+  serialize: function(form) {
+    return $(form).serialize();
+  },
+  activate: function(element) {
+    $(element).select();
+  },
+  assign: function(control, value) {
+    switch(control.nodeName.toUpperCase()) {
+      case 'INPUT':
+      case 'TEXTAREA':
+        $(control).setValue(value);
+        break;
+        
+      case 'SELECT':
+        var options = control.options;
+        var option;
+        for(var i=0;i<options.length;i++) {
+          option = options[i];
+          if(option.value == value) {
+            option.selected = true;
+            return;
+          }
+        }
+        break;
+    }
+  },
+  
   // Events
   delegate: function(parent, event_name, selector, callback) {
     $(parent).observe(event_name, function(e) {
@@ -107,50 +149,6 @@ FT.Adapters.Prototype = {
   },
   target: function(event) {
     return event.element();
-  },
-  
-  // CSS
-  addClass: function(element, class_name) {
-    $(element).addClassName(class_name);
-  },
-  hasClass: function(element, class_name) {
-    return $(element).hasClassName(class_name);
-  },
-  removeClass: function(element, class_name) {
-    $(element).removeClassName(class_name);
-  },
-  hide: function(element) {
-    var element = $(element);
-    element && element.hide();
-  },
-  show: function(element) {
-    var element = $(element);
-    element && element.show();
-  },
-  css: function(element, css) {
-    $(element).setStyle(css);
-  },
-  
-  // Forms
-  assign: function(control, value) {
-    switch(control.nodeName.toUpperCase()) {
-      case 'INPUT':
-      case 'TEXTAREA':
-        $(control).setValue(value);
-        break;
-        
-      case 'SELECT':
-        var options = control.options;
-        var option;
-        for(var i=0;i<options.length;i++) {
-          option = options[i];
-          if(option.value == value) {
-            option.selected = true;
-            return;
-          }
-        }
-        break;
-    }
   },
   
   // Ajax

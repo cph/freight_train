@@ -47,7 +47,16 @@
   
   function readOptions(args) {
     args = args || {};
-    _$ = FT.Adapters.Prototype;
+    switch(args.adapter) {
+      case 'jquery':
+        _$ = FT.Adapters.jQuery;
+        break;
+        
+      default:
+        _$ = FT.Adapters.Prototype;
+        break;
+    }
+    FT.$ = _$;
     token = args.token;
     save_when_navigating = args.save_when_navigating;
     enable_keyboard_navigation = args.enable_keyboard_navigation;
@@ -114,7 +123,28 @@
     if(model && !model.extended) {
       model.init();
       model.extended = true;
-      var _originalHookupRow = model.hookupRow;
+      var _originalHookupRow = model.hookupRow,
+          collection_name = model.collection();
+      model.addRow = function(content) {
+        var list = _$.find_by_id(collection_name),
+            new_row = _$.prependTo(list, content);
+        model.hookupRow(new_row);
+        FT.Helpers.restripeRows();
+      }
+      model.updateRow = function(id, content) {
+        var row = _$.find_by_id(id);
+        if(row) {
+          _$.replace(row, content);
+          model.hookupRow(row);
+        }
+      }
+      model.updateRows = function(content) {
+        var list = _$.find_by_id(collection_name);
+        if(list) {
+          _$.replace(list, content);
+          model.hookupRows();
+        }
+      }
       model.hookupRow = function(row) {
         _$.hasClass(row, 'interactive') && FT.Helpers.hoverRow(row);
         _$.hasClass(row, 'editable') && model.activateEditing && model.activateEditing(row);
@@ -275,8 +305,9 @@
   }
   
   function renumberNestedRow(row, i) {
-    row.select('input, textarea, select').each(function(e) {
-      e.writeAttribute('name', e.readAttribute('name').gsub(/[(\d+)]/, i));
+    withEach(_$.find(row, 'input, textarea, select'), function(e) {
+      // _$.attr(e, 'name', _$.attr(e, 'name').gsub(/[(\d+)]/, i));
+      _$.attr(e, 'name', _$.attr(e, 'name').replace(/\[(\d+)\]/, function() { return '[' + i + ']'; }));
     });
   }
   
@@ -482,7 +513,7 @@
       options = options || 'all';
       if(options != 'none') {
         _$.on(document.body, 'ft:create', function(e) {
-          $$('form[data-model="' + model_name + '"] #add_row').each(function(row) {
+          withEach(_$.find('form[data-model="' + model_name + '"] #add_row'), function(row) {
             resetFormFieldsIn(row, options);
             selectFirstFieldIn(row);
           });
@@ -495,7 +526,10 @@
   
   
   function xhr(url, method, params, args) {
-    params = (params ? (params + '&') : '') + (token ? (token + '&') : '') + 'freight_train=true';
+    params = params || {};
+    params['freight_train'] = 'true';
+    token && (params['token'] = token);
+    // params = (params ? (params + '&') : '') + (token ? (token + '&') : '') + 'freight_train=true';
     return _$.xhr(url, method, params, args);
   }
   

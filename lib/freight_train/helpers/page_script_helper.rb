@@ -12,9 +12,10 @@ module FreightTrain
 raw <<-JS
   var FT=FT||{};
   FT.#{model_name}=(function(){
-    var name='#{model_name}', path='#{path}', o, editor_writer=#{editor_writer_method(table_name.singularize)};
+    var name='#{model_name}', collection='#{table_name}', path='#{path}', o, editor_writer=#{editor_writer_method(table_name.singularize)};
     return {
        init: function(){o=new Observer();#{reset_on_create_method(table_name, options)}}
+     , collection: function(){return collection;}
      , path: function(){return path;}
      , observe: function(n,f){o.observe(n,f);}
      , unobserve: function(n,f){o.unobserve(n,f);}
@@ -56,6 +57,7 @@ HTML
 raw <<-JS
   FT.init({
     token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}'),
+    adapter: #{options[:adapter].to_json},
     enable_keyboard_navigation: #{options[:enable_keyboard_navigation] || false}
   });
 JS
