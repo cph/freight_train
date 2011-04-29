@@ -100,6 +100,12 @@ FT.Adapters.Prototype = {
   insert_after: function(reference, element) {
     reference.insert({'after':element});
   },
+  prependTo: function(reference, html) {
+    return $(reference).insert({top: html});
+  },
+  replace: function(element, html) {
+    return $(element).update(html);
+  },
   
   // Forms
   serialize: function(form) {
