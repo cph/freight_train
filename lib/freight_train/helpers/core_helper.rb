@@ -133,7 +133,7 @@ module FreightTrain
       def ft_generate_html(tags, *args, &block)
         # todo: pass these tags as a parameter; don't rely on ugly globals
         FreightTrain.tags = tags
-    
+        
         options = args.extract_options!
         collection_name = args.last.to_s
         raise ArgumentError, "Missing collection name" if collection_name.blank?
@@ -142,16 +142,16 @@ module FreightTrain
         partial = options[:partial] || instance_name
         
         @inline_editor = "function(tr){}"
-    
+        
         records = instance_variable_get "@#{collection_name}"
         path = options[:path] || polymorphic_path(args)
-    
+        
         # put everything inside a form
         raw_or_concat(
           "<form class=\"freight_train\" data-model=\"#{model_name}\" action=\"#{path}\" method=\"get\">" <<
           "<input name=\"#{request_forgery_protection_token}\" type=\"hidden\" value=\"#{escape_javascript(form_authenticity_token)}\"/>\n" <<
           "<input name=\"ft[partial]\" type=\"hidden\" value=\"#{partial}\"/>\n" <<
-      
+          
           # table
           alt_content_tag(:table, :class => "list #{options[:class]}") {
 =begin        
