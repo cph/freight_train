@@ -82,7 +82,7 @@ module FreightTrain
       
       def text(method, options={})
         attr_name = "#{@object_name}[#{method}]"
-        concat_raw("FT.getAttrValue('#{attr_name}')")
+        concat_raw("FT.getAttrValue(tr, '#{attr_name}')")
       end
       alias :text_of :text
       
