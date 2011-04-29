@@ -175,3 +175,24 @@ To use these events to highlight the changes that have been made to the page, ad
       });
     </script>
 
+
+
+### Where to go from here
+
+The FreightTrain contains a sample app at `./test/test_app` which demonstrates a few more features than **Getting Started** covered.
+
+
+
+## Running the Tests
+
+To run FreightTrain's tests, do
+
+    cd test/test_app
+    bundle install
+    bundle exec cucumber
+
+
+
+## Contributing
+
+Pull requests are welcome!
