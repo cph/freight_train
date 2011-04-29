@@ -28,22 +28,39 @@
       enable_nested_records = true,
       save_when_navigating = false,
       enable_keyboard_navigation = false,
+      initialized = false,
       observer = new Observer(),
       forms = [],
       _$ = null;
   
   
   
+  
+  
   function init(args) {
-    readOptions(args);
+    initOneTime(args);
     activateFreightTrainForms();
-    enable_nested_records       && enableNestedEditors();
-    enable_keyboard_navigation  && enableKeyboardNavigation();
-    respondToInlineEditorEvents();
-    activateRowCommands();
-    removeDestroyedRows();
+    enable_nested_records && enableNestedEditors();
     observer.fire('load');
   }
+  
+  
+  
+  
+  
+  function initOneTime(args) {
+    if(!initialized) {
+      readOptions(args);
+      enable_keyboard_navigation  && enableKeyboardNavigation();
+      respondToInlineEditorEvents();
+      activateRowCommands();
+      removeDestroyedRows();
+      observer.fire('initialized');
+      initialized = true;
+    }
+  }
+  
+  
   
   function readOptions(args) {
     args = args || {};
@@ -63,6 +80,73 @@
     token = args.token;
     save_when_navigating = args.save_when_navigating;
     enable_keyboard_navigation = args.enable_keyboard_navigation;
+  }
+  
+  
+  
+  function enableKeyboardNavigation() {
+    FT.InlineEditor.observe('up', function(e, row, editor) {
+      var previous_row = _$.previous(row, '.editable');
+      if(previous_row) {
+        _$.stop(e);
+        if(save_when_navigating) { editor.save(); }
+        previous_row.edit_inline();
+      }
+    });
+    FT.InlineEditor.observe('down', function(e, row, editor) {
+      var next_row = _$.next(editor, '.editable');
+      if(next_row) {
+        _$.stop(e);
+        if(save_when_navigating) { editor.save(); }
+        next_row.edit_inline();
+      }
+    });
+  }
+  
+  
+  
+  function respondToInlineEditorEvents() {
+    FT.InlineEditor.observe('after_init', function(element, editor) {
+      initializeInlineEditorForModel(element, editor);
+      enable_nested_records && enableNestedEditorsIn(editor);
+    });
+  }
+  
+  function initializeInlineEditorForModel(tr, tr_edit) {
+    var form = _$.up(tr, 'form.freight_train'),
+        model = form && getModelFromForm(form);
+    model && model.initializeEditor(tr, tr_edit);
+  }
+  
+  
+  
+  function activateRowCommands() {
+    activateDeleteCommand();
+  }
+  
+  function activateDeleteCommand() {
+    _$.delegate(document.body, 'click', '.delete-command', function(e) {
+      var a     = _$.target(e),
+          id    = a && _$.attr(a, 'data-id'),
+          form  = a && _$.up(a, 'form.freight_train'),
+          model = form && getModelFromForm(form);
+      if(model && id) {
+        _$.stop(e);
+        model && model.destroy(id);
+      }
+    });
+  }
+  
+  
+  
+  function removeDestroyedRows() {
+    // need to wrap document.body in $() so that it works on IE
+    _$.on(document.body, 'ft:destroy', function(event) {
+      FT.InlineEditor.close();
+      var e = _$.target(event);
+      e && e.parentNode && e.parentNode.removeChild(e);
+      FT.Helpers.restripeRows();
+    });
   }
   
   
@@ -185,14 +269,15 @@
   
   
   function enableNestedEditors() {
-    enableNestedEditorsIn();
-    FT.InlineEditor.observe('after_init', function(element, editor) {
-      enableNestedEditorsIn(editor);
-    })
+    enableNestedEditorsIn(document.body);
   }
   
   function enableNestedEditorsIn(parent) {
     withEach(findNestedEditors(parent), initializeNestedEditor);
+  }
+  
+  function updateNestedEditors() {
+    updateNestedEditorsIn(document.body);
   }
   
   function updateNestedEditorsIn(parent) {
@@ -200,7 +285,7 @@
   }
   
   function findNestedEditors(parent) {
-    return _$.find((parent || document.body), '.nested.editor');
+    return _$.find(parent, '.nested.editor');
   }
   
   function initializeNestedEditor(nested_editor) {
@@ -333,78 +418,6 @@
   
   
   
-  function enableKeyboardNavigation() {
-    FT.InlineEditor.observe('up', function(e, row, editor) {
-      var previous_row = _$.previous(row, '.editable');
-      if(previous_row) {
-        _$.stop(e);
-        if(save_when_navigating) { editor.save(); }
-        previous_row.edit_inline();
-      }
-    });
-    FT.InlineEditor.observe('down', function(e, row, editor) {
-      var next_row = _$.next(editor, '.editable');
-      if(next_row) {
-        _$.stop(e);
-        if(save_when_navigating) { editor.save(); }
-        next_row.edit_inline();
-      }
-    });
-  }
-  
-  
-  
-  
-  
-  function respondToInlineEditorEvents() {
-    FT.InlineEditor.observe('after_init', initializeInlineEditorForModel);
-  }
-  
-  function initializeInlineEditorForModel(tr, tr_edit) {
-    var form = _$.up(tr, 'form.freight_train'),
-        model = form && getModelFromForm(form);
-        // "tr_edit.select('.nested').each(FT.reset_add_remove_for);"
-    model && model.initializeEditor(tr, tr_edit);
-  }
-  
-  
-  
-  
-  
-  function activateRowCommands() {
-    activateDeleteCommand();
-  }
-  
-  function activateDeleteCommand() {
-    _$.delegate(document.body, 'click', '.delete-command', function(e) {
-      var a     = _$.target(e),
-          id    = a && _$.attr(a, 'data-id'),
-          form  = a && _$.up(a, 'form.freight_train'),
-          model = form && getModelFromForm(form);
-      if(model && id) {
-        _$.stop(e);
-        model && model.destroy(id);
-      }
-    });
-  }
-  
-  
-  
-  
-  
-  function removeDestroyedRows() {
-    // need to wrap document.body in $() so that it works on IE
-    _$.on(document.body, 'ft:destroy', function(event) {
-      FT.InlineEditor.close();
-      var e = _$.target(event);
-      e && e.parentNode && e.parentNode.removeChild(e);
-      FT.Helpers.restripeRows();
-    });
-  }
-  
-  
-  
-  
   function destroyRow(msg, id, path) {
     if(!msg || confirm(msg)) {
       renderDeleted(id);
@@ -424,6 +437,7 @@
       });
     }
   }
+  
   
   
   
@@ -454,6 +468,7 @@
       var url = url_root + '/' + idn;
       new FT.InlineEditor(url, row, editor_writer, before_edit, after_edit);
     },
+    
     editRow: function(row, url_root_or_fn) {
       var handler;
       if(typeof url_root_or_fn == 'function') {
@@ -482,8 +497,6 @@
       return html;
     },
     
-    
-    
     forEachRow: function(row, editor, selector, fn) {
       var nested_rows     = _$.find(row, selector),
           nested_editors  = _$.find(editor, selector);
@@ -501,8 +514,6 @@
         fn(nested_rows[i], i);
       }
     },
-    
-    
     
     createEditor: function(node_type, html, klass) {
       var editor = document.createElement(node_type);
@@ -527,6 +538,7 @@
   
   
   
+  
   function xhr(url, method, params, args) {
     params = params || {};
     params['freight_train'] = 'true';
@@ -534,6 +546,8 @@
     // params = (params ? (params + '&') : '') + (token ? (token + '&') : '') + 'freight_train=true';
     return _$.xhr(url, method, params, args);
   }
+  
+  
   
   
   
