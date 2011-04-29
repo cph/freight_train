@@ -38,7 +38,7 @@ FT.Adapters.jQuery = {
     return jQuery(element).next(selector)[0];
   },
   previous: function(element, selector) {
-    return jQuery(element).previous(selector)[0];
+    return jQuery(element).prev(selector)[0];
   },
   up: function(element, selector) {
     return jQuery(element).parents(selector)[0];
@@ -141,15 +141,15 @@ FT.Adapters.jQuery = {
   delegate: function(parent, event_name, selector, callback) {
     jQuery(parent).delegate(selector, event_name, callback);
   },
+  fire: function(element, event_name, args) {
+    jQuery(element).trigger(event_name, args);
+  },
   on: function(element, event_name, callback) {
     jQuery(element).bind(event_name, callback);
   },
   stop: function(event) {
     event.preventDefault();
     event.stopPropagation();
-  },
-  fire: function(element, event_name, args) {
-    jQuery(element).trigger(event_name, args);
   },
   target: function(event) {
     return event.target;
