@@ -56,6 +56,9 @@
         _$ = FT.Adapters.Prototype;
         break;
     }
+    _$.is_in = function(element, selector) {
+      return _$.match(element, selector) || !!_$.up(element, selector);
+    }
     FT.$ = _$;
     token = args.token;
     save_when_navigating = args.save_when_navigating;
@@ -306,7 +309,6 @@
   
   function renumberNestedRow(row, i) {
     withEach(_$.find(row, 'input, textarea, select'), function(e) {
-      // _$.attr(e, 'name', _$.attr(e, 'name').gsub(/[(\d+)]/, i));
       _$.attr(e, 'name', _$.attr(e, 'name').replace(/\[(\d+)\]/, function() { return '[' + i + ']'; }));
     });
   }
