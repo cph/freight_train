@@ -22,6 +22,21 @@ FT.InlineEditor = (function() {
   var observer = new Observer();
   var _$;
   
+  var KEY_BACKSPACE =  8,
+      KEY_TAB       =  9,
+      KEY_RETURN    = 13,
+      KEY_ESC       = 27,
+      KEY_LEFT      = 37,
+      KEY_UP        = 38,
+      KEY_RIGHT     = 39,
+      KEY_DOWN      = 40,
+      KEY_DELETE    = 46,
+      KEY_HOME      = 36,
+      KEY_END       = 35,
+      KEY_PAGEUP    = 33,
+      KEY_PAGEDOWN  = 34,
+      KEY_INSERT    = 45;
+  
   var constructor = function(url, element, editor_writer) {
     if(!element) { return; }
     
@@ -29,7 +44,7 @@ FT.InlineEditor = (function() {
       var a = FT.adapter();
       a.loaded(function() { // Close InlineEditors when the ESC key is pressed
         a.on(document.body, 'keydown', function(e) {
-          (e.keyCode == Event.KEY_ESC) && FT.InlineEditor.close();
+          (e.keyCode == KEY_ESC) && FT.InlineEditor.close();
         });
       });
       return a;
@@ -81,15 +96,14 @@ FT.InlineEditor = (function() {
       
       // ...or on hitting the Return key
       _$.on(editor, 'keydown', function(e) {
-        // window.console.log('kd: ' + e.which);
-        if(e.keyCode == Event.KEY_RETURN) {
+        if(e.keyCode == KEY_RETURN) {
           _$.stop(e);
           editor.save();
         }
-        if(e.keyCode == Event.KEY_UP) {
+        if(e.keyCode == KEY_UP) {
           observer.fire('up', [e, element, editor]);
         }
-        if(e.keyCode == Event.KEY_DOWN) {
+        if(e.keyCode == KEY_DOWN) {
           observer.fire('down', [e, element, editor]);
         }
       });
@@ -108,7 +122,7 @@ FT.InlineEditor = (function() {
     // Edit the row when it is clicked (but not if a link or button was clicked)
     _$.on(element, 'click', function(e) {
       var target = _$.target(e);
-      target && !_$.match(target, 'input, button, a') && element.edit_inline();
+      target && !_$.is_in(target, 'input, button, a') && element.edit_inline();
     });
   };
   
