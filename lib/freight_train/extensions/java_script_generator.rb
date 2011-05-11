@@ -54,7 +54,7 @@ class ActionView::Helpers::PrototypeHelper::JavaScriptGenerator
     model_name    = model.name
     table_name    = model_name.tableize
     partial_name  = options[:partial] || model_name.underscore
-    content       = javascript_object_for(render(:partial => partial_name, :collection => record))
+    content       = javascript_object_for(render(:partial => partial_name, :collection => collection))
     @lines << "FT.#{model_name}.updateRows(#{content});"
   end
   
