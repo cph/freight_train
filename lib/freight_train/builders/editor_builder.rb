@@ -2,6 +2,7 @@ module FreightTrain
   module Builders
     class EditorBuilder < FormBuilder
       include ActionView::Helpers::TagHelper
+      include ActionView::Helpers::FormOptionsHelper
       
       @@default_editor_builder = FreightTrain::Builders::EditorBuilder
       def self.default_editor_builder; @@default_editor_builder; end
@@ -104,7 +105,9 @@ module FreightTrain
       
       def grouped_collection_select(method, collection, group_method, group_label_method, option_key_method, option_value_method, options={}, html_options={})
         autofill!(method, html_options)
-        super(method, collection, group_method, group_label_method, option_key_method, option_value_method, options, html_options)
+        options = option_groups_from_collection_for_select(collection, group_method, group_label_method, option_key_method, option_value_method)
+        options.gsub!("'", "\\\\'")
+        "#{tag("select", html_options, true)}#{options}</select>".html_safe
       end
       
       def hidden_field(method, html_options={})
