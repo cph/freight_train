@@ -647,6 +647,10 @@
     resetFormFieldsIn:  resetFormFieldsIn,
     selectFirstFieldIn: selectFirstFieldIn,
     
+    enableNestedEditors:    enableNestedEditors,
+    enableNestedEditorsIn:  enableNestedEditorsIn,
+    updateNestedEditors:    updateNestedEditors,
+    updateNestedEditorsIn:  updateNestedEditorsIn,
     
     
     
