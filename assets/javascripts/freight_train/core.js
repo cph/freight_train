@@ -212,19 +212,31 @@
       model.extended = true;
       var _originalHookupRow = model.hookupRow,
           collection_name = model.collection();
+      
       model.addRow = function(content) {
         var list = _$.find_by_id(collection_name),
             new_row = _$.prependTo(list, content);
         model.hookupRow(new_row);
+        _$.hide('#flash_error');
+        _$.fire(new_row, 'ft:create')
         FT.Helpers.restripeRows();
       }
+      
       model.updateRow = function(id, content) {
         var row = _$.find_by_id(id);
         if(row) {
           _$.replace(row, content);
           model.hookupRow(row);
+          _$.hide('#flash_error');
+          _$.fire(row, 'ft:update')
         }
       }
+      
+      model.deleteRow = function(id) {
+        var row = _$.find_by_id(id);
+        row && _$.fire(row, 'ft:destroy');
+      }
+      
       model.updateRows = function(content) {
         var list = _$.find_by_id(collection_name);
         if(list) {
@@ -232,11 +244,13 @@
           model.hookupRows();
         }
       }
+      
       model.hookupRow = function(row) {
         _$.hasClass(row, 'interactive') && FT.Helpers.hoverRow(row);
         _$.hasClass(row, 'editable') && model.activateEditing && model.activateEditing(row);
         _originalHookupRow && _originalHookupRow(row);
       }
+      
       model.hookupRows = function(rows) {
         rows = rows || findRowsWithin(form);
         for(var i=0, ii=rows.length; i<ii; i++) {

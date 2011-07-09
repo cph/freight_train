@@ -1,3 +1,6 @@
+require 'freight_train/responder'
+
+
 # to be mixed into an ActionController
 module FreightTrain
   
@@ -42,7 +45,7 @@ module FreightTrain
   
   
   module ClassMethods
-
+    
     # allows substituting builders
     def default_form_builder; ActionView::Base.default_form_builder; end
     def default_form_builder=(value); ActionView::Base.default_form_builder = value; end
@@ -60,13 +63,9 @@ module FreightTrain
     
   end
   
+  
+  include FreightTrain::Core
 end
-
-require 'freight_train/helpers'
-require 'freight_train/builders'
-require 'freight_train/core'
-require 'freight_train/responder'
-FreightTrain.send(:include, FreightTrain::Core)
 
 
 
@@ -78,5 +77,4 @@ Dir["#{dir}/**/*.rb"].each do |file|
   require h
 end
 
-require 'freight_train/extensions/java_script_generator'
 require 'freight_train/extensions/request'
