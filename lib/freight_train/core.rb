@@ -60,9 +60,12 @@ module FreightTrain
       if(e) {
         FT.$.replace(e, #{message.to_json});
         FT.$.show(e);
-        #(!!options[:alert]) && alert(#{options[:alert].to_json});
+        #{!!options[:alert]} && alert(#{options[:alert].to_json});
       }
       JS
+      
+      render :inline => content,
+             :content_type => "application/javascript"
     end
     
     
