@@ -27,7 +27,6 @@ module FreightTrain
     
     # include all FreightTrain helpers
     dir = File.expand_path(File.join(File.dirname(__FILE__), 'freight_train', 'helpers'))
-    p dir
     # dir = "vendor/plugins/freight_train/lib/freight_train/helpers"
     extract = /^#{Regexp.quote(dir)}\/?(.*).rb$/
     Dir["#{dir}/**/*_helper.rb"].each do |file|
