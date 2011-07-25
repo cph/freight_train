@@ -27,9 +27,8 @@ module FreightTrain
           css << "editable" if editable
           
           # this makes striping work on IE7 and Firefox 3
-          alt = !@template.instance_variable_get("@alt")
-          @template.instance_variable_set("@alt", alt)
-          css << "alt" if !alt
+          @alt = !@alt
+          css << "alt" if !@alt
           css << options[:class] if options[:class]
           
           raw_or_concat( alt_content_tag(:tr, :class => css.join(" "), :id => idof(record), :name => singular) {
