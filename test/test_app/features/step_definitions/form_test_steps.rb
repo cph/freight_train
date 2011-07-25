@@ -19,8 +19,8 @@ end
 Then /^the toggle should be (on|off) in the (\d+)(?:st|nd|rd|th) form test$/ do |state, n|
   with_scope('#form_tests') do
     case state
-    when 'on':  assert_equal 'toggle yes',  all('.form_test .toggle')[n.to_i - 1]['class']
-    when 'off': assert_equal 'toggle no',   all('.form_test .toggle')[n.to_i - 1]['class']
+    when 'on';  assert_equal 'toggle yes',  all('.form_test .toggle')[n.to_i - 1]['class']
+    when 'off'; assert_equal 'toggle no',   all('.form_test .toggle')[n.to_i - 1]['class']
     end
   end
 end
