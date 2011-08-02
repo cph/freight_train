@@ -9,27 +9,26 @@ module FreightTrain
         model_name = table_name.classify
         
         javascript_tag do
-raw <<-JS
-  var FT=FT||{};
-  FT.#{model_name}=(function(){
-    var name='#{model_name}', collection='#{table_name}', path='#{path}', o, editor_writer=#{editor_writer_method(table_name.singularize)};
-    return {
-       init: function(){o=new Observer();#{reset_on_create_method(table_name, options)}}
-     , collection: function(){return collection;}
-     , path: function(){return path;}
-     , observe: function(n,f){o.observe(n,f);}
-     , unobserve: function(n,f){o.unobserve(n,f);}
-     #{initialize_editor_method(table_name, options)}
-     #{activate_editing_method(table_name, options)}
-     #{update_in_place_method(table_name)}
-     #{destroy_method(table_name, options)}
-     #{hookup_row_method options}
-    };
-  })();
-JS
+          raw <<-JS
+            var FT=window.FT||{};
+            FT.#{model_name}=(function(){
+              App.debug('FT.#{model_name} established');
+              var name='#{model_name}', collection='#{table_name}', path='#{path}', o, editor_writer=#{editor_writer_method(table_name.singularize)};
+              return {
+                 init: function(){o=new Observer();#{reset_on_create_method(table_name, options)}}
+               , collection: function(){return collection;}
+               , path: function(){return path;}
+               , observe: function(n,f){o.observe(n,f);}
+               , unobserve: function(n,f){o.unobserve(n,f);}
+               #{initialize_editor_method(table_name, options)}
+               #{activate_editing_method(table_name, options)}
+               #{update_in_place_method(table_name)}
+               #{destroy_method(table_name, options)}
+               #{hookup_row_method options}
+              };
+            })();
+          JS
         end
-      ensure
-        @already_defined = true
       end
       
       
@@ -39,13 +38,13 @@ JS
         adapter = "prototype" unless %w{prototype jquery}.member?(adapter)
         adapter_js = "freight_train/#{adapter}_adapter.js"
         
-raw <<-HTML
-  #{javascript_include_tag('freight_train/observer.js')}
-  #{javascript_include_tag('freight_train/inline_editor.js')}
-  #{javascript_include_tag('freight_train/core.js')}
-  #{javascript_include_tag(adapter_js)}
-  #{ft_init(options)}
-HTML
+        raw <<-HTML
+          #{javascript_include_tag('freight_train/observer.js')}
+          #{javascript_include_tag('freight_train/inline_editor.js')}
+          #{javascript_include_tag('freight_train/core.js')}
+          #{javascript_include_tag(adapter_js)}
+          #{ft_init(options)}
+        HTML
       end
       
       
@@ -54,13 +53,13 @@ HTML
         unless @already_initialized
           @already_initialized = true
           javascript_tag do
-raw <<-JS
-  FT.init({
-    token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}'),
-    adapter: #{options[:adapter].to_json},
-    enable_keyboard_navigation: #{options[:enable_keyboard_navigation] || false}
-  });
-JS
+            raw <<-JS
+              FT.init({
+                token: '#{request_forgery_protection_token}='+encodeURIComponent('#{escape_javascript(form_authenticity_token)}'),
+                adapter: #{options[:adapter].to_json},
+                enable_keyboard_navigation: #{options[:enable_keyboard_navigation] || false}
+              });
+            JS
           end
         end
       end

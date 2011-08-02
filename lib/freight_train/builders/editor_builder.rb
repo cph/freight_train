@@ -195,7 +195,7 @@ module FreightTrain
       
       def default_last_child
        ('<button class="save" title="Save" id="tag_submit" name="commit" type="submit">Save</button>' <<
-        '<button class="cancel" title="Cancel" onclick="FT.InlineEditor.close();return false;">Cancel</button>').html_safe
+        '<button class="cancel" title="Cancel" onclick="window.FT.InlineEditor.close();return false;">Cancel</button>').html_safe
       end
       
       

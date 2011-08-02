@@ -151,6 +151,7 @@ module FreightTrain
           "<form class=\"freight_train\" data-model=\"#{model_name}\" action=\"#{path}\" method=\"get\">" <<
           "<input name=\"#{request_forgery_protection_token}\" type=\"hidden\" value=\"#{escape_javascript(form_authenticity_token)}\"/>\n" <<
           "<input name=\"ft[partial]\" type=\"hidden\" value=\"#{partial}\"/>\n" <<
+          "<input name=\"freight_train\" type=\"hidden\" value=\"true\"/>\n" <<
           
           # table
           alt_content_tag(:table, :class => "list #{options[:class]}") {
@@ -175,10 +176,10 @@ module FreightTrain
             html
           } <<
           "</form>\n" <<
-      
+          
           "#{will_paginate(records) if options[:paginate]}" <<
-      
           make_interactive(path, collection_name, options)
+          
         )
       end
   

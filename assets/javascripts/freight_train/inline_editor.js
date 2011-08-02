@@ -15,7 +15,7 @@
 //
 //
 
-var FT=FT||{};
+var FT=window.FT||{};
 FT.InlineEditor = (function() {
   var CURRENT_ELEMENT = null;
   var CURRENT_EDITOR = null;
@@ -44,7 +44,7 @@ FT.InlineEditor = (function() {
       var a = FT.adapter();
       a.loaded(function() { // Close InlineEditors when the ESC key is pressed
         a.on(document.body, 'keydown', function(e) {
-          (e.keyCode == KEY_ESC) && FT.InlineEditor.close();
+          (e.keyCode == KEY_ESC) && window.FT.InlineEditor.close();
         });
       });
       return a;
@@ -54,8 +54,10 @@ FT.InlineEditor = (function() {
     
     element.edit_inline = function() {
       
+      var FT=window.FT;
+      
       // close any existing editors
-      FT.InlineEditor.close();
+      window.FT.InlineEditor.close();
       
       // before_init callback
       // TODO: can return false to cancel the edit?
@@ -73,20 +75,22 @@ FT.InlineEditor = (function() {
       
       // Save the contents of the editor...
       editor.save = function(callback) {
-        var form = _$.up(editor, 'form'),
-            params = _$.serialize(form);
-        FT.xhr(url, 'put', params, {
-          onSuccess: function() {
-            (CURRENT_EDITOR == editor) && FT.InlineEditor.close();
-          },
-          onComplete: function(response) {
-            (response.status != 400) && callback && callback();
-          }
-        });
+        var form = _$.up(editor, 'form');
+        if(form) {
+          var params = _$.serialize(form);
+          FT.xhr(url, 'put', params, {
+            onSuccess: function() {
+              (CURRENT_EDITOR == editor) && window.FT.InlineEditor.close();
+            },
+            onComplete: function(response) {
+              (response.status != 400) && callback && callback();
+            }
+          });
+        }
       }
       
       // ...on clicking a submit button
-      var submits = _$.find(editor, '*[type="submit"]');
+      var submits = _$.find(editor, 'button[name="submit"]');
       for(var i=0, ii=submits.length; i<ii; i++) {
         _$.on(submits[i], 'click', function(e) {
           _$.stop(e);
