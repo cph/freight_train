@@ -86,6 +86,7 @@ module FreightTrain
         concat_raw("FT.getAttrValue(tr, '#{attr_name}')")
       end
       alias :text_of :text
+      alias :content_of :text
       
       
       
