@@ -104,13 +104,19 @@ FT.Adapters.jQuery = {
   
   // Forms
   serialize: function(form) {
-    var temp = jQuery(form).serializeArray();
-    var hash = {};
-    for(var i=0, ii=temp.length, pair; i<ii; i++) {
-      pair = temp[i];
-      hash[pair.name] = pair.value;
-    }
-    return hash;
+    var o = {};
+    var a = jQuery(form).serializeArray();
+    $.each(a, function() {
+      if (o[this.name]) {
+        if (!o[this.name].push) {
+          o[this.name] = [o[this.name]];
+        }
+        o[this.name].push(this.value || '');
+      } else {
+        o[this.name] = this.value || '';
+      }
+    });
+    return o;
   },
   activate: function(element) {
     jQuery(element).focus();
