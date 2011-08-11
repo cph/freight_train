@@ -107,8 +107,8 @@ FT.Adapters.jQuery = {
     var o = {};
     var a = jQuery(form).serializeArray();
     $.each(a, function() {
-      if (o[this.name]) {
-        if (!o[this.name].push) {
+      if(o[this.name] && (this.name.substr(-2) == '[]')) {
+        if(!o[this.name].push) {
           o[this.name] = [o[this.name]];
         }
         o[this.name].push(this.value || '');
