@@ -14,9 +14,12 @@ module FreightTrain
       options       = options.with_indifferent_access
       model_name    = record.class.name
       partial_name  = options[:partial] || record.class.name.underscore
-      content       = javascript_object_for(render_to_string(:partial => partial_name, :object => record))
+      content       = render_to_string(:partial => partial_name, :object => record)
+      page          = JavascriptGenerator.new
       
-      render :inline => "FT.#{model_name}.addRow(#{content});",
+      page.call "FT.#{model_name}.addRow", content
+      yield page if block_given?
+      render :inline => page.to_s,
              :content_type => "application/javascript"
     end
     
@@ -33,29 +36,38 @@ module FreightTrain
       id            = idof(record)
       model_name    = record.class.name
       partial_name  = options[:partial] || record.class.name.underscore
-      content       = javascript_object_for(render_to_string(:partial => partial_name, :object => record))
+      content       = render_to_string(:partial => partial_name, :object => record)
+      page          = JavascriptGenerator.new
       
-      render :inline => "FT.#{model_name}.updateRow('#{id}', #{content});",
+      
+      page.call "FT.#{model_name}.updateRow", id, content
+      yield page if block_given?
+      render :inline => page.to_s,
              :content_type => "application/javascript"
     end
     
     
     
     def remove_deleted(record)
-      id         = idof(record)
-      model_name = record.class.name
-      render :inline => "FT.#{model_name}.deleteRow('#{id}')",
+      id            = idof(record)
+      model_name    = record.class.name
+      page          = JavascriptGenerator.new
+      
+      page.call "FT.#{model_name}.deleteRow", id
+      yield page if block_given?
+      render :inline => page.to_s,
              :content_type => "application/javascript"
     end
     
     
     
     def show_error(*args)
-      options = args.extract_options!.with_indifferent_access
-      message = args.first
-      id      = options[:error_id] || "flash_error"
+      options       = args.extract_options!.with_indifferent_access
+      message       = args.first
+      id            = options[:error_id] || "flash_error"
+      page          = JavascriptGenerator.new
       
-      content = <<-JS
+      page << <<-JS
       var e = FT.$.find_by_id('#{id}');
       if(e) {
         FT.$.replace(e, #{message.to_json});
@@ -63,8 +75,8 @@ module FreightTrain
         #{!!options[:alert]} && alert(#{options[:alert].to_json});
       }
       JS
-      
-      render :inline => content,
+      yield page if block_given?
+      render :inline => page.to_s,
              :content_type => "application/javascript"
     end
     
@@ -76,12 +88,33 @@ module FreightTrain
     
     
     
-  private
-    
-    
-    
-    def javascript_object_for(object)
-      ::ActiveSupport::JSON.encode(object)
+    class JavascriptGenerator
+      
+      def initialize
+        @js = ""
+      end
+      
+      def <<(*lines)
+        lines.each do |line|
+          @js << line << ";"
+        end
+      end
+      
+      def call(method, *args)
+        params = args.map(&method(:javascript_object_for)).join(", ")
+        self << "#{method}(#{params})"
+      end
+      
+      def to_s
+        @js
+      end
+      
+    private
+      
+      def javascript_object_for(object)
+        ::ActiveSupport::JSON.encode(object)
+      end
+      
     end
     
     
