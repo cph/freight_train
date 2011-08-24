@@ -86,8 +86,16 @@ module FreightTrain
       
       
       
-      def static_field(method_or_object, *args)
-        hidden_field(method_or_object, *args)
+      def static_field(method, value)
+        attr_name = "#{@object_name}[#{method}]"
+        html_options = {
+          'data-attr' => method,
+          :type => "hidden",
+          :value => value,
+          :attr => attr_name,
+          :name => attr_name
+        }
+        @template.tag("input", html_options)
       end
       
       
