@@ -12,7 +12,6 @@ module FreightTrain
           raw <<-JS
             var FT=window.FT||{};
             FT.#{model_name}=(function(){
-              App.debug('FT.#{model_name} established');
               var name='#{model_name}', collection='#{table_name}', path='#{path}', o, editor_writer=#{editor_writer_method(table_name.singularize)};
               return {
                  init: function(){o=new Observer();#{reset_on_create_method(table_name, options)}}

@@ -80,7 +80,7 @@ FT.Adapters.Prototype = {
               var attr = attributes[i].nodeName;
               if(('_prototypeUID' == attr) ||
                  (/^jQuery/.test(attr))) {
-                App.debug('removing "' + attr + '"');
+                FT.debug('removing "' + attr + '"');
                 element.removeAttribute(attr);
               }
             }
