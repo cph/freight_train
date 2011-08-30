@@ -174,7 +174,7 @@ module FreightTrain
         @after_init << "FT.copyValue(tr,tr_edit,'#{attr_name}');"
         html_options[:name] = attr_name
         html_options[:attr] = attr_name
-        html_options[:id] = nil
+        html_options[:id] = nil unless html_options.key?(:id)
       end
       
       
