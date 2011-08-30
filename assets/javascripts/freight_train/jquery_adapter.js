@@ -122,25 +122,12 @@ FT.Adapters.jQuery = {
     jQuery(element).focus();
   },
   assign: function(control, value) {
-    jQuery(control).val(value);
-    // switch(control.nodeName.toUpperCase()) {
-    //   case 'INPUT':
-    //   case 'TEXTAREA':
-    //     jQuery(control).setValue(value);
-    //     break;
-    //     
-    //   case 'SELECT':
-    //     var options = control.options;
-    //     var option;
-    //     for(var i=0;i<options.length;i++) {
-    //       option = options[i];
-    //       if(option.value == value) {
-    //         option.selected = true;
-    //         return;
-    //       }
-    //     }
-    //     break;
-    // }
+    var $control = jQuery(control);
+    if($control.is(':radio, :checkbox')) {
+      $control.attr('checked', (value == 'true') ? 'checked' : null);
+    } else {
+      $control.val(value);
+    }
   },
   
   // Events
