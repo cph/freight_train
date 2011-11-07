@@ -556,9 +556,16 @@
   function xhr(url, method, params, args) {
     params = params || {};
     params['freight_train'] = 'true';
-    token && (params['token'] = token);
-    // params = (params ? (params + '&') : '') + (token ? (token + '&') : '') + 'freight_train=true';
+    
+    var csrf_param = getMetaValue('csrf-param');
+    csrf_param && (params[csrf_param] = getMetaValue('csrf-token'));
+    
     return _$.xhr(url, method, params, args);
+  }
+  
+  function getMetaValue(name) {
+    var meta_tag = _$.find('meta[name="' + name + '"]')[0];
+    return meta_tag && _$.attr(meta_tag, 'content');
   }
   
   
