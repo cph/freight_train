@@ -164,16 +164,13 @@ module FreightTrain
             lb = ListBuilder.new(instance_name, self, options)
             header = capture(lb, &block) if block_given?
             footer = lb.footer_html
-            html = alt_content_tag(:thead) {
-              header.html_safe
-            } <<
-            alt_content_tag(:tbody, :id => collection_name) {
+            html = ""
+            html << alt_content_tag(:thead) { header.html_safe } unless header.blank?
+            html << alt_content_tag(:tbody, :id => collection_name) {
               render(:partial => partial, :collection => records) unless !records or records.empty?
             }
-            html << alt_content_tag(:tfoot) {
-              footer.html_safe
-            } unless footer.blank?
-            html
+            html << alt_content_tag(:tfoot) { footer.html_safe } unless footer.blank?
+            html.html_safe
           } <<
           "</form>\n" <<
           
