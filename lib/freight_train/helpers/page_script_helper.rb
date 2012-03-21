@@ -95,7 +95,7 @@ module FreightTrain
       
       
       def activate_editing_method(table_name, options)
-        if @inline_editor
+        if @inline_editor != "function(tr){}"
           ", activateEditing: function(row){FT.Helpers.editRowInline(row,path,editor_writer);}"
         elsif (options[:editable] != false)
           ", activateEditing: function(row){FT.Helpers.editRow(row,path);}"
