@@ -12,12 +12,11 @@ module FreightTrain
       options.merge!(params[:ft] || {})
       
       options       = options.with_indifferent_access
-      model_name    = record.class.name
       partial_name  = options[:partial] || record.class.name.underscore
       content       = render_to_string(:partial => partial_name, :object => record)
       page          = JavascriptGenerator.new
       
-      page.call "FT.#{model_name}.addRow", content
+      page.call "FT.#{ft_model_name(record)}.addRow", content
       yield page if block_given?
       render :inline => page.to_s,
              :content_type => "application/javascript"
@@ -34,13 +33,12 @@ module FreightTrain
       
       options       = options.with_indifferent_access
       id            = idof(record)
-      model_name    = record.class.name
       partial_name  = options[:partial] || record.class.name.underscore
       content       = render_to_string(:partial => partial_name, :object => record)
       page          = JavascriptGenerator.new
       
       
-      page.call "FT.#{model_name}.updateRow", id, content
+      page.call "FT.#{ft_model_name(record)}.updateRow", id, content
       yield page if block_given?
       render :inline => page.to_s,
              :content_type => "application/javascript"
@@ -50,10 +48,9 @@ module FreightTrain
     
     def remove_deleted(record)
       id            = idof(record)
-      model_name    = record.class.name
       page          = JavascriptGenerator.new
       
-      page.call "FT.#{model_name}.deleteRow", id
+      page.call "FT.#{ft_model_name(record)}.deleteRow", id
       yield page if block_given?
       render :inline => page.to_s,
              :content_type => "application/javascript"
@@ -115,6 +112,12 @@ module FreightTrain
         ::ActiveSupport::JSON.encode(object)
       end
       
+    end
+    
+    
+    
+    def ft_model_name(record)
+      record.class.name
     end
     
     
