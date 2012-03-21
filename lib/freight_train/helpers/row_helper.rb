@@ -31,7 +31,7 @@ module FreightTrain
           css << "alt" if !@alt
           css << options[:class] if options[:class]
           
-          raw_or_concat( alt_content_tag(:tr, :class => css.join(" "), :id => idof(record), :name => singular) {
+          raw_or_concat( alt_content_tag(:tr, options.fetch(:html, {}).merge(:class => css.join(" "), :id => idof(record), :name => singular)) {
             row_guts_for(record, options, &block)
           })
         end
