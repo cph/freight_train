@@ -358,6 +358,10 @@
     });
     (undeleted_rows <= 1) && addNestedRow(row);
     
+    // Give focus either to the previous row or the next row
+    var previous_row = _$.previous(row) || _$.next(row);
+    selectFirstFieldIn(previous_row);
+    
     // Remove or hide the deleted record
     if(getNestedRowFieldValue(row, 'id')) {
       setNestedRowFieldValue(row, '_destroy', 1);
