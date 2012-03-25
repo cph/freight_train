@@ -673,6 +673,9 @@
     updateNestedEditors:    updateNestedEditors,
     updateNestedEditorsIn:  updateNestedEditorsIn,
     
+    addNestedRow:           addNestedRow,
+    deleteNestedRow:        deleteNestedRow,
+    getNestedRowFromEvent:  getNestedRowFromEvent,
     
     
     
