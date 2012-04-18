@@ -149,7 +149,7 @@ module FreightTrain
       def nested_row_hidden_properties(f)
         alt_content_tag(:td, :class => "hidden") do
           (f.hidden_field :id) <<
-          (f.static_field :_destroy, 0)
+          (f.static_field :_destroy, (f.object.respond_to?(:_destroy) && f.object._destroy) ? 1 : 0)
         end
       end
       

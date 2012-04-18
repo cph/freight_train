@@ -306,6 +306,14 @@
     _$.delegate(nested_editor, 'click',    '.add-nested-link', nestedRowAction(addNestedRow));
     _$.delegate(nested_editor, 'click', '.delete-nested-link', nestedRowAction(deleteNestedRow));
     updateNestedEditor(nested_editor);
+    
+    // Hide rows that were created with _destroy="1"
+    var deleted_rows = _$.find(nested_editor, '[data-attr="_destroy"][value="1"]');
+    for(var i=0, ii=deleted_rows.length, row, input; i<ii; i++) {
+      input = deleted_rows[i];
+      row = _$.up(input, '.nested-row');
+      row && _$.hide(row);
+    }
   }
   
   function nestedRowAction(action) {
