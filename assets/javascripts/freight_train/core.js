@@ -420,7 +420,10 @@
   
   function renumberNestedRow(row, i) {
     withEach(_$.find(row, 'input, textarea, select'), function(e) {
-      _$.attr(e, 'name', _$.attr(e, 'name').replace(/\[(\d+)\]/, function() { return '[' + i + ']'; }));
+      var name = _$.attr(e, 'name');
+      if(name) {
+        _$.attr(e, 'name', name.replace(/\[(\d+)\]/, function() { return '[' + i + ']'; }));
+      }
     });
   }
   
