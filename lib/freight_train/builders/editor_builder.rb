@@ -118,7 +118,8 @@ module FreightTrain
       
       def select(method, choices, options={}, html_options={})
         autofill!(method, html_options)
-        "#{tag("select", html_options, true)}'+FT.Helpers.createOptions(#{choices.to_json})+'</select>".html_safe
+        choices_html = choices.is_a?(String) ? choices : "'+FT.Helpers.createOptions(#{choices.to_json})+'"
+        "#{tag("select", html_options, true)}#{choices_html}</select>".html_safe
       end
       
       def text_field(method, html_options={})
