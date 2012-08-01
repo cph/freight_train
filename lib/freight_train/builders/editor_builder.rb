@@ -127,6 +127,11 @@ module FreightTrain
         super(method, html_options)
       end
       
+      def text_area(method, html_options={})
+        autofill!(method, html_options)
+        super(method, html_options)
+      end
+      
       def fields_for(method, *args, &block)
         options = args.extract_options!
         name = options[:name] || "#{@object_name}[#{method}]"
