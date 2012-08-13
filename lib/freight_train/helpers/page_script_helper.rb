@@ -70,7 +70,7 @@ module FreightTrain
       
       
       def editor_writer_method(singular)
-        editor_fn = @inline_editor.to_s.gsub(/\r|\n/, " ").gsub(/\s+</, "<").gsub(/>\s+/, ">")
+        editor_fn = escape_for_js(@inline_editor.to_s)
         if editor_fn.blank?
           editor_fn = "return null;"
         else
@@ -78,6 +78,13 @@ module FreightTrain
                       "return FT.Helpers.createEditor('#{FreightTrain.tag(:tr)}',html,'#{singular}');"
         end
         "function(tr){#{editor_fn}}"
+      end
+      
+      def escape_for_js(html)
+        html.gsub(/\r|\n/, " ") \
+            .gsub(/\s+</, "<") \
+            .gsub(/>\s+/, ">") \
+            .gsub("'") { |c| "\\#{c}" } # this mess is to replace ' with \'.
       end
       
       
