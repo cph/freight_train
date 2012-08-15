@@ -107,7 +107,7 @@ module FreightTrain
       def grouped_collection_select(method, collection, group_method, group_label_method, option_key_method, option_value_method, options={}, html_options={})
         autofill!(method, html_options)
         options = option_groups_from_collection_for_select(collection, group_method, group_label_method, option_key_method, option_value_method)
-        options.gsub!("'", "\\\\'")
+        options.gsub!("'") { |c| "\\#{c}" } # this mess is to replace ' with \'.
         "#{tag("select", html_options, true)}#{options}</select>".html_safe
       end
       
@@ -118,7 +118,7 @@ module FreightTrain
       
       def select(method, choices, options={}, html_options={})
         autofill!(method, html_options)
-        choices_html = choices.is_a?(String) ? choices : "'+FT.Helpers.createOptions(#{choices.to_json})+'"
+        choices_html = choices.is_a?(String) ? choices.gsub("'") { |c| "\\#{c}" } : "'+FT.Helpers.createOptions(#{choices.to_json})+'"
         "#{tag("select", html_options, true)}#{choices_html}</select>".html_safe
       end
       

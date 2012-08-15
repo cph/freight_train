@@ -83,8 +83,7 @@ module FreightTrain
       def escape_for_js(html)
         html.gsub(/\r|\n/, " ") \
             .gsub(/\s+</, "<") \
-            .gsub(/>\s+/, ">") \
-            .gsub("'") { |c| "\\#{c}" } # this mess is to replace ' with \'.
+            .gsub(/>\s+/, ">")
       end
       
       
