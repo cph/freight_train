@@ -70,7 +70,7 @@ module FreightTrain
       end
       
       def static_field(method, value)
-        attr_name = "#{@object_name}[#{method}]"
+        attr_name = "#{@object_name}[#{method}]".html_safe
         html_options = {
           'data-attr' => method,
           :type => "hidden",
@@ -82,7 +82,7 @@ module FreightTrain
       end
       
       def text(method, options={})
-        attr_name = "#{@object_name}[#{method}]"
+        attr_name = "#{@object_name}[#{method}]".html_safe
         concat_raw("FT.getAttrValue(tr, '#{attr_name}')")
       end
       alias :text_of :text
@@ -162,7 +162,7 @@ module FreightTrain
       
       def check_list_for(method, values, &block)
         Rails.logger.info "DEPRECATED EditorBuilder#check_list_for (I don't believe this is used anywhere)"
-        attr_name = "#{@object_name}[#{method}]"
+        attr_name = "#{@object_name}[#{method}]".html_safe
         @after_init << "FT.check_selected_values(tr,tr_edit,'#{attr_name}');"
         for value in values
           yield FreightTrain::Builders::CheckListBuilder.new(attr_name, [], value, @template)
@@ -176,7 +176,7 @@ module FreightTrain
       
       
       def autofill!(method, html_options)
-        attr_name = "#{@object_name}[#{method}]"
+        attr_name = "#{@object_name}[#{method}]".html_safe
         @after_init << "FT.copyValue(tr,tr_edit,'#{attr_name}');"
         html_options[:name] = attr_name
         html_options[:attr] = attr_name
@@ -193,7 +193,7 @@ module FreightTrain
         # by `fields_for`, 'tr' refers to the nested row rather than its parent.
         code("FT.Helpers.forEachNestedRow(tr,'.#{singular}',function(tr,i){") <<
         (fields_for(method, :name => "'+FT.$.attr(tr,'name')+'") do |f|
-          nested_editor_row(f, attr_name, "'+i+'", method, &block)
+          nested_editor_row(f, attr_name, "'+i+'".html_safe, method, &block)
         end) <<
         code("});")
       end

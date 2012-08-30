@@ -44,45 +44,54 @@ module FreightTrain
       
       
       def hidden_field(method_or_object, *args)
-        options = args.extract_options!
-        
-        case method_or_object
-        when String, Symbol
-          method = method_or_object
-          obj = @object ? @object.send(method) : nil
-        when Array
-          obj = method_or_object
-          # method = ActionController::RecordIdentifier.singular_class_name(obj.first)
-          method = obj.first.class.name.tableize.singularize
-        else
-          obj = method_or_object
-          # method = ActionController::RecordIdentifier.singular_class_name(obj)
-          method = obj.class.name.tableize.singularize
+        method = case method_or_object
+        when String, Symbol; method_or_object
+        when Array; obj.first.class.name.tableize.singularize
+        else; obj.class.name.tableize.singularize
         end
         
-        options[:type] = "hidden"
+        html_options = args.extract_options!
+        html_options[:id] = html_options[:name].parameterize.underscore if html_options[:name] && !html_options.key?(:id)
+        html_options["data-attr"] = method
         
-        content = ""
-        content = "<!--#{@object.class}-->"
-        if obj.is_a? Array
-          options[:name] = "#{@object_name}[#{method}][]"
-          options["data-attr"] = method
-          options[:id] = options[:name].parameterize.underscore
-          for value in obj
-            value.nil? ? options.delete(:value) : (options[:value] = value)
-            content << @template.tag( "input", options )
-          end
-        else
-          options[:name] = "#{@object_name}[#{method}]"
-          options["data-attr"] = method
-          options[:id] = options[:name].parameterize.underscore
-          obj = obj.to_s
-          obj.blank? ? options.delete(:value) : (options[:value] = obj)
-          # options[:value] = obj ? "#{obj}" : ""
-          content << @template.tag( "input", options )
-        end
-        content.html_safe
+        super(method_or_object, html_options)
       end
+      
+      # def hidden_field(method_or_object, *args)
+      #   options = args.extract_options!
+      #   
+      #   case method_or_object
+      #   when String, Symbol
+      #     method = method_or_object
+      #     obj = @object ? @object.send(method) : nil
+      #   when Array
+      #     obj = method_or_object
+      #     method = obj.first.class.name.tableize.singularize
+      #   else
+      #     obj = method_or_object
+      #     method = obj.class.name.tableize.singularize
+      #   end
+      #   
+      #   options[:type] = "hidden"
+      #   options["data-attr"] = method
+      #   options[:name] = "#{@object_name}[#{method}]".html_safe # !hack: figure out how to implement the commented-out method above
+      #   options[:id] = options[:name].parameterize.underscore
+      #   
+      #   content = ""
+      #   content = "<!--#{@object.class}-->"
+      #   if obj.is_a? Array
+      #     options[:name] = "#{options[:name]}[]".html_safe # !hack: figure out how to implement the commented-out method above
+      #     for value in obj
+      #       value.nil? ? options.delete(:value) : (options[:value] = value)
+      #       content << @template.tag( "input", options )
+      #     end
+      #   else
+      #     obj = obj.to_s
+      #     obj.blank? ? options.delete(:value) : (options[:value] = obj)
+      #     content << @template.tag( "input", options )
+      #   end
+      #   content.html_safe
+      # end
       
       
       
@@ -131,10 +140,10 @@ module FreightTrain
       
       def nested_editor_row(f, attr_name, i, method, &block)
         singular = method.to_s.singularize
-        attr_name = "#{attr_name}[#{i}]"
+        attr_name = "#{attr_name}[#{i}]".html_safe # for sake of EditorBuilder which wants to pass "'+i+'"
         html_options = {
           :class => "nested-row #{singular}",
-          :id => "#{singular}_#{i}",
+          :id => "#{singular}_#{i}".html_safe, # for sake of EditorBuilder which wants to pass "'+i+'"
           :name => attr_name,
           :attr => attr_name
         }
