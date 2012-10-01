@@ -599,7 +599,7 @@
   
   function getAttrValue(row, attr_name) {
     var element = getField(row, attr_name);
-    return element && (_$.attr(element, 'value') || element.innerHTML);
+    return element && (_$.attr(element, 'value') || _$.text(element));
   }
   
   function getField(row, attr_name) {

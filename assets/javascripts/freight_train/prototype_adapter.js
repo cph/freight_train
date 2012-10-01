@@ -27,6 +27,9 @@ FT.Adapters.Prototype = {
   removeClass: function(element, class_name) {
     $(element).removeClassName(class_name);
   },
+  text: function(element) {
+    return element.innerText;
+  },
   
   // Selection/Traversal
   find_by_id: function(id) {

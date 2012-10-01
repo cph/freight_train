@@ -23,6 +23,9 @@ FT.Adapters.jQuery = {
   removeClass: function(element, class_name) {
     jQuery(element).removeClass(class_name);
   },
+  text: function(element) {
+    return jQuery(element).text();
+  },
   
   // Selection/Traversal
   find_by_id: function(id) {
