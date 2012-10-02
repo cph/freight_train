@@ -6,7 +6,7 @@ module FreightTrain
       # !todo: this is simply copied for lail_extensions' FormattingHelper!
       def format_errors( object )
         if object and object.respond_to?("errors") and !(messages = object.errors.all_messages).empty?
-          "<ul>" + messages.collect{|msg| "<li>#{msg}</li>"}.join + "</ul>"
+          ("<ul>" + messages.collect{|msg| "<li>#{msg}</li>"}.join + "</ul>").html_safe
         else
           ""
         end    
@@ -31,7 +31,7 @@ module FreightTrain
 
 
       def format_exception_for(record, options={})
-        "<p>An error occurred while trying to #{options[:action] || "access"} #{record.class.name.titleize}:</p><ul><li>#{h $!}</li></ul>"
+        "<p>An error occurred while trying to #{options[:action] || "access"} #{record.class.name.titleize}:</p><ul><li>#{h $!}</li></ul>".html_safe
       end
       
     end
