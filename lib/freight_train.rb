@@ -1,3 +1,4 @@
+require 'freight_train/rails3'
 require 'freight_train/responder'
 
 

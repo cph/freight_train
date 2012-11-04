@@ -1,2 +1,1 @@
-require 'rails3';
-require 'freight_train';
+require 'freight_train'
