@@ -9,7 +9,11 @@ FT.Adapters.jQuery = {
   
   // Attributes
   attr: function(element, name, value) {
-    return jQuery(element).attr(name, value);
+    if(value === undefined) {
+      return jQuery(element).attr(name);
+    } else {
+      jQuery(element).attr(name, value);
+    }
   },
   css: function(element, css) {
     for(property in css) { jQuery(element).css(property, css[property]); }
