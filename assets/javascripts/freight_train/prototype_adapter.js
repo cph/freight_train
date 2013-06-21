@@ -117,24 +117,27 @@ FT.Adapters.Prototype = {
   activate: function(element) {
     $(element).select();
   },
-  assign: function(control, value) {
-    switch(control.nodeName.toUpperCase()) {
-      case 'INPUT':
-      case 'TEXTAREA':
-        $(control).setValue(value);
-        break;
+  assign: function(controls, value) {
+    var control = controls[0];
+    if(control) {
+      switch(control.nodeName.toUpperCase()) {
+        case 'INPUT':
+        case 'TEXTAREA':
+          $(control).setValue(value);
+          break;
         
-      case 'SELECT':
-        var options = control.options;
-        var option;
-        for(var i=0;i<options.length;i++) {
-          option = options[i];
-          if(option.value == value) {
-            option.selected = true;
-            return;
+        case 'SELECT':
+          var options = control.options;
+          var option;
+          for(var i=0;i<options.length;i++) {
+            option = options[i];
+            if(option.value == value) {
+              option.selected = true;
+              return;
+            }
           }
-        }
-        break;
+          break;
+      }
     }
   },
   

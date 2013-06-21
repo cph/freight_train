@@ -99,6 +99,11 @@ module FreightTrain
         super(method, html_options)
       end
       
+      def radio_button(method, value, html_options={})
+        autofill!(method, html_options)
+        super(method, value, html_options)
+      end
+      
       def collection_select(method, collection, value_method=:id, text_method=:to_s, options={}, html_options={})
         choices = collection.collect {|i| [i.send(text_method), i.send(value_method)]}
         select(method, choices, options, html_options)

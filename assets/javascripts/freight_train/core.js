@@ -588,9 +588,9 @@
   
   
   function copyValue(row, editor, attr_name) {
-    var value   = getAttrValue(row, attr_name),
-        control = getField(editor, attr_name);
-    control && value && _$.assign(control, value);
+    var value    = getAttrValue(row, attr_name),
+        controls = getFields(editor, attr_name);
+    controls && value && _$.assign(controls, value);
   }
   
   function getAttrName(row, method) {
@@ -606,6 +606,11 @@
     var selector = '*[attr="' + attr_name + '"]',
         element  = _$.find(row, selector)[0];
     return element ? element : (FT.debug(selector + ' not found') && null);
+  }
+  
+  function getFields(row, attr_name) {
+    var selector = '*[attr="' + attr_name + '"]';
+    return _$.find(row, selector);
   }
   
   

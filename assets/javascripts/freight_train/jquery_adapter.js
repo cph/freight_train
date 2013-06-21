@@ -128,12 +128,14 @@ FT.Adapters.jQuery = {
   activate: function(element) {
     jQuery(element).focus();
   },
-  assign: function(control, value) {
-    var $control = jQuery(control);
-    if($control.is(':radio, :checkbox')) {
-      $control.attr('checked', (value == 'true') ? 'checked' : null);
+  assign: function(controls, value) {
+    var $controls = jQuery(controls);
+    if($controls.is(':radio')) {
+      $controls.filter('[value="' + value + '"]').prop('checked', true);
+    } else if($controls.is(':checkbox')) {
+      $controls.attr('checked', (value == 'true') ? 'checked' : null);
     } else {
-      $control.val(value);
+      $controls.val(value);
     }
   },
   
