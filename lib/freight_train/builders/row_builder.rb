@@ -158,7 +158,7 @@ module FreightTrain
       
       def delete_command
         @commands_called = true
-        "<a class=\"delete-command\" data-id=\"#{record.to_param}\" href=\"#\">delete</a>".html_safe
+        "<a class=\"delete-command\" data-confirm=\"Delete #{record.class.name}?\" data-id=\"#{record.to_param}\" href=\"#\">delete</a>".html_safe
       end
       
       
