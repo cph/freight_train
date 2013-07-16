@@ -77,7 +77,7 @@ module FreightTrain
         options = args.extract_options!  
         css = options[:hidden] ? "nested hidden" : "nested"
         name = "#{@object_name}[#{method}_attributes]"
-    
+        
         raw_or_concat(alt_content_tag(:table, :class => css) do
           alt_content_tag(:tbody, :attr => name) do
             i = -1
@@ -85,13 +85,13 @@ module FreightTrain
             children.collect {|child|
               i += 1
               name = "#{@object_name}[#{method}_attributes][#{i}]"
-          
+              
               klass = options[:class]
               klass = klass.call(child) if klass.is_a?(Proc)
               temp = ["nested-row", singular]
               temp << klass if klass
               klass = temp.join(" ")
-          
+              
               alt_content_tag(:tr, :id => "#{singular}_#{i}", :class => klass, :name => name) do
                 f = @@default_row_builder.new(@template, name, child)
                 alt_content_tag(:td, (f.hidden_field :id), :class => "hidden", :style => "display:none;") <<
