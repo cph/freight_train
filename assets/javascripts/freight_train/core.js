@@ -602,6 +602,11 @@
     return element && (_$.attr(element, 'value') || _$.text(element));
   }
   
+  function getAttrHtml(row, attr_name) {
+    var element = getField(row, attr_name);
+    return element && (_$.attr(element, 'value') || element.innerHTML);
+  }
+  
   function getField(row, attr_name) {
     var selector = '*[attr="' + attr_name + '"]',
         element  = _$.find(row, selector)[0];
@@ -683,6 +688,7 @@
     copyValue:          copyValue,
     getAttrName:        getAttrName,
     getAttrValue:       getAttrValue,
+    getAttrHtml:        getAttrHtml,
     getField:           getField,
     
     resetFormFieldsIn:  resetFormFieldsIn,

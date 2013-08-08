@@ -88,6 +88,11 @@ module FreightTrain
       alias :text_of :text
       alias :content_of :text
       
+      def html(method, options={})
+        attr_name = "#{@object_name}[#{method}]".html_safe
+        concat_raw("FT.getAttrHtml(tr, '#{attr_name}')")
+      end
+      
       
       
       # ===================================================================================================
