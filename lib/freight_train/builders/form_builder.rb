@@ -25,7 +25,7 @@ module FreightTrain
           case method_or_object
           when String, Symbol
             object = @object.send method_or_object
-            if object.is_a? Array
+            if object.is_a?(Array) or object.is_a?(ActiveRecord::Relation)
               name = options[:name] || "#{@object_name}[#{method_or_object}_attributes]"
               return ((0...object.length).collect do |i|
                 @template.fields_for("#{name}[#{i}]", object[i], *args, &block)
