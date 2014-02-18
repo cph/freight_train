@@ -28,6 +28,7 @@
       enable_nested_records = true,
       save_when_navigating = false,
       enable_keyboard_navigation = false,
+      enable_ghost_rows = false,
       initialized = false,
       observer = new Observer(),
       forms = [],
@@ -80,6 +81,7 @@
     token = args.token;
     save_when_navigating = args.save_when_navigating;
     enable_keyboard_navigation = args.enable_keyboard_navigation;
+    enable_ghost_rows = args.enable_ghost_rows;
   }
   
   
@@ -305,6 +307,11 @@
   function initializeNestedEditor(nested_editor) {
     _$.delegate(nested_editor, 'click',    '.add-nested-link', nestedRowAction(addNestedRow));
     _$.delegate(nested_editor, 'click', '.delete-nested-link', nestedRowAction(deleteNestedRow));
+    if(enable_ghost_rows) {
+      _$.delegate(nested_editor, 'change, keyup', 'input, select', changedNestedRow);
+    }
+    _$.delegate(nested_editor, 'focus', '*', focusInNestedRow);
+    _$.delegate(nested_editor, 'blur', '*', blurInNestedRow);
     updateNestedEditor(nested_editor);
     
     // Hide rows that were created with _destroy="1"
@@ -314,6 +321,8 @@
       row = _$.up(input, '.nested-row');
       row && _$.hide(row);
     }
+    
+    updateNestedRowCount(nested_editor);
   }
   
   function nestedRowAction(action) {
@@ -333,9 +342,75 @@
   
   
   
-  function addNestedRow(row) {
+  function changedNestedRow(e) {
+    var row = getNestedRowFromEvent(e);
+    if(!row || !row.parentNode) {return;}
+    var nested_editor = _$.up(row, '.nested.editor');
+    updateNestedRowCount(nested_editor);
+  }
+  
+  function focusInNestedRow(e) {
+    var row = getNestedRowFromEvent(e);
+    if(!row) { return; }
+    _$.addClass(row, 'focused-row');
+  }
+  
+  function blurInNestedRow(e) {
+    var row = getNestedRowFromEvent(e);
+    if(!row) { return; }
+    _$.removeClass(row, 'focused-row');
+  }
+  
+  function updateNestedRowCount(nested_editor) {
+    if(!enable_ghost_rows) { return; }
+    
+    var isEmptyRow = isEmptyNestedRow;
+    var isEmptyRowFunction = _$.attr(nested_editor, 'data-is-empty-row');
+    if(isEmptyRowFunction) {
+      var references = isEmptyRowFunction.split('.');
+      var context = window;
+      for(var i=0; i<references.length; i++) {
+        context = context && context[references[i]];
+      }
+      context && (isEmptyRow = context);
+    }
+    
+    // How many empty rows are left?
+    var rows = _$.find(nested_editor, '.nested-row');
+    var empty_rows = [];
+    var row;
+    for(var i=0, ii=rows.length; i<ii; i++) {
+      row = rows[i];
+      if(isEmptyRow(row)) {
+        (i > 0) && _$.addClass(row, 'empty-row'); // never mark the first row as empty
+        empty_rows.push(row);
+      } else {
+        _$.removeClass(row, 'empty-row');
+      }
+    }
+    
+    // If there are no empty rows, create one.
+    (rows.length > 0 && empty_rows.length == 0) && addNestedRow(rows[0], {noSelect: true});
+    
+    // If there is more than one empty row, delete the rest.
+    for(var i=1; i<empty_rows.length; i++) {
+      deleteNestedRow(empty_rows[i], {noSelect: true});
+    }
+  }
+  
+  function isEmptyNestedRow(row) {
+    var filled_inputs = 0;
+    withEach(_$.find(row, 'input:visible'), function(input) {
+      if(input.type == 'hidden' || input.type == 'checkbox' || input.type == 'radio') { return; }
+      (input.value == '') || (filled_inputs++);
+    });
+    return filled_inputs == 0;
+  }
+  
+  function addNestedRow(row, options) {
     if(!row.parentNode) {return;}
     var nested_editor = _$.up(row, '.nested.editor');
+    options = options || {};
     
     // Clone a row
     var new_row   = _$.clone(row),
@@ -343,21 +418,24 @@
     new_row.id    = row.id.replace(/(\d+)$/, function(m, n){return Number(n) + 1;});
     _$.attr(new_row, 'name', name);
     _$.attr(new_row, 'attr', name);
+    _$.removeClass(new_row, 'focused-row');
+    _$.addClass(new_row, 'empty-row');
     row.parentNode.appendChild(new_row);
     
     // Reset the cloned row's values
     setNestedRowFieldValue(new_row, '_destroy', 0);
     setNestedRowFieldValue(new_row, 'id', '');
     resetFormFieldsIn(new_row);
-    selectFirstFieldIn(new_row);
+    options.noSelect || selectFirstFieldIn(new_row);
     
     observer.fire('after_add_nested', [nested_editor, new_row]);
     updateNestedEditor(nested_editor);
   }
   
-  function deleteNestedRow(row) {
+  function deleteNestedRow(row, options) {
     if(!row.parentNode) {return;}
     var nested_editor = _$.up(row, '.nested.editor');
+    options = options || {};
     
     // How many undeleted records are left? Only 1? Create a new empty record.
     var undeleted_rows = 0;
@@ -368,7 +446,7 @@
     
     // Give focus either to the previous row or the next row
     var previous_row = _$.previous(row) || _$.next(row);
-    selectFirstFieldIn(previous_row);
+    options.noSelect || selectFirstFieldIn(previous_row);
     
     // Remove or hide the deleted record
     if(getNestedRowFieldValue(row, 'id')) {

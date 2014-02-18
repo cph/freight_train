@@ -109,7 +109,7 @@ module FreightTrain
       
       
       
-      def nested_editor_for(method, *args, &block)
+      def nested_editor_for(method, options={}, &block)
         raise ArgumentError, "Missing block" unless block_given?
         
         @template.instance_variable_set "@enable_nested_records", true
@@ -117,7 +117,7 @@ module FreightTrain
         attr_name = "#{@object_name}[#{method}_attributes]"
         
         # for some reason, things break if I make "#{@object_name}[#{object_name.to_s}_attributes]" the 'id' of the table
-        alt_content_tag(:table, :class => "nested editor") do
+        alt_content_tag(:table, options.merge(:class => "nested editor")) do
           alt_content_tag(:tbody, :attr => attr_name) do
             nested_editor_wrapper(method, attr_name, &block)
           end
