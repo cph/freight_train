@@ -363,6 +363,7 @@
   
   function updateNestedRowCount(nested_editor) {
     if(!enable_ghost_rows) { return; }
+    if(_$.find(nested_editor, '.nested-row input:visible').length == 0) { return; }
     
     var isEmptyRow = isEmptyNestedRow;
     var isEmptyRowFunction = _$.attr(nested_editor, 'data-is-empty-row');
