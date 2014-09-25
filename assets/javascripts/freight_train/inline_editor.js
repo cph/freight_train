@@ -100,6 +100,8 @@ FT.InlineEditor = (function() {
       
       // ...or on hitting the Return key
       _$.on(editor, 'keydown', function(e) {
+        var target = _$.target(e);
+        if(target && _$.is_in(target, '.chosen-with-drop')) return;
         if(e.keyCode == KEY_RETURN) {
           _$.stop(e);
           editor.save();
@@ -141,6 +143,6 @@ FT.InlineEditor = (function() {
   };
   constructor.observe = function(name,func){ observer.observe(name, func); };
   constructor.unobserve = function(name,func){ observer.unobserve(name, func); };
-  
-  return constructor;  
+
+  return constructor;
 })();
