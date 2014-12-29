@@ -40,7 +40,7 @@ module FreightTrain
       
       
       
-      def initialize(object_name, object, template, options, proc)
+      def initialize(object_name, object, template, options, &block)
         super
         @after_init = ""
       end

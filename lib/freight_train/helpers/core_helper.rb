@@ -52,7 +52,7 @@ module FreightTrain
           options = args.extract_options!.reverse_merge!(
             :last_child => true)
           builder = FreightTrain::Builders::EditorBuilder.default_editor_builder
-          editor_builder = builder.new(@sym, nil, @template, options, block)
+          editor_builder = builder.new(@sym, nil, @template, options, &block)
           
           editor_html = capture(editor_builder, &block)
           editor_html << editor_builder.last_child unless !options[:last_child] or editor_builder.last_child_called?
