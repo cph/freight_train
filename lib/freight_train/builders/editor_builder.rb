@@ -187,6 +187,7 @@ module FreightTrain
       
       def autofill!(method, html_options)
         attr_name = "#{@object_name}[#{method}]".html_safe
+        attr_name << "[]" if html_options[:multiple]
         @after_init << "FT.copyValue(tr,tr_edit,'#{attr_name}');"
         html_options[:name] = attr_name
         html_options[:attr] = attr_name
