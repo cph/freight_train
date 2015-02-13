@@ -11,6 +11,7 @@
 //   ft:create          raised by an element that's just been created by FreightTrain
 //   ft:delete          raised by an element that's just been deleted by FreightTrain
 //   ft:update          raised by an element that's just been updated by FreightTrain
+//   ft:value_assigned  raised by each form element when FreightTrain assigns it's value
 //
 //
 // For every FreightTrain instance created in a page, a namespace will be added to FT that is named after the model.
@@ -670,6 +671,7 @@
     var value    = getAttrValue(row, attr_name),
         controls = getFields(editor, attr_name);
     controls && value && _$.assign(controls, value);
+    _$.fire(controls, 'ft:value_assigned');
   }
   
   function getAttrName(row, method) {
