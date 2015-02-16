@@ -134,6 +134,8 @@ FT.Adapters.jQuery = {
       $controls.filter('[value="' + value + '"]').prop('checked', true);
     } else if($controls.is(':checkbox')) {
       $controls.attr('checked', (value == 'true') ? 'checked' : null);
+    } else if($controls.prop('multiple')) {
+      $controls.val(value.split(','));
     } else {
       $controls.val(value);
     }
