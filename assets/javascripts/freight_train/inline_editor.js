@@ -101,7 +101,7 @@ FT.InlineEditor = (function() {
       // ...or on hitting the Return key
       _$.on(editor, 'keydown', function(e) {
         var target = _$.target(e);
-        if(target && _$.is_in(target, '.chosen-with-drop')) return;
+        if(target && _$.is_in(target, '.chosen-with-drop, .select2-container')) return;
         if(e.keyCode == KEY_RETURN) {
           _$.stop(e);
           editor.save();
