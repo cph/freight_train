@@ -103,7 +103,7 @@ FT.Adapters.jQuery = {
     return jQuery(element).insertAfter(reference)[0];
   },
   prependTo: function(reference, html) {
-    return jQuery(html).prependTo(reference)[0];
+    return $(reference).prepend(html).children()[0];
   },
   replace: function(element, html) {
     return jQuery(element).html(html)[0];
