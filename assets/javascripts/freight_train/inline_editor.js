@@ -128,7 +128,7 @@ FT.InlineEditor = (function() {
     // Edit the row when it is clicked (but not if a link or button was clicked)
     _$.on(element, 'click', function(e) {
       var target = _$.target(e);
-      target && !_$.is_in(target, 'input, button, a') && element.edit_inline();
+      target && !_$.is_in(target, 'input, button, a, dd.dotWrap') && element.edit_inline();
     });
   };
   
