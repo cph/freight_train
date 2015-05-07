@@ -220,9 +220,11 @@
         var list = _$.find_by_id(collection_name),
             new_row = _$.prependTo(list, content);
         model.hookupRow(new_row);
-        _$.hide('#flash_error');
-        _$.fire(new_row, 'ft:create')
-        FT.Helpers.restripeRows();
+        window.setTimeout(function() {
+          _$.hide('#flash_error');
+          _$.fire(new_row, 'ft:create')
+          FT.Helpers.restripeRows();
+        });
       }
       
       model.updateRow = function(id, content) {
@@ -230,8 +232,10 @@
         if(row) {
           _$.replace(row, content);
           model.hookupRow(row);
-          _$.hide('#flash_error');
-          _$.fire(row, 'ft:update')
+          window.setTimeout(function() {
+            _$.hide('#flash_error');
+            _$.fire(row, 'ft:update');
+          });
         }
       }
       
