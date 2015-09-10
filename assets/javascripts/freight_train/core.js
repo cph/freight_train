@@ -312,7 +312,7 @@
   function initializeNestedEditor(nested_editor) {
     _$.delegate(nested_editor, 'click',    '.add-nested-link', nestedRowAction(addNestedRow));
     _$.delegate(nested_editor, 'click', '.delete-nested-link', nestedRowAction(deleteNestedRow));
-    if(enable_ghost_rows) {
+    if(nested_editor.hasAttribute('data-ghost-rows') ? nested_editor.getAttribute('data-ghost-rows') == 'true' : enable_ghost_rows) {
       _$.delegate(nested_editor, 'change, keyup', 'input, select', changedNestedRow);
     }
     _$.delegate(nested_editor, 'focus', '*', focusInNestedRow);
@@ -367,7 +367,9 @@
   }
   
   function updateNestedRowCount(nested_editor) {
-    if(!enable_ghost_rows) { return; }
+    if(nested_editor.hasAttribute('data-ghost-rows') ? nested_editor.getAttribute('data-ghost-rows') != 'true' : !enable_ghost_rows) {
+      return;
+    }
     if(_$.find(nested_editor, '.nested-row input:visible').length == 0) { return; }
     
     var isEmptyRow = isEmptyNestedRow;
