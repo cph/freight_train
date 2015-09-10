@@ -515,7 +515,13 @@
   
   function setAddNestedVisibility(row, add_visibility) {
     var add_link = _$.find(row, '.add-link')[0];
-    add_link && _$.css(add_link, {visibility: add_visibility});
+    if(add_link) {
+      if(add_visibility == 'visible') {
+        _$.show(add_link);
+      } else {
+        _$.hide(add_link);
+      }
+    }
   }
   
   
