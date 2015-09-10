@@ -135,9 +135,9 @@ FT.Adapters.jQuery = {
     } else if($controls.is(':checkbox')) {
       $controls.attr('checked', (value == 'true') ? 'checked' : null);
     } else if($controls.prop('multiple')) {
-      $controls.val(value.split(','));
+      $controls.val(value.split(',')).trigger('change');
     } else {
-      $controls.val(value);
+      $controls.val(value).trigger('change');
     }
   },
   
