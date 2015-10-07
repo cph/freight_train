@@ -77,12 +77,14 @@ FT.InlineEditor = (function() {
       editor.save = function(callback) {
         var form = _$.up(editor, 'form');
         if(form) {
+          observer.fire('before_update', [editor, form]);
           var params = _$.serialize(form);
           FT.xhr(url, 'put', params, {
             onSuccess: function() {
               (CURRENT_EDITOR == editor) && window.FT.InlineEditor.close();
             },
             onComplete: function(response) {
+              observer.fire('after_update', [editor, form]);
               (response.status != 400) && callback && callback();
             }
           });
