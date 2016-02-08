@@ -718,7 +718,10 @@
     }
     for(var i=0, ii=selects.length; i<ii; i++) {
       var select = selects[i];
-      fieldToBeReset(select.id) && (select.selectedIndex = 0);
+      if(fieldToBeReset(select.id)) {
+        select.selectedIndex = select.multiple ? -1 : 0;
+        _$.fire(select,'change');
+      }
     }
     for(var i=0, ii=nested_editors.length; i<ii; i++) {
       resetNestedEditor(nested_editors[i]);
