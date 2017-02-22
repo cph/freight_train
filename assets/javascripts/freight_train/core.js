@@ -708,8 +708,8 @@
         options         = options || {};
     
     function fieldToBeReset(id) {
-      return !(options.only && !member(options.only, input.id)) &&
-             !(options.except && member(options.except, input.id));
+      return !(options.only && !member(options.only, id)) &&
+             !(options.except && member(options.except, id));
     }
     
     for(var i=0, ii=inputs.length; i<ii; i++) {
