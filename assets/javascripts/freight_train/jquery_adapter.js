@@ -105,6 +105,9 @@ FT.Adapters.jQuery = {
   prependTo: function(reference, html) {
     return $(reference).prepend(html).children()[0];
   },
+  appendTo: function(reference, html) {
+    return $(reference).append(html).children()[0];
+  },
   replace: function(element, html) {
     return jQuery(element).html(html)[0];
   },

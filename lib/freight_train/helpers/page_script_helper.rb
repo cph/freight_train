@@ -6,6 +6,7 @@ module FreightTrain
       
       def make_interactive(path, table_name, options)
         options[:destroy] = true unless options.key?(:destroy)
+        options[:prepend_new] = true unless options.key?(:prepend_new)
         model_name = table_name.classify
         
         javascript_tag do
@@ -19,6 +20,7 @@ module FreightTrain
                , path: function(){return path;}
                , observe: function(n,f){o.observe(n,f);}
                , unobserve: function(n,f){o.unobserve(n,f);}
+               , prependNew: #{options[:prepend_new]}
                #{initialize_editor_method(table_name, options)}
                #{activate_editing_method(table_name, options)}
                #{update_in_place_method(table_name)}

@@ -217,8 +217,13 @@
           collection_name = model.collection();
       
       model.addRow = function(content) {
+        if(model.prependNew) {
+          var additionPlacementMethod = _$.prependTo
+        } else {
+          var additionPlacementMethod = _$.appendTo
+        }
         var list = _$.find_by_id(collection_name),
-            new_row = _$.prependTo(list, content);
+            new_row = additionPlacementMethod(list, content);
         model.hookupRow(new_row);
         window.setTimeout(function() {
           _$.hide('#flash_error');
