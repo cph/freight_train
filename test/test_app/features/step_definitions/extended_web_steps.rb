@@ -31,9 +31,9 @@ end
 #     fill_in("#{klass}[#{field.downcase}]", :with => value)
 #   end
 # end
-# 
-# 
-# 
+#
+#
+#
 # When /^I select "([^"]*)" for "([^"]*)" for the (new|edited) (.*)$/ do |value, field, edited_or_new, klass|
 #   klass = klass.downcase.gsub(/ /, '_')
 #   selector = (edited_or_new == "edited" ? "#edit_row.#{klass}" : "#new_#{klass}")
@@ -41,4 +41,4 @@ end
 #     select(value, :from => "#{klass}[#{field.downcase}]")
 #   end
 # end
-# 
+#

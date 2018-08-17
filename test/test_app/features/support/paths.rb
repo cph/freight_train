@@ -10,7 +10,7 @@ module NavigationHelpers
 
     when /the home\s?page/
       '/'
-    
+
     when /the To[ \-]Do Items page/
       '/to_do_items'
 

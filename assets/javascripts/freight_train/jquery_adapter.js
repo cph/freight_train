@@ -1,12 +1,12 @@
 var FT=FT||{};
 FT.Adapters=FT.Adapters||{};
 FT.Adapters.jQuery = {
-  
+
   // Load
   loaded: function(callback) {
     jQuery(callback);
   },
-  
+
   // Attributes
   attr: function(element, name, value) {
     if(value === undefined) {
@@ -30,7 +30,7 @@ FT.Adapters.jQuery = {
   text: function(element) {
     return jQuery(element).text();
   },
-  
+
   // Selection/Traversal
   find_by_id: function(id) {
     return jQuery('#' + id)[0];
@@ -50,7 +50,7 @@ FT.Adapters.jQuery = {
   up: function(element, selector) {
     return jQuery(element).parents(selector)[0];
   },
-  
+
   // Manipulation
   hide: function(element) {
     jQuery(element).hide();
@@ -71,7 +71,7 @@ FT.Adapters.jQuery = {
     // if(Prototype.Browser.IE) {
     //   clone = element.clone(false);
     //   clone.innerHTML = element.innerHTML;
-    //   
+    //
     //   // innerHTML still copies all kinds of custom attributes over in IE.
     //   (function(element) {
     //     var attributes = element.attributes,
@@ -108,7 +108,7 @@ FT.Adapters.jQuery = {
   replace: function(element, html) {
     return jQuery(element).html(html)[0];
   },
-  
+
   // Forms
   serialize: function(form) {
     var o = {};
@@ -140,7 +140,7 @@ FT.Adapters.jQuery = {
       $controls.val(value);
     }
   },
-  
+
   // Events
   delegate: function(parent, event_name, selector, callback) {
     jQuery(parent).delegate(selector, event_name, callback);
@@ -158,7 +158,7 @@ FT.Adapters.jQuery = {
   target: function(event) {
     return event.target;
   },
-  
+
   // Ajax
   xhr: function(url, method, params, args) {
     var settings = args || {};

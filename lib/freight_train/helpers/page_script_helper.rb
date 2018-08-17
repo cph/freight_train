@@ -1,13 +1,13 @@
 module FreightTrain
   module Helpers
     module PageScriptHelper
-      
-      
-      
+
+
+
       def make_interactive(path, table_name, options)
         options[:destroy] = true unless options.key?(:destroy)
         model_name = table_name.classify
-        
+
         javascript_tag do
           raw <<-JS
             var FT=window.FT||{};
@@ -29,14 +29,14 @@ module FreightTrain
           JS
         end
       end
-      
-      
-      
+
+
+
       def include_freight_train(options={})
         adapter = options[:adapter].to_s
         adapter = "prototype" unless %w{prototype jquery}.member?(adapter)
         adapter_js = "freight_train/#{adapter}_adapter.js"
-        
+
         raw <<-HTML
           #{javascript_include_tag('freight_train/observer.js')}
           #{javascript_include_tag('freight_train/inline_editor.js')}
@@ -45,9 +45,9 @@ module FreightTrain
           #{ft_init(options)}
         HTML
       end
-      
-      
-      
+
+
+
       def ft_init(options={})
         unless @already_initialized
           @already_initialized = true
@@ -62,13 +62,13 @@ module FreightTrain
           end
         end
       end
-      
-      
-      
+
+
+
     private
-      
-      
-      
+
+
+
       def editor_writer_method(singular)
         editor_fn = escape_for_js(@inline_editor.to_s)
         if editor_fn.blank?
@@ -79,27 +79,27 @@ module FreightTrain
         end
         "function(tr){#{editor_fn}}"
       end
-      
+
       def escape_for_js(html)
         html.gsub(/\r|\n/, " ") \
             .gsub(/\s+</, "<") \
             .gsub(/>\s+/, ">")
       end
-      
-      
-      
+
+
+
       def reset_on_create_method(table_name, options)
         "FT.Helpers.resetOnCreate(name, #{options[:reset_on_create].to_json});"
       end
-      
-      
-      
+
+
+
       def initialize_editor_method(table_name, options)
         ", initializeEditor: function(tr,tr_edit){#{@after_init_edit}}"
       end
-      
-      
-      
+
+
+
       def activate_editing_method(table_name, options)
         if @inline_editor != "function(tr){}"
           ", activateEditing: function(row){FT.Helpers.editRowInline(row,path,editor_writer);}"
@@ -107,33 +107,33 @@ module FreightTrain
           ", activateEditing: function(row){FT.Helpers.editRow(row,path);}"
         end
       end
-      
-      
-      
+
+
+
       def update_in_place_method(table_name)
         ", updateInPlace: function(property,id,value){" <<
           "FT.xhr((path+'/'+id+'/update_'+property),'put',('#{table_name.singularize}['+property+']='+value));" <<
         "}"
       end
-      
-      
-      
+
+
+
       def destroy_method(table_name, options)
         ", destroy: function(idn){" <<
           "return FT.destroy(false,('#{table_name.to_s.singularize}_'+idn),(path+'/'+idn));" <<
         "}"
       end
-      
-      
-      
+
+
+
       def hookup_row_method(options)
         ", hookupRow: function(row){" <<
           "o.fire('hookup_row',row);" <<
         "}"
       end
-      
-      
-      
+
+
+
     end
   end
 end
