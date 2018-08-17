@@ -40,7 +40,7 @@ module FreightTrain
 
 
 
-      def initialize(object_name, object, template, options, proc)
+      def initialize(*args)
         super
         @after_init = ""
       end
@@ -145,7 +145,7 @@ module FreightTrain
       def fields_for(method, *args, &block)
         options = args.extract_options!
         name = options[:name] || "#{@object_name}[#{method}]"
-        editor = @@default_editor_builder.new(name, nil, @template, options, block)
+        editor = @@default_editor_builder.new(name, nil, @template, options)
         capture(editor, &block)
       ensure
         @after_init << editor.after_init
