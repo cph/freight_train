@@ -9,7 +9,7 @@ module FreightTrain
           ("<ul>" + messages.collect{|msg| "<li>#{msg}</li>"}.join + "</ul>").html_safe
         else
           ""
-        end    
+        end
 =begin
     if object and object.respond_to? "errors"
       temp = "<ul>"
@@ -26,14 +26,14 @@ module FreightTrain
     else
       ""
     end
-=end    
+=end
       end
 
 
       def format_exception_for(record, options={})
         "<p>An error occurred while trying to #{options[:action] || "access"} #{record.class.name.titleize}:</p><ul><li>#{h $!}</li></ul>".html_safe
       end
-      
+
     end
   end
 end

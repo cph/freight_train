@@ -1,17 +1,17 @@
 var FT=FT||{};
 FT.Adapters=FT.Adapters||{};
 FT.Adapters.Prototype = {
-  
+
   // Load
   loaded: function(callback) {
     document.observe('dom:loaded', callback);
   },
-  
+
   // Attributes
   attr: function(element, name, value) {
     if(value) {
       $(element).writeAttribute(name, value);
-    } else {  
+    } else {
       return $(element).readAttribute(name);
     }
   },
@@ -30,7 +30,7 @@ FT.Adapters.Prototype = {
   text: function(element) {
     return element.innerText;
   },
-  
+
   // Selection/Traversal
   find_by_id: function(id) {
     return $(id);
@@ -50,7 +50,7 @@ FT.Adapters.Prototype = {
   up: function(element, selector) {
     return $(element).up(selector);
   },
-  
+
   // Manipulation
   hide: function(element) {
     var element = $(element);
@@ -72,7 +72,7 @@ FT.Adapters.Prototype = {
     if(Prototype.Browser.IE) {
       clone = element.clone(false);
       clone.innerHTML = element.innerHTML;
-      
+
       // innerHTML still copies all kinds of custom attributes over in IE.
       (function(element) {
         var attributes = element.attributes,
@@ -109,7 +109,7 @@ FT.Adapters.Prototype = {
   replace: function(element, html) {
     return $(element).update(html);
   },
-  
+
   // Forms
   serialize: function(form) {
     return $(form).serialize();
@@ -125,7 +125,7 @@ FT.Adapters.Prototype = {
         case 'TEXTAREA':
           $(control).setValue(value);
           break;
-        
+
         case 'SELECT':
           var options = control.options;
           var option;
@@ -140,7 +140,7 @@ FT.Adapters.Prototype = {
       }
     }
   },
-  
+
   // Events
   delegate: function(parent, event_name, selector, callback) {
     $(parent).observe(event_name, function(e) {
@@ -157,12 +157,13 @@ FT.Adapters.Prototype = {
     Event.stop(event);
   },
   fire: function(element, event_name, args) {
+    if(toString.call(element) === '[object Array]') element = element[0];
     $(element).fire(event_name, args);
   },
   target: function(event) {
     return event.element();
   },
-  
+
   // Ajax
   xhr: function(url, method, params, args) {
     args = args || {};
