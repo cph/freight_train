@@ -157,6 +157,7 @@ FT.Adapters.Prototype = {
     Event.stop(event);
   },
   fire: function(element, event_name, args) {
+    if(toString.call(element) === '[object Array]') element = element[0];
     $(element).fire(event_name, args);
   },
   target: function(event) {
