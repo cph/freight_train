@@ -9,7 +9,7 @@ module FreightTrain
 
 
     def refresh_on_create(record, options={})
-      options.merge!(params[:ft] || {})
+      options.merge!(ft_params)
 
       options       = options.with_indifferent_access
       partial_name  = options[:partial] || record.class.name.underscore
@@ -25,7 +25,7 @@ module FreightTrain
 
 
     def refresh_on_update(record, options={})
-      options.merge!(params[:ft] || {})
+      options.merge!(ft_params)
 
       # this is kind of a clunky way of solving this problem; but I want row_for to know whether
       # it is creating a row or updating a row (whether it should write the TR tags or not).
@@ -81,6 +81,12 @@ module FreightTrain
 
     def show_errors_for(record, options={})
       show_error(format_errors(record), options)
+    end
+
+
+
+    def ft_params
+      params[:ft] || {}
     end
 
 
