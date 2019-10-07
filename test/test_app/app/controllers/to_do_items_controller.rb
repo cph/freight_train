@@ -20,7 +20,7 @@ class ToDoItemsController < ApplicationController
 
   def update
     @to_do_item = ToDoItem.find(params[:id])
-    @to_do_item.update_attributes(params[:to_do_item])
+    @to_do_item.update(params[:to_do_item])
     respond_with @to_do_item
   end
 

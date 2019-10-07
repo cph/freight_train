@@ -24,7 +24,7 @@ class FormTestsController < ApplicationController
     @form_test = FormTest.find(params[:id])
     attributes = params[:form_test]
     attributes[:money] = Money.from_hash(attributes.delete(:money))
-    @form_test.update_attributes(attributes)
+    @form_test.update(attributes)
     respond_with @form_test
   end
 

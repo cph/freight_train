@@ -20,7 +20,7 @@ class QuestionAnswersController < ApplicationController
 
   def update
     @answer = Answer.find(params[:id])
-    @answer.update_attributes(params[:answer])
+    @answer.update(params[:answer])
     respond_with @answer
   end
 
